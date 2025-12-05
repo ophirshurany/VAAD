@@ -157,11 +157,12 @@
                 <h1 class="text-4xl font-extrabold tracking-wide drop-shadow-sm title-gradient">
                     ברוכים הבאים לאלונים 8
                 </h1>
+                <span class="text-4xl filter drop-shadow-lg opacity-90">🌳</span>
             </div>
 
             <!-- Left: Weather -->
             <div class="flex items-center gap-5">
-                <a href="https://ims.gov.il/he/cityPortal" target="_blank" rel="noopener noreferrer" class="group flex items-center gap-5 cursor-pointer hover:opacity-100 opacity-90 transition-all transform hover:scale-105" title="צפייה בתחזית המלאה ב-IMS City Portal">
+                <a href="https://ims.gov.il/he" target="_blank" rel="noopener noreferrer" class="group flex items-center gap-5 cursor-pointer hover:opacity-100 opacity-90 transition-all transform hover:scale-105" title="צפייה בתחזית המלאה ב-IMS City Portal">
                     <div class="text-right">
                         <div class="text-sm text-blue-100 font-medium mb-0.5 group-hover:text-white transition-colors text-shadow-md">מזג אוויר</div>
                         <div id="header-weather-temp" class="text-4xl font-bold text-white drop-shadow-md">--°</div>
@@ -178,30 +179,7 @@
             
             <!-- ==================== RIGHT COLUMN: Shabbat & Info ==================== -->
             <div class="col-span-12 lg:col-span-3 flex flex-col gap-6">
-                <!-- Shabbat Card -->
-                <div class="glass-panel rounded-3xl p-6 relative overflow-hidden group">
-                    <div class="absolute inset-0 bg-gradient-to-br from-indigo-900/50 to-purple-900/50 opacity-50"></div>
-                    <div class="absolute -top-10 -right-10 w-32 h-32 bg-gold/20 rounded-full blur-3xl"></div>
-                    <div class="relative z-10 text-center">
-                        <div class="inline-flex items-center justify-center p-3 bg-white/5 rounded-2xl mb-4 border border-white/10 shadow-inner">
-                            <span class="text-3xl filter drop-shadow-lg">🕯️</span>
-                        </div>
-                        <h3 class="text-xl font-bold text-gold mb-1">זמני השבת</h3>
-                        <p id="parsha-name" class="text-sm text-blue-200/80 font-medium mb-6">פרשת השבוע</p>
-                        <div class="space-y-3">
-                            <div class="flex items-center justify-between bg-black/20 p-3 rounded-xl border border-white/5">
-                                <span class="text-blue-200 text-sm">כניסה</span>
-                                <span id="shabbat-entry" class="text-2xl font-bold text-white tabular-nums">--:--</span>
-                            </div>
-                            <div class="flex items-center justify-between bg-black/20 p-3 rounded-xl border border-white/5">
-                                <span class="text-blue-200 text-sm">יציאה</span>
-                                <span id="shabbat-exit" class="text-2xl font-bold text-white tabular-nums">--:--</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Info Card -->
+                <!-- Info Card (Moved Up) -->
                 <div class="glass-panel rounded-3xl flex-1 flex flex-col overflow-hidden">
                     <div class="p-5 border-b border-white/5 bg-white/5">
                         <h2 class="text-lg font-bold text-white flex items-center gap-2">
@@ -246,15 +224,46 @@
                         </div>
                     </div>
                 </div>
+
+                <!-- Shabbat Card (Moved Down) -->
+                <div class="glass-panel rounded-3xl p-6 relative overflow-hidden group">
+                    <div class="absolute inset-0 bg-gradient-to-br from-indigo-900/50 to-purple-900/50 opacity-50"></div>
+                    <div class="absolute -top-10 -right-10 w-32 h-32 bg-gold/20 rounded-full blur-3xl"></div>
+                    <div class="relative z-10 text-center">
+                        <div class="inline-flex items-center justify-center p-3 bg-white/5 rounded-2xl mb-4 border border-white/10 shadow-inner">
+                            <span class="text-3xl filter drop-shadow-lg">🕯️</span>
+                        </div>
+                        <h3 class="text-xl font-bold text-gold mb-1">זמני השבת</h3>
+                        <p id="parsha-name" class="text-sm text-blue-200/80 font-medium mb-6">פרשת השבוע</p>
+                        <div class="space-y-3">
+                            <div class="flex items-center justify-between bg-black/20 p-3 rounded-xl border border-white/5">
+                                <span class="text-blue-200 text-sm">כניסה</span>
+                                <span id="shabbat-entry" class="text-2xl font-bold text-white tabular-nums">--:--</span>
+                            </div>
+                            <div class="flex items-center justify-between bg-black/20 p-3 rounded-xl border border-white/5">
+                                <span class="text-blue-200 text-sm">יציאה</span>
+                                <span id="shabbat-exit" class="text-2xl font-bold text-white tabular-nums">--:--</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
             
             <!-- ==================== CENTER COLUMN: Notices ==================== -->
-            <div class="col-span-12 lg:col-span-6 flex flex-col">
+            <div class="col-span-12 lg:col-span-5 flex flex-col">
                 <div class="glass-panel rounded-3xl flex-1 flex flex-col overflow-hidden relative">
                     <div class="p-5 border-b border-white/5 bg-white/5 flex items-center justify-between backdrop-blur-md sticky top-0 z-10">
-                        <h2 class="text-xl font-bold text-white flex items-center gap-3">
-                            <span class="text-2xl">📣</span> לוח מודעות
-                        </h2>
+                        <div class="flex items-center gap-3">
+                            <h2 class="text-xl font-bold text-white flex items-center gap-2">
+                                <span class="text-2xl">📣</span> לוח מודעות
+                            </h2>
+                            <!-- Added Plus Button for Notices -->
+                            <button onclick="openAdminPanel('notice')" class="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition-all shadow-lg hover:scale-110" title="הוסף מודעה">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-5 h-5">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                                </svg>
+                            </button>
+                        </div>
                         <span class="px-3 py-1 rounded-full bg-white/10 text-xs text-blue-200 border border-white/5" id="notices-count">0 הודעות</span>
                     </div>
                     <div id="notices-content" class="custom-scroll flex-1 overflow-y-auto p-5 space-y-4">
@@ -267,13 +276,18 @@
             </div>
             
             <!-- ==================== LEFT COLUMN: Building News (WAS NEWS) ==================== -->
-            <div class="col-span-12 lg:col-span-3 flex flex-col">
+            <div class="col-span-12 lg:col-span-4 flex flex-col">
                 <div class="glass-panel rounded-3xl flex-1 flex flex-col overflow-hidden">
-                    <div class="p-5 border-b border-white/5 bg-white/5">
+                    <div class="p-5 border-b border-white/5 bg-white/5 flex items-center justify-between">
                         <h2 class="text-lg font-bold text-white flex items-center gap-2">
-                            <!-- Changed Icon and Title -->
                             <span class="text-green-400">🏘️</span> חדשות הבניין
                         </h2>
+                        <!-- Added Plus Button for Building News -->
+                        <button onclick="openAdminPanel('news')" class="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition-all shadow-lg hover:scale-110" title="הוסף עדכון">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-5 h-5">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                            </svg>
+                        </button>
                     </div>
                     <!-- Removed RSS ID, added separate ID -->
                     <div class="flex-1 overflow-y-auto custom-scroll p-4 space-y-3" id="building-news-content">
@@ -303,11 +317,6 @@
             </div>
         </div>
     </footer>
-    
-    <!-- ==================== ADMIN BUTTON ==================== -->
-    <button onclick="openAdminPanel()" class="fixed top-6 left-6 z-50 group flex items-center justify-center w-12 h-12 rounded-full glass-panel hover:bg-white/20 transition-all duration-300 hover:scale-110 hover:rotate-90" title="ניהול">
-        <span class="text-xl opacity-70 group-hover:opacity-100">⚙️</span>
-    </button>
     
     <!-- ==================== ADMIN MODAL ==================== -->
     <div id="admin-modal" class="fixed inset-0 z-[60] hidden">
@@ -401,7 +410,7 @@
     <script>
         const CONFIG = {
             location: { name: 'באר יעקב', lat: 31.9424, lon: 34.8391, geonameid: 295530 },
-            intervals: { clock: 1000, news: 900000, weather: 900000 }
+            intervals: { clock: 1000, news: 100000, weather: 450000 }
         };
         
         let notices = [];
@@ -665,8 +674,13 @@
         }
         
         /* --- Admin Logic --- */
-        function openAdminPanel() {
+        function openAdminPanel(type) {
             document.getElementById('admin-modal').classList.remove('hidden');
+            if (type) {
+                // If a type is passed, force selection of that radio button
+                const radio = document.querySelector(`input[name="post-type"][value="${type}"]`);
+                if (radio) radio.checked = true;
+            }
             setTimeout(() => document.getElementById('notice-title').focus(), 100);
         }
         
