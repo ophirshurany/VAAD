@@ -410,7 +410,8 @@
     <script>
         const CONFIG = {
             location: { name: 'באר יעקב', lat: 31.9424, lon: 34.8391, geonameid: 295530 },
-            intervals: { clock: 1000, news: 100000, weather: 450000 }
+            // clock: every second, news: every 60s, weather: every 7.5 minutes
+            intervals: { clock: 1000, news: 60000, weather: 450000 }
         };
         
         let notices = [];
