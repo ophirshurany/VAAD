@@ -13,23 +13,26 @@
             theme: {
                 extend: {
                     colors: {
-                        primary: '#0a1628',
-                        secondary: '#0f2847',
-                        surface: '#1a3a5c',
-                        surfaceAlt: '#2a4a6c',
-                        accent: '#3b82f6',
-                        accentLight: '#60a5fa',
-                        textPrimary: '#ffffff',
-                        textSecondary: '#94a3b8',
-                        textMuted: '#64748b',
-                        cardBg: '#ffffff',
-                        cardBorder: '#e2e8f0',
-                        success: '#10b981',
-                        warning: '#f59e0b',
-                        danger: '#ef4444',
+                        dark: '#0f172a',
+                        glass: 'rgba(30, 41, 59, 0.7)',
+                        glassBorder: 'rgba(255, 255, 255, 0.08)',
+                        accent: '#38bdf8', // Sky 400
+                        accentGlow: 'rgba(56, 189, 248, 0.3)',
+                        gold: '#fbbf24',
+                        goldGlow: 'rgba(251, 191, 36, 0.2)',
                     },
                     fontFamily: {
                         heebo: ['Heebo', 'sans-serif'],
+                    },
+                    animation: {
+                        'float': 'float 6s ease-in-out infinite',
+                        'pulse-slow': 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                    },
+                    keyframes: {
+                        float: {
+                            '0%, 100%': { transform: 'translateY(0)' },
+                            '50%': { transform: 'translateY(-10px)' },
+                        }
                     }
                 }
             }
@@ -38,12 +41,51 @@
     <style>
         * { font-family: 'Heebo', sans-serif; }
         html, body { height: 100%; overflow: hidden; }
-        body { background: linear-gradient(135deg, #0a1628 0%, #0f2847 100%); }
         
-        .notices-scroll::-webkit-scrollbar { width: 6px; }
-        .notices-scroll::-webkit-scrollbar-track { background: #f1f5f9; border-radius: 3px; }
-        .notices-scroll::-webkit-scrollbar-thumb { background: #3b82f6; border-radius: 3px; }
-        .notices-scroll::-webkit-scrollbar-thumb:hover { background: #2563eb; }
+        /* Dynamic Background Base */
+        body {
+            /* Default fallback (Night) */
+            background: radial-gradient(circle at top left, #020617 0%, #0b1120 18%, #111827 42%, #1e293b 75%, #020617 100%);
+            background-size: 200% 200%;
+            animation: background-pulse 30s ease-in-out infinite;
+            color: #ffffff;
+            transition: background 2s ease-in-out;
+        }
+
+        @keyframes background-pulse {
+            0% { background-position: 0% 0%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 0%; }
+        }
+
+        /* Glassmorphism Utilities */
+        .glass-panel {
+            background: rgba(30, 41, 59, 0.65);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        
+        .glass-header {
+            background: linear-gradient(180deg, rgba(2, 6, 23, 0.6) 0%, rgba(2, 6, 23, 0.0) 100%);
+        }
+
+        .title-gradient {
+            background: linear-gradient(90deg, #e5f2ff, #ffffff, #bfdbfe);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            text-shadow: 0 0 30px rgba(56, 189, 248, 0.4);
+        }
+
+        .text-shadow-md { text-shadow: 0 2px 4px rgba(0,0,0,0.3); }
+
+        .custom-scroll::-webkit-scrollbar { width: 6px; }
+        .custom-scroll::-webkit-scrollbar-track { background: rgba(255,255,255,0.02); }
+        .custom-scroll::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 10px; }
+        .custom-scroll::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.25); }
         
         @keyframes marquee-rtl {
             0% { transform: translateX(0%); }
@@ -54,304 +96,303 @@
             display: flex;
             white-space: nowrap;
         }
-        .marquee-content:hover { animation-play-state: paused; }
         
-        @keyframes priority-pulse {
-            0%, 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); }
-            50% { box-shadow: 0 0 0 8px rgba(239, 68, 68, 0); }
+        @keyframes glow-pulse {
+            0%, 100% { box-shadow: 0 0 5px rgba(239, 68, 68, 0.2), inset 0 0 0 1px rgba(239, 68, 68, 0.3); }
+            50% { box-shadow: 0 0 20px rgba(239, 68, 68, 0.4), inset 0 0 0 1px rgba(239, 68, 68, 0.6); }
         }
         .priority-notice {
-            animation: priority-pulse 2s ease-in-out infinite;
-            border-right-color: #ef4444 !important;
+            animation: glow-pulse 3s infinite;
+            border: 1px solid rgba(239, 68, 68, 0.3) !important;
+            background: rgba(239, 68, 68, 0.05) !important;
         }
         
-        .modal-backdrop {
-            background-color: rgba(10, 22, 40, 0.85);
-            backdrop-filter: blur(8px);
+        input, select, textarea {
+            background: rgba(255,255,255,0.05) !important;
+            border: 1px solid rgba(255,255,255,0.1) !important;
+            color: white !important;
+        }
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: #38bdf8 !important;
+            box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.2);
         }
         
-        .color-option {
-            width: 28px; height: 28px; border-radius: 50%;
-            cursor: pointer; transition: transform 0.2s ease;
-            border: 2px solid transparent;
-        }
-        .color-option:hover { transform: scale(1.15); }
-        .color-option.selected { border-color: #1e293b; box-shadow: 0 0 0 2px white; }
-        
-        .dashboard-card {
-            background: white; border-radius: 16px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-        }
-        .dashboard-card-dark {
-            background: linear-gradient(145deg, #1a3a5c 0%, #0f2847 100%);
-            border-radius: 16px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
-        }
-        
-        .notice-item {
-            background: #f8fafc; border-right: 4px solid #3b82f6;
-            border-radius: 12px; transition: all 0.2s ease;
-        }
-        .notice-item:hover { background: #f1f5f9; transform: translateX(-2px); }
-        
-        .admin-btn {
-            transition: all 0.2s ease;
-            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
-        }
-        .admin-btn:hover { transform: scale(1.05); box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4); }
-        
-        .shabbat-card { background: linear-gradient(145deg, #1e40af 0%, #1e3a8a 100%); }
-        .time-display { font-variant-numeric: tabular-nums; letter-spacing: -0.02em; }
-        .ticker-container { background: linear-gradient(90deg, #0f2847 0%, #1a3a5c 50%, #0f2847 100%); }
-
-        .notice-content {
-            white-space: pre-line;
+        .icon-box {
+            display: flex; align-items: center; justify-content: center;
+            border-radius: 12px;
+            backdrop-filter: blur(4px);
         }
 
         .ynet-icon {
-            width: 22px;
-            height: 22px;
-            border-radius: 9999px;
+            width: 20px; height: 20px;
+            border-radius: 50%;
             background-color: #e50914;
-            color: #ffffff;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 800;
-            font-size: 13px;
-            flex-shrink: 0;
+            color: white;
+            font-weight: 900;
+            font-size: 12px;
+            display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
         }
     </style>
 </head>
-<body class="font-heebo text-white">
-    
+<body class="font-heebo antialiased selection:bg-accent selection:text-white">
+
     <!-- ==================== TOP BAR ==================== -->
-    <header class="bg-secondary py-3 px-6 shadow-lg">
-        <div class="flex items-center justify-between max-w-[1920px] mx-auto">
-            <!-- Left: Time/Date/Weather Widget -->
-            <div class="flex items-center gap-6 bg-primary/50 rounded-xl px-5 py-3">
-                <div class="text-right">
-                    <div id="header-time" class="text-4xl font-bold time-display">--:--</div>
-                </div>
-                <div class="text-right border-r border-white/20 pr-5">
-                    <div id="header-date" class="text-sm text-textSecondary">--</div>
-                    <div id="header-day" class="text-base font-medium">---</div>
-                </div>
-                <div class="flex items-center gap-2 border-r border-white/20 pr-5">
-                    <span id="header-weather-icon" class="text-2xl">☀️</span>
-                    <span id="header-weather-temp" class="text-xl font-semibold">--°</span>
+    <header class="fixed top-0 left-0 right-0 z-20 pt-6 pb-8 px-8 glass-header">
+        <div class="max-w-[1920px] mx-auto flex items-end justify-between">
+            <!-- Right: Date & Time -->
+            <div class="flex flex-col text-right">
+                <div id="header-time" class="text-6xl font-bold tracking-tight text-white drop-shadow-lg leading-none text-shadow-md" style="font-variant-numeric: tabular-nums;">--:--</div>
+                <div class="flex items-center gap-3 mt-1 text-blue-100">
+                    <span id="header-day" class="text-xl font-medium text-shadow-md">---</span>
+                    <span class="w-1 h-1 rounded-full bg-blue-400 box-shadow"></span>
+                    <span id="header-date" class="text-lg text-shadow-md">--.--.----</span>
                 </div>
             </div>
-            
+
             <!-- Center: Building Title -->
-            <div class="absolute left-1/2 transform -translate-x-1/2 flex items-center gap-4">
-                <h1 class="text-3xl lg:text-4xl font-bold tracking-tight">ברוכים הבאים לאלונים 8</h1>
-                <div class="text-4xl">🏢</div>
+            <div class="absolute left-1/2 transform -translate-x-1/2 flex items-center gap-4 top-8">
+                <span class="text-4xl filter drop-shadow-lg opacity-90">🏢</span>
+                <h1 class="text-4xl font-extrabold tracking-wide drop-shadow-sm title-gradient">
+                    ברוכים הבאים לאלונים 8
+                </h1>
             </div>
-            
-            <!-- Right: Empty space for balance -->
-            <div class="w-[280px]"></div>
+
+            <!-- Left: Weather -->
+            <div class="flex items-center gap-5">
+                <a href="https://ims.gov.il/he/cityPortal" target="_blank" rel="noopener noreferrer" class="group flex items-center gap-5 cursor-pointer hover:opacity-100 opacity-90 transition-all transform hover:scale-105" title="צפייה בתחזית המלאה ב-IMS City Portal">
+                    <div class="text-right">
+                        <div class="text-sm text-blue-100 font-medium mb-0.5 group-hover:text-white transition-colors text-shadow-md">מזג אוויר</div>
+                        <div id="header-weather-temp" class="text-4xl font-bold text-white drop-shadow-md">--°</div>
+                    </div>
+                    <div id="header-weather-icon" class="text-5xl filter drop-shadow-lg animate-float">...</div>
+                </a>
+            </div>
         </div>
     </header>
     
     <!-- ==================== MAIN DASHBOARD ==================== -->
-    <main class="h-[calc(100vh-140px)] p-4 lg:p-6">
-        <div class="grid grid-cols-12 gap-5 h-full max-w-[1920px] mx-auto">
+    <main class="h-screen pt-36 pb-20 px-6 lg:px-10 max-w-[1920px] mx-auto">
+        <div class="grid grid-cols-12 gap-6 h-full">
             
-            <!-- ==================== LEFT COLUMN: News ==================== -->
-            <div class="col-span-12 lg:col-span-3 flex flex-col">
-                <div class="dashboard-card flex-1 flex flex-col overflow-hidden">
-                    <div class="bg-gradient-to-l from-accent to-blue-600 px-4 py-3 rounded-t-2xl">
-                        <h2 class="text-lg font-bold flex items-center gap-2">📰 חדשות ועדכונים</h2>
-                    </div>
-                    <div class="flex-1 overflow-y-auto p-3 space-y-2" id="news-headlines">
-                        <div class="text-center text-gray-400 py-8">
-                            <div class="text-3xl mb-2">📡</div>
-                            <p class="text-sm">טוען חדשות...</p>
+            <!-- ==================== RIGHT COLUMN: Shabbat & Info ==================== -->
+            <div class="col-span-12 lg:col-span-3 flex flex-col gap-6">
+                <!-- Shabbat Card -->
+                <div class="glass-panel rounded-3xl p-6 relative overflow-hidden group">
+                    <div class="absolute inset-0 bg-gradient-to-br from-indigo-900/50 to-purple-900/50 opacity-50"></div>
+                    <div class="absolute -top-10 -right-10 w-32 h-32 bg-gold/20 rounded-full blur-3xl"></div>
+                    <div class="relative z-10 text-center">
+                        <div class="inline-flex items-center justify-center p-3 bg-white/5 rounded-2xl mb-4 border border-white/10 shadow-inner">
+                            <span class="text-3xl filter drop-shadow-lg">🕯️</span>
+                        </div>
+                        <h3 class="text-xl font-bold text-gold mb-1">זמני השבת</h3>
+                        <p id="parsha-name" class="text-sm text-blue-200/80 font-medium mb-6">פרשת השבוע</p>
+                        <div class="space-y-3">
+                            <div class="flex items-center justify-between bg-black/20 p-3 rounded-xl border border-white/5">
+                                <span class="text-blue-200 text-sm">כניסה</span>
+                                <span id="shabbat-entry" class="text-2xl font-bold text-white tabular-nums">--:--</span>
+                            </div>
+                            <div class="flex items-center justify-between bg-black/20 p-3 rounded-xl border border-white/5">
+                                <span class="text-blue-200 text-sm">יציאה</span>
+                                <span id="shabbat-exit" class="text-2xl font-bold text-white tabular-nums">--:--</span>
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
-            
-            <!-- ==================== CENTER COLUMN: Notices Board (Expanded) ==================== -->
-            <div class="col-span-12 lg:col-span-6 flex flex-col">
-                <div class="dashboard-card flex-1 flex flex-col overflow-hidden">
-                    <div class="bg-gradient-to-l from-accent to-blue-600 px-4 py-3 rounded-t-2xl flex items-center justify-between">
-                        <h2 class="text-lg font-bold flex items-center gap-2">📣 הודעות לדיירים</h2>
-                        <span class="text-sm text-blue-100" id="notices-count">0 הודעות</span>
-                    </div>
-                    <div id="notices-content" class="notices-scroll flex-1 overflow-y-auto p-4 space-y-3">
-                        <div class="text-center text-gray-400 py-16" id="no-notices">
-                            <div class="text-6xl mb-4">📭</div>
-                            <p class="text-xl text-gray-500">אין הודעות להצגה</p>
-                            <p class="text-sm text-gray-400 mt-2">לחץ על "ניהול" להוספת הודעה חדשה</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- ==================== RIGHT COLUMN: Info + Shabbat (top-aligned with other blocks) ==================== -->
-            <div class="col-span-12 lg:col-span-3 flex flex-col justify-start gap-4">
-                <!-- Useful Information Card -->
-                <div class="dashboard-card text-gray-800 overflow-hidden">
-                    <div class="bg-gradient-to-l from-accent to-blue-600 px-4 py-3 rounded-t-2xl">
-                        <h2 class="text-lg font-bold flex items-center gap-2">
-                            <span>ℹ️</span>
-                            <span>מידע שימושי</span>
+
+                <!-- Info Card -->
+                <div class="glass-panel rounded-3xl flex-1 flex flex-col overflow-hidden">
+                    <div class="p-5 border-b border-white/5 bg-white/5">
+                        <h2 class="text-lg font-bold text-white flex items-center gap-2">
+                            <span class="text-accent">ℹ️</span> מידע שימושי
                         </h2>
                     </div>
-                    <div class="p-4 space-y-3 text-right">
-                        <!-- Trash Collection -->
-                        <div class="flex items-start gap-3">
-                            <div class="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 text-lg flex-shrink-0">
-                                🗑️
-                            </div>
-                            <div class="text-sm leading-relaxed">
-                                <div class="font-semibold text-gray-900">ימי פינוי אשפה:</div>
-                                <div class="text-gray-700">ראשון, שלישי, חמישי</div>
+                    <div class="p-5 space-y-5 overflow-y-auto custom-scroll flex-1">
+                        <div class="flex gap-4 group">
+                            <div class="icon-box w-10 h-10 bg-blue-500/10 text-blue-400 group-hover:bg-blue-500 group-hover:text-white transition-all duration-300 shrink-0">🗑️</div>
+                            <div>
+                                <div class="text-white font-medium text-base">פינוי אשפה</div>
+                                <div class="text-blue-200/60 text-sm">ראשון, שלישי, חמישי</div>
                             </div>
                         </div>
-                        <!-- Floor & Stairs Cleaning -->
-                        <div class="flex items-start gap-3">
-                            <div class="w-8 h-8 rounded-full bg-yellow-100 flex items-center justify-center text-yellow-600 text-lg flex-shrink-0">
-                                🧹
-                            </div>
-                            <div class="text-sm leading-relaxed">
-                                <div class="font-semibold text-gray-900">ניקיון קומות:</div>
-                                <div class="text-gray-700">שני וחמישי</div>
-                                <div class="font-semibold text-gray-900 mt-1">ניקיון מדרגות:</div>
-                                <div class="text-gray-700">שלישי</div>
+                        <div class="flex gap-4 group">
+                            <div class="icon-box w-10 h-10 bg-yellow-500/10 text-yellow-400 group-hover:bg-yellow-500 group-hover:text-white transition-all duration-300 shrink-0">🧹</div>
+                            <div>
+                                <div class="text-white font-medium text-base">ניקיון</div>
+                                <div class="text-blue-200/60 text-sm">קומות: שני וחמישי | מדרגות: שלישי</div>
                             </div>
                         </div>
-                        <!-- Garden Waste -->
-                        <div class="flex items-start gap-3">
-                            <div class="w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-600 text-lg flex-shrink-0">
-                                🌿
-                            </div>
-                            <div class="text-sm leading-relaxed">
-                                <div class="font-semibold text-gray-900">ימי הוצאת גזם:</div>
-                                <div class="text-gray-700">שלישי</div>
+                        <div class="flex gap-4 group">
+                            <div class="icon-box w-10 h-10 bg-emerald-500/10 text-emerald-400 group-hover:bg-emerald-500 group-hover:text-white transition-all duration-300 shrink-0">🌿</div>
+                            <div>
+                                <div class="text-white font-medium text-base">גזם</div>
+                                <div class="text-blue-200/60 text-sm">יום שלישי</div>
                             </div>
                         </div>
-                        <!-- City Hotline -->
-                        <div class="flex items-start gap-3">
-                            <div class="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600 text-lg flex-shrink-0">
-                                ☎️
-                            </div>
-                            <div class="text-sm leading-relaxed">
-                                <div class="font-semibold text-gray-900">מוקד עירוני 106</div>
+                         <div class="flex gap-4 group">
+                            <div class="icon-box w-10 h-10 bg-pink-500/10 text-pink-400 group-hover:bg-pink-500 group-hover:text-white transition-all duration-300 shrink-0">💳</div>
+                            <div>
+                                <div class="text-white font-medium text-base">גבייה (DING)</div>
+                                <div class="text-blue-200/60 text-sm text-[13px]">051-5246200 | pay@oxs.co.il</div>
                             </div>
                         </div>
-
-                        <!-- DING Billing Service -->
-                        <div class="flex items-start gap-3">
-                            <div class="w-8 h-8 rounded-full bg-pink-100 flex items-center justify-center text-pink-600 text-lg flex-shrink-0">
-                                💳
+                         <div class="flex gap-4 group">
+                            <div class="icon-box w-10 h-10 bg-indigo-500/10 text-indigo-400 group-hover:bg-indigo-500 group-hover:text-white transition-all duration-300 shrink-0">☎️</div>
+                            <div>
+                                <div class="text-white font-medium text-base">מוקד עירוני</div>
+                                <div class="text-blue-200/60 text-sm">חייגו 106</div>
                             </div>
-                            <div class="text-sm leading-relaxed">
-                                <div class="font-semibold text-gray-900">שרות גבייה DING:</div>
-                                <div class="text-gray-700">וואטסאפ 051‑5246200 | מייל pay@oxs.co.il | טלפון 03‑5020158</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Shabbat Card with Parasha Name -->
-                <div class="shabbat-card dashboard-card-dark p-6 text-center">
-                    <div class="flex items-center justify-center gap-3 mb-3">
-                        <div class="text-5xl">🕯️</div>
-                        <h3 class="text-xl font-bold text-white">זמני השבת</h3>
-                        <div class="text-5xl">🕯️</div>
-                    </div>
-                    
-                    <!-- Parasha Name -->
-                    <p id="parsha-name" class="text-lg text-blue-200 font-medium mb-4"> וישלח</p>
-                    
-                    <div class="grid grid-cols-2 gap-4 mt-4">
-                        <div class="bg-white/10 rounded-xl p-3">
-                            <div class="text-sm text-blue-200 mb-1">כניסת שבת</div>
-                            <div id="shabbat-entry" class="text-3xl font-bold time-display">--:--</div>
-                        </div>
-                        <div class="bg-white/10 rounded-xl p-3">
-                            <div class="text-sm text-blue-200 mb-1">יציאת שבת</div>
-                            <div id="shabbat-exit" class="text-3xl font-bold time-display">--:--</div>
                         </div>
                     </div>
                 </div>
             </div>
+            
+            <!-- ==================== CENTER COLUMN: Notices ==================== -->
+            <div class="col-span-12 lg:col-span-6 flex flex-col">
+                <div class="glass-panel rounded-3xl flex-1 flex flex-col overflow-hidden relative">
+                    <div class="p-5 border-b border-white/5 bg-white/5 flex items-center justify-between backdrop-blur-md sticky top-0 z-10">
+                        <h2 class="text-xl font-bold text-white flex items-center gap-3">
+                            <span class="text-2xl">📣</span> לוח מודעות
+                        </h2>
+                        <span class="px-3 py-1 rounded-full bg-white/10 text-xs text-blue-200 border border-white/5" id="notices-count">0 הודעות</span>
+                    </div>
+                    <div id="notices-content" class="custom-scroll flex-1 overflow-y-auto p-5 space-y-4">
+                        <div class="flex flex-col items-center justify-center h-full text-blue-300/30" id="no-notices">
+                            <div class="text-7xl mb-4 opacity-20">📭</div>
+                            <p class="text-xl font-light">אין הודעות חדשות</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- ==================== LEFT COLUMN: Building News (WAS NEWS) ==================== -->
+            <div class="col-span-12 lg:col-span-3 flex flex-col">
+                <div class="glass-panel rounded-3xl flex-1 flex flex-col overflow-hidden">
+                    <div class="p-5 border-b border-white/5 bg-white/5">
+                        <h2 class="text-lg font-bold text-white flex items-center gap-2">
+                            <!-- Changed Icon and Title -->
+                            <span class="text-green-400">🏘️</span> חדשות הבניין
+                        </h2>
+                    </div>
+                    <!-- Removed RSS ID, added separate ID -->
+                    <div class="flex-1 overflow-y-auto custom-scroll p-4 space-y-3" id="building-news-content">
+                         <!-- Empty State for Building News -->
+                         <div class="flex flex-col items-center justify-center h-40 text-blue-300/30" id="no-building-news">
+                             <div class="text-4xl mb-2 opacity-30">🎈</div>
+                            <span class="text-sm font-light">אין עדכונים בקהילה</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
         </div>
     </main>
     
     <!-- ==================== NEWS TICKER ==================== -->
-    <footer class="fixed bottom-0 left-0 right-0 ticker-container py-2.5 px-4 shadow-lg z-30">
-        <div class="flex items-center gap-4 max-w-[1920px] mx-auto">
-            <a href="https://www.ynet.co.il" target="_blank" rel="noopener noreferrer" class="flex-shrink-0 hover:opacity-90 transition-opacity">
-                <div class="bg-danger text-white px-4 py-1.5 rounded font-bold text-sm flex items-center gap-1">
-                    <span>📺</span><span>חדשות</span>
-                </div>
+    <footer class="fixed bottom-0 left-0 right-0 z-30 bg-gray-900/90 backdrop-blur-md border-t border-white/10 shadow-2xl">
+        <div class="flex items-center max-w-[1920px] mx-auto h-14">
+            <a href="https://www.ynet.co.il" target="_blank" class="h-full bg-red-600 px-6 flex items-center justify-center gap-2 text-white font-bold hover:bg-red-700 transition-colors z-20 shadow-xl">
+                <span>מבזקים</span>
+                <span class="animate-pulse w-2 h-2 bg-white rounded-full"></span>
             </a>
-            <div class="flex-1 overflow-hidden">
+            <div class="flex-1 overflow-hidden relative h-full flex items-center">
                 <div class="marquee-content" id="news-ticker">
-                    <span class="text-textSecondary">טוען מבזקים...</span>
+                    <span class="text-gray-400 px-4">מערכת החדשות מתעדכנת...</span>
                 </div>
             </div>
         </div>
     </footer>
     
     <!-- ==================== ADMIN BUTTON ==================== -->
-    <button onclick="openAdminPanel()" class="admin-btn fixed top-4 left-4 text-white px-4 py-2.5 rounded-xl font-semibold shadow-xl z-40 flex items-center gap-2">
-        <span>⚙️</span><span>ניהול</span>
+    <button onclick="openAdminPanel()" class="fixed top-6 left-6 z-50 group flex items-center justify-center w-12 h-12 rounded-full glass-panel hover:bg-white/20 transition-all duration-300 hover:scale-110 hover:rotate-90" title="ניהול">
+        <span class="text-xl opacity-70 group-hover:opacity-100">⚙️</span>
     </button>
     
     <!-- ==================== ADMIN MODAL ==================== -->
-    <div id="admin-modal" class="fixed inset-0 modal-backdrop z-50 hidden flex items-center justify-center p-4">
-        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
-            <div class="bg-gradient-to-l from-accent to-blue-600 text-white px-6 py-4 rounded-t-2xl">
-                <h2 class="text-xl font-bold flex items-center gap-2">📝 ניהול ההודעות</h2>
-            </div>
-            <div class="p-6 space-y-4">
-                <div>
-                    <label class="block text-gray-700 font-semibold mb-1.5 text-sm">כותרת ההודעה *</label>
-                    <input type="text" id="notice-title" class="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-accent focus:border-transparent text-gray-800 bg-gray-50" placeholder="הזן כותרת..." dir="rtl">
+    <div id="admin-modal" class="fixed inset-0 z-[60] hidden">
+        <div class="absolute inset-0 bg-black/80 backdrop-blur-sm transition-opacity" onclick="closeAdminPanel()"></div>
+        <div class="absolute inset-0 flex items-center justify-center p-4 pointer-events-none">
+            <div class="glass-panel w-full max-w-lg rounded-3xl shadow-2xl transform transition-all scale-100 pointer-events-auto flex flex-col max-h-[90vh]">
+                <div class="p-6 border-b border-white/10 flex items-center justify-between bg-white/5 rounded-t-3xl">
+                    <h2 class="text-xl font-bold text-white flex items-center gap-2">📝 ניהול תצוגה</h2>
+                    <button onclick="closeAdminPanel()" class="text-white/40 hover:text-white transition-colors">✕</button>
                 </div>
-                <div>
-                    <label class="block text-gray-700 font-semibold mb-1.5 text-sm">תוכן ההודעה</label>
-                    <textarea id="notice-content" rows="3" class="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-accent focus:border-transparent text-gray-800 bg-gray-50 min-h-[80px] resize-none" placeholder="הזן תוכן..." dir="rtl"></textarea>
-                </div>
-                <div>
-                    <label class="block text-gray-700 font-semibold mb-1.5 text-sm">קטגוריה</label>
-                    <select id="notice-category" class="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-accent focus:border-transparent text-gray-800 bg-gray-50">
-                        <option value="general">📢 כללי</option>
-                        <option value="maintenance">🔧 תחזוקה</option>
-                        <option value="event">🎉 אירוע</option>
-                        <option value="important">⚠️ חשוב</option>
-                        <option value="billing">💳 חיוב</option>
-                        <option value="vaad">🏠 ועד הבית</option>
-                    </select>
-                </div>
-                <div>
-                    <label class="block text-gray-700 font-semibold mb-1.5 text-sm">תאריך</label>
-                    <input type="date" id="notice-date" class="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-accent focus:border-transparent text-gray-800 bg-gray-50">
-                </div>
-                <div>
-                    <label class="block text-gray-700 font-semibold mb-2 text-sm">צבע ההודעה</label>
-                    <div class="flex gap-3" id="color-picker">
-                        <button type="button" class="color-option selected" data-color="#3b82f6" style="background-color: #3b82f6;" onclick="selectColor(this)"></button>
-                        <button type="button" class="color-option" data-color="#10b981" style="background-color: #10b981;" onclick="selectColor(this)"></button>
-                        <button type="button" class="color-option" data-color="#f59e0b" style="background-color: #f59e0b;" onclick="selectColor(this)"></button>
-                        <button type="button" class="color-option" data-color="#ef4444" style="background-color: #ef4444;" onclick="selectColor(this)"></button>
-                        <button type="button" class="color-option" data-color="#8b5cf6" style="background-color: #8b5cf6;" onclick="selectColor(this)"></button>
+
+                <div class="p-6 space-y-5 overflow-y-auto custom-scroll">
+                    <!-- NEW: Post Type Selector -->
+                    <div>
+                        <label class="block text-blue-200/80 text-sm font-medium mb-2">מיקום פרסום</label>
+                        <div class="flex gap-4 p-1">
+                            <label class="flex items-center gap-2 cursor-pointer bg-white/5 px-4 py-2 rounded-xl border border-white/10 hover:bg-white/10 transition">
+                                <input type="radio" name="post-type" value="notice" checked class="text-accent focus:ring-accent bg-transparent">
+                                <span class="text-white font-medium">לוח מודעות (מרכז)</span>
+                            </label>
+                            <label class="flex items-center gap-2 cursor-pointer bg-white/5 px-4 py-2 rounded-xl border border-white/10 hover:bg-white/10 transition">
+                                <input type="radio" name="post-type" value="news" class="text-accent focus:ring-accent bg-transparent">
+                                <span class="text-white font-medium">חדשות הבניין (שמאל)</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-blue-200/80 text-sm font-medium mb-2">כותרת</label>
+                        <input type="text" id="notice-title" class="w-full px-4 py-3 rounded-xl focus:ring-2 focus:ring-accent bg-transparent text-right" placeholder="לדוגמה: יום הולדת ל..." dir="rtl">
+                    </div>
+                    
+                    <div>
+                        <label class="block text-blue-200/80 text-sm font-medium mb-2">תוכן</label>
+                        <textarea id="notice-content" rows="3" class="w-full px-4 py-3 rounded-xl focus:ring-2 focus:ring-accent bg-transparent resize-none text-right" placeholder="פרטים נוספים..." dir="rtl"></textarea>
+                    </div>
+                    
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-blue-200/80 text-sm font-medium mb-2">קטגוריה</label>
+                            <select id="notice-category" class="w-full px-4 py-3 rounded-xl bg-transparent">
+                                <optgroup label="כללי">
+                                    <option value="general" class="text-black">📢 כללי</option>
+                                    <option value="maintenance" class="text-black">🔧 תחזוקה</option>
+                                    <option value="important" class="text-black">⚠️ חשוב</option>
+                                    <option value="vaad" class="text-black">🏠 ועד</option>
+                                </optgroup>
+                                <optgroup label="חיי קהילה">
+                                    <option value="birthday" class="text-black">🎂 יום הולדת</option>
+                                    <option value="holiday" class="text-black">🍷 חג ומועד</option>
+                                    <option value="welcome" class="text-black">👋 ברוכים הבאים</option>
+                                    <option value="event" class="text-black">🎉 אירוע</option>
+                                </optgroup>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-blue-200/80 text-sm font-medium mb-2">תאריך</label>
+                            <input type="date" id="notice-date" class="w-full px-4 py-3 rounded-xl bg-transparent text-right">
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-blue-200/80 text-sm font-medium mb-2">צבע דגש</label>
+                        <div class="flex gap-4 p-2 bg-white/5 rounded-xl justify-center">
+                            <button type="button" class="w-8 h-8 rounded-full border-2 border-transparent transition-transform hover:scale-110 focus:ring-2 ring-offset-2 ring-offset-slate-900 selected-color ring-white" data-color="#38bdf8" style="background: #38bdf8;" onclick="selectColor(this)"></button>
+                            <button type="button" class="w-8 h-8 rounded-full border-2 border-transparent transition-transform hover:scale-110 focus:ring-2 ring-offset-2 ring-offset-slate-900" data-color="#10b981" style="background: #10b981;" onclick="selectColor(this)"></button>
+                            <button type="button" class="w-8 h-8 rounded-full border-2 border-transparent transition-transform hover:scale-110 focus:ring-2 ring-offset-2 ring-offset-slate-900" data-color="#f59e0b" style="background: #f59e0b;" onclick="selectColor(this)"></button>
+                            <button type="button" class="w-8 h-8 rounded-full border-2 border-transparent transition-transform hover:scale-110 focus:ring-2 ring-offset-2 ring-offset-slate-900" data-color="#ef4444" style="background: #ef4444;" onclick="selectColor(this)"></button>
+                            <button type="button" class="w-8 h-8 rounded-full border-2 border-transparent transition-transform hover:scale-110 focus:ring-2 ring-offset-2 ring-offset-slate-900" data-color="#a855f7" style="background: #a855f7;" onclick="selectColor(this)"></button>
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-center gap-3 p-3 rounded-xl bg-white/5 cursor-pointer" onclick="document.getElementById('notice-priority').click()">
+                        <input type="checkbox" id="notice-priority" class="w-5 h-5 rounded border-gray-500 text-accent focus:ring-accent bg-transparent">
+                        <label class="text-white text-sm cursor-pointer select-none">⚡ סמן כדחוף (הבהוב אדום)</label>
                     </div>
                 </div>
-                <div class="flex items-center gap-2">
-                    <input type="checkbox" id="notice-priority" class="w-5 h-5 text-accent rounded focus:ring-accent">
-                    <label for="notice-priority" class="text-gray-700 font-medium text-sm">⚡ עדיפות גבוהה (הודעה מהבהבת)</label>
+
+                <div class="p-6 border-t border-white/10 bg-white/5 rounded-b-3xl flex justify-between">
+                    <button onclick="clearForm()" class="px-6 py-2 rounded-xl text-sm font-medium text-white/60 hover:text-white hover:bg-white/10 transition-colors">נקה</button>
+                    <div class="flex gap-3">
+                        <button onclick="closeAdminPanel()" class="px-6 py-2 rounded-xl text-sm font-medium text-white hover:bg-white/10 transition-colors">ביטול</button>
+                        <button onclick="addNotice()" class="px-6 py-2 rounded-xl text-sm font-bold bg-accent text-slate-900 hover:bg-accentLight shadow-lg shadow-accent/20 transition-all transform hover:-translate-y-1">פרסם</button>
+                    </div>
                 </div>
-            </div>
-            <div class="px-6 py-4 bg-gray-50 rounded-b-2xl flex flex-wrap gap-3 justify-end border-t border-gray-100">
-                <button onclick="clearForm()" class="px-4 py-2 bg-gray-200 text-gray-700 rounded-xl font-medium hover:bg-gray-300 transition-colors text-sm">🗑️ נקה</button>
-                <button onclick="closeAdminPanel()" class="px-4 py-2 bg-gray-200 text-gray-700 rounded-xl font-medium hover:bg-gray-300 transition-colors text-sm">סגור</button>
-                <button onclick="addNotice()" class="px-5 py-2 bg-gradient-to-l from-accent to-blue-600 text-white rounded-xl font-semibold hover:opacity-90 transition-opacity text-sm">➕ הוסף הודעה</button>
             </div>
         </div>
     </div>
@@ -360,12 +401,11 @@
     <script>
         const CONFIG = {
             location: { name: 'באר יעקב', lat: 31.9424, lon: 34.8391, geonameid: 295530 },
-            // intervals in milliseconds: clock every second, news & weather every 15 minutes
             intervals: { clock: 1000, news: 900000, weather: 900000 }
         };
         
         let notices = [];
-        let selectedColor = '#3b82f6';
+        let selectedColor = '#38bdf8';
         
         document.addEventListener('DOMContentLoaded', () => {
             loadNotices();
@@ -374,22 +414,23 @@
             fetchShabbatTimes();
             fetchNewsFromRSS();
             document.getElementById('notice-date').valueAsDate = new Date();
+            
             setInterval(updateTime, CONFIG.intervals.clock);
             setInterval(fetchNewsFromRSS, CONFIG.intervals.news);
             setInterval(fetchWeather, CONFIG.intervals.weather);
+            
             document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeAdminPanel(); });
-            document.getElementById('admin-modal').addEventListener('click', (e) => { if (e.target.id === 'admin-modal') closeAdminPanel(); });
         });
         
+        // ... Time/Weather/Shabbat functions remain the same ...
         function updateTime() {
             const now = new Date();
             const timeStr = now.toLocaleTimeString('he-IL', { hour: '2-digit', minute: '2-digit', hour12: false });
-            const dateStr = now.toLocaleDateString('he-IL', { year: 'numeric', month: 'long', day: 'numeric' });
+            const dateStr = now.toLocaleDateString('he-IL', { day: 'numeric', month: 'numeric', year: 'numeric' });
             const dayStr = now.toLocaleDateString('he-IL', { weekday: 'long' });
-            const shortDateStr = now.toLocaleDateString('he-IL', { day: 'numeric', month: 'short', year: 'numeric' });
             
             document.getElementById('header-time').textContent = timeStr;
-            document.getElementById('header-date').textContent = shortDateStr;
+            document.getElementById('header-date').textContent = dateStr;
             document.getElementById('header-day').textContent = dayStr;
         }
         
@@ -400,16 +441,48 @@
                     const data = await response.json();
                     const temp = Math.round(data.current_weather.temperature);
                     const weatherCode = data.current_weather.weathercode;
-                    updateWeatherDisplay(temp, weatherCode);
+                    const isDay = data.current_weather.is_day;
+                    updateWeatherDisplay(temp, weatherCode, isDay);
+                    updateBackgroundTheme(isDay, weatherCode);
                 }
-            } catch (error) { console.error('Weather fetch error:', error); }
+            } catch (error) { console.error('Weather error:', error); }
         }
-        
-        function updateWeatherDisplay(temp, weatherCode) {
-            const icons = { 0: '☀️', 1: '🌤️', 2: '⛅', 3: '☁️', 45: '🌫️', 48: '🌫️', 51: '🌧️', 53: '🌧️', 55: '🌧️', 61: '🌧️', 63: '🌧️', 65: '🌧️', 71: '🌨️', 73: '🌨️', 75: '🌨️', 77: '🌨️', 80: '🌦️', 81: '🌦️', 82: '🌦️', 85: '🌨️', 86: '🌨️', 95: '⛈️', 96: '⛈️', 99: '⛈️' };
-            const icon = icons[weatherCode] || '🌡️';
+
+        function updateBackgroundTheme(isDay, weatherCode) {
+            const body = document.body;
+            const themes = {
+                day: {
+                    clear: 'radial-gradient(circle at top left, #38bdf8 0%, #0ea5e9 30%, #0284c7 70%, #0369a1 100%)',
+                    cloudy: 'radial-gradient(circle at top left, #94a3b8 0%, #64748b 30%, #475569 70%, #334155 100%)',
+                    rain: 'radial-gradient(circle at top left, #334155 0%, #1e293b 50%, #0f172a 100%)',
+                },
+                night: {
+                    default: 'radial-gradient(circle at top left, #020617 0%, #0b1120 18%, #111827 42%, #1e293b 75%, #020617 100%)'
+                }
+            };
+            let theme = 'default';
+            if (isDay) {
+                if ([0, 1].includes(weatherCode)) theme = themes.day.clear;
+                else if ([2, 3, 45, 48].includes(weatherCode)) theme = themes.day.cloudy;
+                else theme = themes.day.rain;
+            } else {
+                theme = themes.night.default;
+            }
+            body.style.background = theme;
+            body.style.backgroundSize = '200% 200%';
+        }
+
+        function updateWeatherDisplay(temp, weatherCode, isDay) {
+            const getIcon = (code, day) => {
+                const icons = {
+                    0: day ? '☀️' : '🌙', 1: day ? '🌤️' : '🌙', 2: day ? '⛅' : '☁️', 3: '☁️',
+                    45: '🌫️', 48: '🌫️', 51: '🌧️', 53: '🌧️', 55: '🌧️', 61: '🌧️', 63: '🌧️', 65: '🌧️',
+                    71: '🌨️', 73: '🌨️', 75: '🌨️', 80: '🌦️', 81: '🌦️', 82: '🌦️', 95: '⛈️', 96: '⛈️', 99: '⛈️'
+                };
+                return icons[code] || (day ? '🌡️' : '🌙');
+            };
             document.getElementById('header-weather-temp').textContent = `${temp}°`;
-            document.getElementById('header-weather-icon').textContent = icon;
+            document.getElementById('header-weather-icon').textContent = getIcon(weatherCode, isDay);
         }
         
         async function fetchShabbatTimes() {
@@ -423,11 +496,11 @@
                         else if (item.category === 'candles') candleLighting = formatTime(item.date);
                         else if (item.category === 'havdalah') havdalah = formatTime(item.date);
                     }
-                    document.getElementById('parsha-name').textContent = ` ${parsha}`;
+                    document.getElementById('parsha-name').textContent = parsha;
                     document.getElementById('shabbat-entry').textContent = candleLighting;
                     document.getElementById('shabbat-exit').textContent = havdalah;
                 }
-            } catch (error) { console.error('Shabbat times fetch error:', error); }
+            } catch (error) { console.error('Shabbat error:', error); }
         }
         
         function formatTime(isoString) {
@@ -441,108 +514,170 @@
                 const response = await fetch(apiUrl);
                 if (response.ok) {
                     const data = await response.json();
-                    if (data.status === 'ok' && data.items && data.items.length > 0) {
-                        const newsItems = data.items.slice(0, 8).map(item => {
+                    if (data.status === 'ok' && data.items?.length > 0) {
+                        const newsItems = data.items.slice(0, 10).map(item => {
                             const pubDate = new Date(item.pubDate);
-                            // Adjust by +2 hours to match local display
                             pubDate.setHours(pubDate.getHours() + 2);
-                            const time = pubDate.toLocaleTimeString('he-IL', {
-                                hour: '2-digit',
-                                minute: '2-digit',
-                                hour12: false
-                            });
                             return {
-                                title: item.title,
-                                time,
+                                title: item.title.replace(/&quot;/g, '"'),
+                                time: pubDate.toLocaleTimeString('he-IL', { hour: '2-digit', minute: '2-digit' }),
                                 url: item.link
                             };
                         });
                         updateNewsTicker(newsItems);
-                        updateNewsHeadlines(newsItems.slice(0, 6));
+                        // REMOVED: updateNewsHeadlines(newsItems.slice(0, 6)); -> Now managed by Admin
                         return;
                     }
                 }
-            } catch (error) { console.error('News fetch error:', error); }
-            const fallbackNews = [
-                { title: 'ברוכים הבאים לאלונים 8 - מסך הלובי החכם שלכם', time: '--:--', url: '#' },
-                { title: 'לעדכונים נוספים עקבו אחר לוח ההודעות', time: '--:--', url: '#' }
-            ];
-            updateNewsTicker(fallbackNews);
-            updateNewsHeadlines(fallbackNews);
+            } catch (error) { console.error('News error:', error); }
+            updateNewsTicker([{ title: 'ברוכים הבאים לאלונים 8', time: '', url: '#' }]);
         }
         
         function updateNewsTicker(newsItems) {
             const ticker = document.getElementById('news-ticker');
             const newsHtml = newsItems.map(item => `
-                <span class="inline-flex items-center mx-6">
-                    <span class="ynet-icon mr-2">y</span>
-                    <span class="text-danger font-bold ml-2">${item.time}</span>
-                    <a href="${item.url}" target="_blank" rel="noopener noreferrer" class="text-white hover:text-accentLight transition-colors">${escapeHtml(item.title)}</a>
-                    <span class="mx-4 text-white/30">|</span>
+                <span class="inline-flex items-center mx-8">
+                    <span class="ynet-icon mr-3 ml-1">y</span>
+                    <span class="text-accent font-bold ml-2 text-sm">${item.time}</span>
+                    <span class="text-white text-lg font-light tracking-wide">${item.title}</span>
                 </span>
             `).join('');
             ticker.innerHTML = newsHtml + newsHtml;
         }
         
-        function updateNewsHeadlines(newsItems) {
-            const container = document.getElementById('news-headlines');
-            container.innerHTML = newsItems.map(item => `
-                <a href="${item.url}" target="_blank" rel="noopener noreferrer" class="block p-3 rounded-lg hover:bg-gray-50 transition-colors border-b border-gray-100 last:border-0">
-                    <div class="flex items-start gap-3">
-                        <div class="w-14 h-14 bg-gradient-to-br from-blue-100 to-blue-50 rounded-lg flex items-center justify-center flex-shrink-0">
-                            <div class="ynet-icon">y</div>
-                        </div>
-                        <div class="flex-1 min-w-0">
-                            <p class="text-gray-800 text-sm font-medium leading-snug line-clamp-2">${escapeHtml(item.title)}</p>
-                            <p class="text-gray-400 text-xs mt-1">${item.time}</p>
-                        </div>
-                    </div>
-                </a>
-            `).join('');
-        }
-        
+        /* --- Notices & Building News Logic --- */
         function loadNotices() {
             const stored = localStorage.getItem('lobby-notices');
-            if (stored) { notices = JSON.parse(stored); renderNotices(); }
+            if (stored) { 
+                notices = JSON.parse(stored);
+                // Backward compatibility: add type='notice' to old items
+                notices = notices.map(n => ({ ...n, type: n.type || 'notice' }));
+                renderAll(); 
+            }
         }
         
         function saveNotices() { localStorage.setItem('lobby-notices', JSON.stringify(notices)); }
         
+        function renderAll() {
+            renderNotices();
+            renderBuildingNews();
+        }
+
+        // Render Center Board (Notices)
         function renderNotices() {
             const container = document.getElementById('notices-content');
             const noNotices = document.getElementById('no-notices');
             const countEl = document.getElementById('notices-count');
-            if (notices.length === 0) { noNotices.style.display = 'block'; countEl.textContent = '0 הודעות'; return; }
+            
+            const boardNotices = notices.filter(n => n.type === 'notice');
+            
+            if (boardNotices.length === 0) {
+                noNotices.style.display = 'flex';
+                countEl.textContent = '0 הודעות';
+                container.querySelectorAll('.notice-item').forEach(el => el.remove());
+                return;
+            }
+            
             noNotices.style.display = 'none';
-            countEl.textContent = `${notices.length} הודעות`;
+            countEl.textContent = `${boardNotices.length} הודעות`;
+            
             container.querySelectorAll('.notice-item').forEach(el => el.remove());
-            notices.forEach(notice => { container.insertBefore(createNoticeElement(notice), noNotices); });
+            
+            boardNotices.forEach(notice => {
+                const el = createNoticeElement(notice, false);
+                container.appendChild(el);
+            });
+        }
+
+        // Render Left Column (Building News)
+        function renderBuildingNews() {
+            const container = document.getElementById('building-news-content');
+            const noNews = document.getElementById('no-building-news');
+            
+            const newsItems = notices.filter(n => n.type === 'news');
+            
+            if (newsItems.length === 0) {
+                noNews.style.display = 'flex';
+                container.querySelectorAll('.news-item-card').forEach(el => el.remove());
+                return;
+            }
+            
+            noNews.style.display = 'none';
+            container.querySelectorAll('.news-item-card').forEach(el => el.remove());
+            
+            newsItems.forEach(notice => {
+                const el = createBuildingNewsElement(notice);
+                container.appendChild(el);
+            });
         }
         
+        // Element for Main Board
         function createNoticeElement(notice) {
             const div = document.createElement('div');
-            div.className = `notice-item p-4 ${notice.priority ? 'priority-notice' : ''}`;
-            div.style.borderRightColor = notice.color;
+            div.className = `notice-item p-4 rounded-2xl bg-white/5 border border-white/5 hover:bg-white/10 transition-all duration-300 transform hover:-translate-y-1 hover:shadow-lg ${notice.priority ? 'priority-notice' : ''}`;
             div.dataset.id = notice.id;
-            const emojis = { general: '📢', maintenance: '🔧', event: '🎉', important: '⚠️', billing: '💳', vaad: '🏠' };
-            const names = { general: 'כללי', maintenance: 'תחזוקה', event: 'אירוע', important: 'חשוב', billing: 'חיוב', vaad: 'ועד הבית' };
+            
+            const emojis = { general: '📢', maintenance: '🔧', event: '🎉', important: '⚠️', billing: '💳', vaad: '🏠', birthday: '🎂', holiday: '🍷', welcome: '👋' };
             const dateStr = new Date(notice.date).toLocaleDateString('he-IL');
+            
             div.innerHTML = `
-                <div class="flex justify-between items-start gap-3">
-                    <div class="flex-1">
-                        <div class="flex items-center gap-2 mb-1">
-                            <span class="text-xs px-2 py-0.5 rounded-full bg-gray-100 text-gray-600">${emojis[notice.category] || '📢'} ${names[notice.category] || 'כללי'}</span>
-                            <span class="text-xs text-gray-400">${dateStr}</span>
+                <div class="flex gap-4">
+                    <div class="flex flex-col items-center gap-1 min-w-[60px] border-l border-white/10 pl-4">
+                        <div class="w-10 h-10 rounded-full flex items-center justify-center text-xl shadow-lg" style="background: ${notice.color}20; color: ${notice.color}; border: 1px solid ${notice.color}40;">
+                            ${emojis[notice.category] || '📢'}
                         </div>
-                        <h4 class="font-bold text-base text-gray-800" style="color: ${notice.color}">${escapeHtml(notice.title)}</h4>
-                        ${notice.content ? `<p class="text-gray-600 text-sm mt-1.5 leading-relaxed notice-content">${escapeHtml(notice.content)}</p>` : ''}
+                        <span class="text-[10px] text-gray-400 font-mono mt-1">${dateStr}</span>
                     </div>
-                    <button onclick="deleteNotice('${notice.id}')" class="text-gray-300 hover:text-danger transition-colors p-1 rounded-lg hover:bg-red-50" title="מחק הודעה">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-                    </button>
+                    <div class="flex-1 min-w-0">
+                        <div class="flex justify-between items-start">
+                            <h4 class="font-bold text-lg text-white mb-1 leading-tight">${escapeHtml(notice.title)}</h4>
+                            ${notice.priority ? '<span class="text-xs text-red-400 font-bold border border-red-500/30 px-2 py-0.5 rounded-full bg-red-500/10">דחוף</span>' : ''}
+                        </div>
+                        <p class="text-gray-300 text-sm leading-relaxed whitespace-pre-line font-light opacity-90">${escapeHtml(notice.content)}</p>
+                    </div>
+                    <button onclick="deleteNotice('${notice.id}')" class="self-start opacity-0 group-hover:opacity-100 text-gray-500 hover:text-red-400 transition-all p-1">✕</button>
+                </div>
+            `;
+            div.classList.add('group');
+            return div;
+        }
+
+        // Element for Building News (Left Column)
+        function createBuildingNewsElement(notice) {
+            const div = document.createElement('div');
+            div.className = 'news-item-card p-3 rounded-xl bg-white/5 hover:bg-white/10 transition-colors border border-white/5 group relative';
+            
+            const emojis = { general: '📢', maintenance: '🔧', event: '🎉', important: '⚠️', billing: '💳', vaad: '🏠', birthday: '🎂', holiday: '🍷', welcome: '👋' };
+            
+            div.innerHTML = `
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-full flex items-center justify-center text-lg flex-shrink-0" style="background: ${notice.color}20; color: ${notice.color};">
+                        ${emojis[notice.category] || '📢'}
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <p class="text-white text-sm font-bold leading-snug truncate">${escapeHtml(notice.title)}</p>
+                        <p class="text-gray-400 text-xs mt-0.5 truncate">${escapeHtml(notice.content)}</p>
+                    </div>
+                    <button onclick="deleteNotice('${notice.id}')" class="opacity-0 group-hover:opacity-100 text-gray-500 hover:text-red-400 transition-all p-1">✕</button>
                 </div>
             `;
             return div;
+        }
+        
+        /* --- Admin Logic --- */
+        function openAdminPanel() {
+            document.getElementById('admin-modal').classList.remove('hidden');
+            setTimeout(() => document.getElementById('notice-title').focus(), 100);
+        }
+        
+        function closeAdminPanel() {
+            document.getElementById('admin-modal').classList.add('hidden');
+        }
+        
+        function selectColor(btn) {
+            document.querySelectorAll('button[data-color]').forEach(b => b.classList.remove('ring-white', 'ring-2'));
+            btn.classList.add('ring-white', 'ring-2');
+            selectedColor = btn.dataset.color;
         }
         
         function addNotice() {
@@ -551,33 +686,51 @@
             const category = document.getElementById('notice-category').value;
             const date = document.getElementById('notice-date').value;
             const priority = document.getElementById('notice-priority').checked;
-            if (!title) { alert('נא להזין כותרת להודעה'); document.getElementById('notice-title').focus(); return; }
-            notices.unshift({ id: Date.now().toString(), title, content, category, date: date || new Date().toISOString().split('T')[0], color: selectedColor, priority });
-            saveNotices(); renderNotices(); clearForm(); closeAdminPanel();
+            
+            // Get selected post type
+            const type = document.querySelector('input[name="post-type"]:checked').value;
+            
+            if (!title) return;
+            
+            notices.unshift({
+                id: Date.now().toString(),
+                title, content, category,
+                date: date || new Date().toISOString().split('T')[0],
+                color: selectedColor,
+                priority,
+                type: type // 'notice' or 'news'
+            });
+            
+            saveNotices();
+            renderAll();
+            closeAdminPanel();
+            clearForm();
         }
         
-        function deleteNotice(id) { if (confirm('האם למחוק את ההודעה?')) { notices = notices.filter(n => n.id !== id); saveNotices(); renderNotices(); } }
-        
-        function openAdminPanel() { document.getElementById('admin-modal').classList.remove('hidden'); document.getElementById('notice-title').focus(); }
-        function closeAdminPanel() { document.getElementById('admin-modal').classList.add('hidden'); }
+        function deleteNotice(id) {
+            if (confirm('למחוק פריט זה?')) {
+                notices = notices.filter(n => n.id !== id);
+                saveNotices();
+                renderAll();
+            }
+        }
         
         function clearForm() {
             document.getElementById('notice-title').value = '';
             document.getElementById('notice-content').value = '';
             document.getElementById('notice-category').value = 'general';
-            document.getElementById('notice-date').valueAsDate = new Date();
             document.getElementById('notice-priority').checked = false;
-            document.querySelectorAll('.color-option').forEach(btn => { btn.classList.remove('selected'); if (btn.dataset.color === '#3b82f6') btn.classList.add('selected'); });
-            selectedColor = '#3b82f6';
+            document.getElementById('notice-date').valueAsDate = new Date();
+            // Reset to "Main Board"
+            document.querySelector('input[name="post-type"][value="notice"]').checked = true;
         }
         
-        function selectColor(button) {
-            document.querySelectorAll('.color-option').forEach(btn => btn.classList.remove('selected'));
-            button.classList.add('selected');
-            selectedColor = button.dataset.color;
+        function escapeHtml(text) {
+            if (!text) return '';
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
         }
-        
-        function escapeHtml(text) { const div = document.createElement('div'); div.textContent = text; return div.innerHTML; }
     </script>
 </body>
 </html>
