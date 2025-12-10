@@ -291,7 +291,7 @@
     <!-- ==================== NEWS TICKER ==================== -->
     <footer class="fixed bottom-0 left-0 right-0 z-30 bg-gray-900/90 backdrop-blur-md border-t border-white/10 shadow-2xl">
         <div class="flex items-center max-w-[1920px] mx-auto h-20">
-            <a href="https://www.ynet.co.il" target="_blank" class="h-full bg-red-600 px-6 flex items-center justify-center gap-2 text-white font-bold hover:bg-red-700 transition-colors z-20 shadow-xl">
+            <a href="https://www.ynet.co.il/news/category/184" target="_blank" class="h-full bg-red-600 px-6 flex items-center justify-center gap-2 text-white font-bold hover:bg-red-700 transition-colors z-20 shadow-xl">
                 <span>מבזקים</span>
                 <span class="animate-pulse w-2 h-2 bg-white rounded-full"></span>
             </a>
@@ -368,7 +368,10 @@
                 </div>
 
                 <div class="p-6 border-t border-white/10 bg-white/5 rounded-b-3xl flex justify-between">
-                    <button onclick="clearForm()" class="px-6 py-2 rounded-xl text-sm font-medium text-white/60 hover:text-white hover:bg-white/10 transition-colors">נקה</button>
+                    <div class="flex gap-3">
+                        <button onclick="exportNoticesJson()" class="px-4 py-2 rounded-xl text-xs font-medium text-white/60 hover:text-white hover:bg-white/10 transition-colors border border-white/10">ייצוא JSON</button>
+                        <button onclick="clearForm()" class="px-6 py-2 rounded-xl text-sm font-medium text-white/60 hover:text-white hover:bg-white/10 transition-colors">נקה</button>
+                    </div>
                     <div class="flex gap-3">
                         <button onclick="closeAdminPanel()" class="px-6 py-2 rounded-xl text-sm font-medium text-white hover:bg-white/10 transition-colors">ביטול</button>
                         <button onclick="addNotice()" class="px-6 py-2 rounded-xl text-sm font-bold bg-accent text-slate-900 hover:bg-accentLight shadow-lg shadow-accent/20 transition-all transform hover:-translate-y-1">פרסם</button>
@@ -554,16 +557,25 @@
         }
         
         /* --- Notices & Building News Logic (Admin System) --- */
-        function loadNotices() {
-            const stored = localStorage.getItem('lobby-notices');
-            if (stored) { 
-                notices = JSON.parse(stored);
-                // Backward compatibility: add type='notice' to old items
-                notices = notices.map(n => ({ ...n, type: n.type || 'notice' }));
-                renderAll(); 
+        // Load notices from shared JSON file (with localStorage fallback for offline/local edits)
+        async function loadNotices() {
+            try {
+                const res = await fetch('notices.json?_=' + Date.now());
+                if (!res.ok) throw new Error('HTTP ' + res.status);
+                notices = await res.json();
+            } catch (err) {
+                console.error('Failed to load notices.json, falling back to localStorage', err);
+                const stored = localStorage.getItem('lobby-notices');
+                notices = stored ? JSON.parse(stored) : [];
             }
+
+            // Ensure type field exists
+            notices = notices.map(n => ({ ...n, type: n.type || 'notice' }));
+            renderAll();
         }
-        
+
+        // NOTE: In a static setup we cannot write back to notices.json from the browser.
+        // This only keeps temporary/local changes on this device.
         function saveNotices() { localStorage.setItem('lobby-notices', JSON.stringify(notices)); }
         
         function renderAll() {
@@ -689,6 +701,26 @@
             const div = document.createElement('div');
             div.textContent = text;
             return div.innerHTML;
+        }
+
+        // Helper: export current notices array as a downloadable JSON file
+        function exportNoticesJson() {
+            try {
+                const dataStr = JSON.stringify(notices, null, 2);
+                const blob = new Blob([dataStr], { type: 'application/json;charset=utf-8' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'notices.json';
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+                alert('קובץ notices.json הורד. העתק אותו לתיקיית הפרויקט כדי לעדכן את השרת.');
+            } catch (e) {
+                console.error('Export JSON failed', e);
+                alert('אירעה שגיאה ביצוא ה-JSON.');
+            }
         }
     </script>
 </body>
