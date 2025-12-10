@@ -392,6 +392,41 @@
         
         let notices = [];
         let selectedColor = '#38bdf8';
+
+        // --- DEFAULT NOTICES (Fallback) ---
+        // This ensures the screen works immediately without a server
+        const DEFAULT_NOTICES = [
+          {
+            "id": "1",
+            "title": "התרעת מזג אוויר סוער!",
+            "content": "דיירים יקרים, נא לקשור חפצים במרפסות, לסגור חלונות ודלתות פתוחים.\nמומלץ לא לחנות מתחת לעצים.\n\nבברכה,\nועד הבית",
+            "category": "important",
+            "date": "2025-12-10",
+            "color": "#ef4444",
+            "priority": true,
+            "type": "notice"
+          },
+          {
+            "id": "2",
+            "title": "ברוכים הבאים ללוח המודעות הדיגיטלי החדש של הבניין!",
+            "content": "נשמח לשמוע מכם רעיונות והצעות לשיפור הנראות והתכנים המופיעים בלוח.\nלהצעות ושיפורים ניתן לפנות לועד הבניין בוואטסאפ: 052-4244788 (אופיר).",
+            "category": "welcome",
+            "date": "2025-12-10",
+            "color": "#38bdf8",
+            "priority": false,
+            "type": "notice"
+          },
+          {
+            "id": "3",
+            "title": "הזמנה לאסיפת דיירים",
+            "content": "יום ראשון 23.12.25 | 20:00 | לובי הבניין\n\nנדון בשיפורים לבניין ונקבל הצעות.\nשימו לב: ההצבעה לבעלי דירות בלבד, אך ההחלטות יחייבו את כולם. נוכחותכם חשובה!\n\nהועד הבניין",
+            "category": "event",
+            "date": "2025-12-05",
+            "color": "#f59e0b",
+            "priority": false,
+            "type": "notice"
+          }
+        ];
         
         document.addEventListener('DOMContentLoaded', () => {
             loadNotices();
@@ -557,20 +592,34 @@
         }
         
         /* --- Notices & Building News Logic (Admin System) --- */
-        // Load notices from shared JSON file (with localStorage fallback for offline/local edits)
+        
+        // Load notices from shared JSON file (with fallback to DEFAULT_NOTICES or localStorage)
         async function loadNotices() {
             try {
+                // Try fetching external file (works if hosted on a server)
+                // If running locally or as blob, this might fail, hence the try/catch
                 const res = await fetch('notices.json?_=' + Date.now());
                 if (!res.ok) throw new Error('HTTP ' + res.status);
                 notices = await res.json();
             } catch (err) {
-                console.error('Failed to load notices.json, falling back to localStorage', err);
+                console.warn('Could not load remote notices.json, checking localStorage or using defaults:', err);
+                
+                // Fallback 1: LocalStorage (saved edits)
                 const stored = localStorage.getItem('lobby-notices');
-                notices = stored ? JSON.parse(stored) : [];
+                if (stored) {
+                    notices = JSON.parse(stored);
+                } else {
+                    // Fallback 2: Default hardcoded data (from notices.json content)
+                    notices = DEFAULT_NOTICES;
+                }
             }
 
             // Ensure type field exists
-            notices = notices.map(n => ({ ...n, type: n.type || 'notice' }));
+            if (Array.isArray(notices)) {
+                notices = notices.map(n => ({ ...n, type: n.type || 'notice' }));
+            } else {
+                notices = [];
+            }
             renderAll();
         }
 
