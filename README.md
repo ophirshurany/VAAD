@@ -1,40 +1,35 @@
-# אלונים 8 - מסך לובי חכם
-## Smart Building Lobby Display System
+# אלונים 8 - מסך לובי (VAAD)
 
-A responsive, real-time web dashboard designed for 24/7 display on lobby screens, combining community announcements, real-time data, and administrative management.
+דאשבורד Web למסך לובי (RTL) שמיועד לעבודה רציפה 24/7 על טלוויזיה/מסך, כולל הודעות ועד/דיירים, מזג אוויר, זמני שבת ותזכורות, וטיקר חדשות.
 
 ---
 
-## 📐 Layout Specification
+## 📐 Layout (עדכני)
 
-### Grid Structure (1920×1080 optimized)
+### מבנה מסך (1920×1080)
 
 ```
-┌─────────────────────────────────────────────────────────────────────────┐
-│                           TOP BAR (64px)                                 │
-│  [🏢 ברוכים הבאים לאלונים 8, נתניה]              [Weather│Date│Time]    │
-├──────────────────┬────────────────────────────┬─────────────────────────┤
-│                  │                            │                         │
-│   LEFT COLUMN    │      CENTER COLUMN         │     RIGHT COLUMN        │
-│      (25%)       │          (50%)             │         (25%)           │
-│                  │                            │                         │
-│  ┌────────────┐  │  ┌──────────────────────┐  │  ┌───────────────────┐  │
-│  │   NEWS     │  │  │                      │  │  │   LARGE TIME      │  │
-│  │ HEADLINES  │  │  │   NOTICES BOARD      │  │  │   DISPLAY         │  │
-│  │            │  │  │   (הודעות לדיירים)    │  │  │                   │  │
-│  │            │  │  │                      │  │  └───────────────────┘  │
-│  │            │  │  │                      │  │  ┌───────────────────┐  │
-│  └────────────┘  │  └──────────────────────┘  │  │   BUILDING        │  │
-│  ┌────────────┐  │  ┌───────────┬──────────┐  │  │   INFO CARD       │  │
-│  │  SHABBAT   │  │  │ SHABBAT   │ WEATHER  │  │  │                   │  │
-│  │  TIMES     │  │  │ TIMES     │ CARD     │  │  └───────────────────┘  │
-│  └────────────┘  │  └───────────┴──────────┘  │  ┌───────────────────┐  │
-│                  │                            │  │   QUICK INFO      │  │
-│                  │                            │  └───────────────────┘  │
-├──────────────────┴────────────────────────────┴─────────────────────────┤
-│                        NEWS TICKER (48px)                                │
-│  [📺 חדשות]  ◄──── Scrolling Headlines ────►           [Forecast Time]  │
-└─────────────────────────────────────────────────────────────────────────┘
+┌────────────────────────────────────────────────────────────────────────────┐
+│ TOP HEADER                                                                  │
+│ [מזג אוויר (קליק לאקו-וויז'ר)]   [כותרת הבניין]   [תג חנוכה (מופיע בעונה)]  │
+├──────────────────────┬─────────────────────────────────────────────────────┤
+│ RIGHT SIDEBAR (≈25%) │ CENTER (≈75%)                                        │
+│ ┌──────────────────┐ │ ┌─────────────────────────────────────────────────┐ │
+│ │ DATE & TIME      │ │ │ לוח הודעות (מציג הודעה אחת כל פעם + פס התקדמות) │ │
+│ │ כולל תאריך עברי  │ │ │ + כפתור הוספה (Admin Modal)                      │ │
+│ └──────────────────┘ │ └─────────────────────────────────────────────────┘ │
+│ ┌──────────────────┐ │                                                     │
+│ │ מידע לדייר        │ │                                                     │
+│ └──────────────────┘ │                                                     │
+│ ┌──────────────────┐ │                                                     │
+│ │ זמני השבת         │ │                                                     │
+│ │ כותרת: פרשה       │ │                                                     │
+│ │ שורה: יום שישי +  │ │                                                     │
+│ │ תאריך עברי         │ │                                                     │
+│ └──────────────────┘ │                                                     │
+├──────────────────────┴─────────────────────────────────────────────────────┤
+│ BOTTOM TICKER: “מבזקים” (Ynet RSS) – גלילה חלקה ורציפה                     │
+└────────────────────────────────────────────────────────────────────────────┘
 ```
 
 ### Responsive Breakpoints
@@ -131,110 +126,39 @@ font-family: 'Heebo', sans-serif;
 
 ---
 
-## 🔌 RSS News Integration
+## 🔌 Data sources
 
-### Backend Python Script
+### Weather
+- נתונים: **Open‑Meteo**
+- קישור “תחזית מלאה”: **AccuWeather (Beer Yaakov)**
 
-The provided Python script fetches Ynet headlines:
+### Shabbat / Parasha
+- זמני שבת + פרשה: **Hebcal Shabbat JSON**
+- תאריך עברי: **Hebcal Converter JSON**
+- הווידג’ט מציג:
+  - כותרת: `זמני השבת - פרשת ...`
+  - שורה: `יום שישי, ... • ...` (לועזי + עברי)
 
-```python
-import feedparser
-
-ynet_rss_url = "http://www.ynet.co.il/Integration/StoryRss1854.xml"
-feed = feedparser.parse(ynet_rss_url)
-
-# Extract headlines as list of strings
-headlines = [entry.title for entry in feed.entries[:5]]
-```
-
-### Backend Implementation Steps
-
-1. **Create a Flask/FastAPI endpoint** that runs the script periodically:
-
-```python
-from flask import Flask, jsonify
-import feedparser
-
-app = Flask(__name__)
-
-@app.route('/api/news')
-def get_news():
-    feed = feedparser.parse("http://www.ynet.co.il/Integration/StoryRss1854.xml")
-    news_items = [{
-        'title': entry.title,
-        'link': entry.link,
-        'published': entry.published
-    } for entry in feed.entries[:8]]
-    return jsonify(news_items)
-```
-
-2. **Map `entry.title` to ticker items**:
-   - Each `entry.title` becomes a headline string
-   - Extract timestamp from `entry.published`
-   - Format as `{ title: string, time: string, url: string }`
-
-3. **Serve via REST API** or WebSocket for real-time updates
-
-### Frontend Consumption
-
-The ticker component expects an array of news items:
-
-```javascript
-// Expected data structure
-const newsItems = [
-    { title: "כותרת החדשות", time: "14:30", url: "https://..." },
-    { title: "כותרת נוספת", time: "14:25", url: "https://..." }
-];
-
-// Update ticker function
-function updateNewsTicker(newsItems) {
-    const ticker = document.getElementById('news-ticker');
-    const newsHtml = newsItems.map(item => `
-        <span class="inline-flex items-center mx-6">
-            <span class="text-danger font-bold ml-2">${item.time}</span>
-            <a href="${item.url}" target="_blank" class="text-white">
-                ${item.title}
-            </a>
-            <span class="mx-4 text-white/30">|</span>
-        </span>
-    `).join('');
-    
-    // Duplicate for seamless loop
-    ticker.innerHTML = newsHtml + newsHtml;
-}
-```
-
-### Ticker Animation (RTL)
-
-```css
-@keyframes marquee-rtl {
-    0% { transform: translateX(0%); }
-    100% { transform: translateX(50%); }
-}
-
-.marquee-content {
-    animation: marquee-rtl 60s linear infinite;
-    display: flex;
-    white-space: nowrap;
-}
-```
-
-The animation moves content from left to right (RTL direction), creating a seamless loop by duplicating the content.
+### News ticker
+- מקור: **Ynet RSS** דרך `rss2json`.
+- הטיקר משתמש באנימציה רציפה שמחושבת לפי רוחב התוכן (pixels/sec) כדי למנוע “עצירות” בסוף הלולאה.
 
 ---
 
-## 🔄 Data Update Intervals
+## 🔄 רענון נתונים (ברירת מחדל)
 
 | Data Source | Interval | Function |
 |-------------|----------|----------|
-| Clock | 1 second | `updateTime()` |
-| Weather | 60 minutes | `fetchWeather()` |
-| News | 10 minutes | `fetchNewsFromRSS()` |
-| Shabbat Times | On load only | `fetchShabbatTimes()` |
+| שעון | כל שנייה | `updateTime()` |
+| תאריך עברי (היום) | כל שעה | `updateHebrewDateToday()` |
+| מזג אוויר | כל 10 דקות | `fetchWeather()` |
+| חדשות | כל 5 דקות | `fetchNews()` |
+| שבת | בטעינה | `fetchShabbat()` |
+| הודעות | בטעינה | `loadNotices()` |
 
 ---
 
-## 📡 API Endpoints Used
+## 📡 API Endpoints
 
 ### Weather (Open-Meteo)
 ```
@@ -253,6 +177,42 @@ GET https://www.hebcal.com/shabbat
 ```
 
 ### News RSS (via rss2json proxy)
+### Hebrew Date (Hebcal Converter)
+```
+GET https://www.hebcal.com/converter
+        ?cfg=json
+        &gy=YYYY
+        &gm=MM
+        &gd=DD
+        &g2h=1
+        &lg=he
+```
+
+---
+
+## 🗂️ Notices: `notices.json`
+
+הודעות הלוח נשמרות בקובץ `notices.json` (שורש הפרויקט).
+
+### מבנה פריט
+```json
+{
+    "id": "...",
+    "title": "...",
+    "content": "...",
+    "category": "general|important|event|welcome|maintenance|vaad|holiday",
+    "date": "YYYY-MM-DD",
+    "color": "#...",
+    "priority": false,
+    "type": "notice"
+}
+```
+
+> הערה: פריטים עם `"type": "news"` מסוננים ולא מוצגים בלוח ההודעות.
+
+### למה לפעמים לא רואים שינוי אחרי עריכת `notices.json`?
+אם פותחים את `index.html` ישירות (כלומר `file://`), הדפדפן עלול לחסום `fetch('notices.json')`.
+לכן מומלץ לעבוד מקומית דרך HTTP (ראה למטה).
 ```
 GET https://api.rss2json.com/v1/api.json
     ?rss_url=http://www.ynet.co.il/Integration/StoryRss1854.xml
@@ -260,14 +220,17 @@ GET https://api.rss2json.com/v1/api.json
 
 ---
 
-## 🚀 Deployment
+## 🚀 הרצה מקומית
 
-### Local Development
 ```bash
 cd VAAD
-python -m http.server 8080
-# Open http://localhost:8080
+python -m http.server 8000
+# Open http://localhost:8000/index.html
 ```
+
+### טיפים
+- אם ה־`notices.json` לא מתעדכן בדפדפן: רענון קשיח (Ctrl+F5).
+- הקוד מוסיף cache-busting ל־`notices.json` (`?_=`) כדי למנוע קאש על JSON.
 
 ### Production Recommendations
 1. Serve via nginx/Apache with proper caching headers
@@ -277,20 +240,16 @@ python -m http.server 8080
 
 ---
 
-## 📱 Features
+## ✨ Features (עדכני)
 
-- ✅ Real-time clock with seconds
-- ✅ Weather display (Open-Meteo API)
-- ✅ Shabbat times (Hebcal API)
-- ✅ News headlines (Ynet RSS)
-- ✅ Scrolling news ticker
-- ✅ Notice management with localStorage
-- ✅ Admin panel for adding notices
-- ✅ Priority notices with pulse animation
-- ✅ Color-coded categories
-- ✅ RTL Hebrew support
-- ✅ Responsive design
-- ✅ Dark blue Nuvola-style theme
+- ✅ שעון + תאריך לועזי + **תאריך עברי (היום)**
+- ✅ מזג אוויר (Open‑Meteo) + קישור ל‑AccuWeather
+- ✅ זמני שבת + פרשה (Hebcal) + תאריך עברי לשבת
+- ✅ טיקר חדשות (Ynet RSS דרך rss2json) – גלילה רציפה ללא “עצירות”
+- ✅ הודעות דיירים נטענות מ־`notices.json` עם גיבוי ל־localStorage
+- ✅ מסך הודעות מתחלף (מציג הודעה אחת כל X שניות) עם פס התקדמות
+- ✅ Admin modal להוספת הודעות מקומית
+- ✅ תמיכה RTL
 
 ---
 
