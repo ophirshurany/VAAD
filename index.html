@@ -64,7 +64,8 @@
             position: relative;
             display: flex;
             align-items: center;
-            justify-content: flex-end; /* RTL: start from right edge */
+            justify-content: flex-end;
+            /* RTL: start from right edge */
         }
 
         .marquee-content {
@@ -147,240 +148,256 @@
     </style>
 </head>
 
-<body class="flex flex-col">
+<body class="flex flex-col p-4">
 
-    <!-- TOP HEADER: Title Only (Date moved to sidebar) -->
-    <header class="h-24 flex items-center justify-between px-10 border-b border-white/10 bg-dark/50 z-20">
-        <!-- Weather Widget (Left Side) -->
-        <!-- Weather Widget (Left Side) -->
-        <div class="flex items-center gap-4 bg-white/5 px-4 py-2 rounded-xl border border-white/10 cursor-pointer hover:bg-white/10 transition"
-            onclick="window.open('https://www.accuweather.com/he/il/beer-yaaqov/1281409/weather-forecast/1281409', '_blank')"
-            title="פתח תחזית ב-AccuWeather">
-            <span id="weather-icon" class="text-4xl">☀️</span>
-            <div class="flex flex-col">
-                <span id="weather-temp" class="text-3xl font-bold leading-none">--°</span>
-                <span class="text-sm text-blue-200">באר יעקב</span>
+    <!-- App frame (adds top/bottom/side border like the panels) -->
+    <div class="info-panel rounded-3xl overflow-hidden flex flex-col h-full">
+
+        <!-- TOP HEADER: Title Only (Date moved to sidebar) -->
+        <header class="h-24 flex items-center justify-between px-10 border-b border-white/10 bg-dark/50 z-20">
+            <!-- Left spacer (weather moved to sidebar clock card) -->
+            <div class="w-[220px]"></div>
+
+            <!-- Center Title -->
+            <div class="absolute left-1/2 -translate-x-1/2 text-center">
+                <h1 class="text-7xl font-black tracking-tight text-white header-glow drop-shadow-xl">
+                    ברוכים הבאים לאלונים 8
+                </h1>
             </div>
-        </div>
 
-        <!-- Center Title -->
-        <div class="absolute left-1/2 -translate-x-1/2 text-center">
-            <h1 class="text-6xl font-black tracking-tight text-white header-glow drop-shadow-xl">
-                ברוכים הבאים לאלונים 8
-            </h1>
-        </div>
+            <!-- Left spacer (menorah moved to the notices header line) -->
+            <div class="w-[260px]"></div>
+        </header>
 
-        <!-- Hanukkah Menorah (Top Left - RTL End) -->
-        <div class="flex items-center gap-4 bg-indigo-900/40 px-6 py-2 rounded-2xl border border-white/5 backdrop-blur-sm shadow-xl"
-            title="חנוכה 2025">
-            <span class="text-gold font-bold text-xl drop-shadow-md">חנוכה שמח</span>
-            <div id="hanukkah-container" class="flex items-end gap-2">
-                <!-- Candles injected by JS -->
-            </div>
-        </div>
-    </header>
+        <style>
+            /* New Menorah Styles */
+            .menorah-candle {
+                width: 14px;
+                height: 34px;
+                background: linear-gradient(to right, #e2e8f0, #94a3b8, #e2e8f0);
+                border-radius: 4px;
+                position: relative;
+                box-shadow: inset 0 -2px 4px rgba(0, 0, 0, 0.3);
+            }
 
-    <style>
-        /* New Menorah Styles */
-        .menorah-candle {
-            width: 16px;
-            height: 50px;
-            background: linear-gradient(to right, #e2e8f0, #94a3b8, #e2e8f0);
-            border-radius: 4px;
-            position: relative;
-            box-shadow: inset 0 -2px 4px rgba(0, 0, 0, 0.3);
-        }
+            .menorah-flame {
+                position: absolute;
+                top: -18px;
+                left: 50%;
+                transform: translateX(-50%) scale(0);
+                width: 12px;
+                height: 18px;
+                background: radial-gradient(circle at 50% 80%, #fbbf24, #f59e0b, transparent 70%);
+                border-radius: 50% 50% 20% 20%;
+                filter: drop-shadow(0 0 4px #fbbf24);
+                opacity: 0;
+                transition: all 0.5s ease-out;
+            }
 
-        .menorah-flame {
-            position: absolute;
-            top: -24px;
-            left: 50%;
-            transform: translateX(-50%) scale(0);
-            width: 14px;
-            height: 24px;
-            background: radial-gradient(circle at 50% 80%, #fbbf24, #f59e0b, transparent 70%);
-            border-radius: 50% 50% 20% 20%;
-            filter: drop-shadow(0 0 4px #fbbf24);
-            opacity: 0;
-            transition: all 0.5s ease-out;
-        }
+            .menorah-candle.lit .menorah-flame {
+                opacity: 1;
+                transform: translateX(-50%) scale(1);
+                animation: flame-flicker 1.5s infinite alternate;
+            }
 
-        .menorah-candle.lit .menorah-flame {
-            opacity: 1;
-            transform: translateX(-50%) scale(1);
-            animation: flame-flicker 1.5s infinite alternate;
-        }
-
-        /* Shamash (Helper) - Optional, but keeping 8 as requested. 
+            /* Shamash (Helper) - Optional, but keeping 8 as requested. 
            If needed we can add a 9th taller one, but user asked for 8. */
-    </style>
+        </style>
 
-    <!-- MAIN CONTENT -->
-    <main class="flex-1 grid grid-cols-12 gap-6 p-6 overflow-hidden">
+        <!-- MAIN CONTENT -->
+        <main class="flex-1 grid grid-cols-12 gap-6 p-6 pr-10 overflow-hidden">
 
-        <!-- RIGHT COLUMN: Date, Info, Shabbat -->
-        <aside class="col-span-3 flex flex-col gap-4 h-full">
+            <!-- RIGHT COLUMN: Date, Info, Shabbat -->
+            <aside class="col-span-4 flex flex-col gap-4 h-full">
 
-            <!-- 1. DATE & TIME (Moved here for alignment) -->
-            <div
-                class="info-panel rounded-2xl p-6 text-center flex flex-col items-center justify-center bg-gradient-to-br from-blue-900/40 to-slate-900/40">
-                <div id="clock-time"
-                    class="text-7xl font-black text-white tabular-nums leading-none mb-2 drop-shadow-lg">--:--</div>
-                <div class="h-px w-32 bg-white/20 my-2"></div>
-                <div id="clock-day" class="text-2xl font-bold text-accent">---</div>
-                <div class="flex items-center gap-3 mt-1">
-                    <div id="clock-date" class="text-lg text-blue-100/70 tracking-widest">--.--.----</div>
-                    <span class="text-white/20">•</span>
-                    <div id="clock-hebrew-date" class="text-lg text-blue-100/80">--</div>
+                <!-- 1. DATE & TIME (Moved here for alignment) -->
+                <div
+                    class="info-panel rounded-2xl p-6 flex flex-col items-center text-center justify-center bg-gradient-to-br from-blue-900/40 to-slate-900/40">
+                    <div class="flex items-center justify-center gap-6 w-full">
+                        <div id="clock-time"
+                            class="text-7xl font-black text-white tabular-nums leading-none drop-shadow-lg">--:--</div>
+
+                        <!-- Weather Widget (compact one-line) -->
+                        <div class="flex items-center gap-3 bg-white/5 px-4 py-3 rounded-2xl border border-white/10 cursor-pointer hover:bg-white/10 transition"
+                            onclick="window.open('https://www.accuweather.com/he/il/beer-yaaqov/1281409/weather-forecast/1281409', '_blank')"
+                            title="פתח תחזית ב-AccuWeather">
+                            <span id="weather-icon" class="text-5xl">☀️</span>
+                            <div class="flex items-center gap-3 leading-none">
+                                <span id="weather-temp" class="text-4xl font-black tabular-nums">--°</span>
+                                <span class="text-white/20 text-2xl">·</span>
+                                <span id="weather-desc" class="text-2xl font-semibold text-blue-100">--</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="h-px w-32 bg-white/20 my-2"></div>
+                    <div id="clock-day" class="text-3xl font-black text-accent">---</div>
+                    <div class="flex items-center gap-3 mt-1">
+                        <div id="clock-date" class="text-2xl text-blue-100/80 tracking-widest font-bold">--.--.----
+                        </div>
+                        <span class="text-white/20">•</span>
+                        <div id="clock-hebrew-date" class="text-2xl text-blue-100/90 font-bold">--</div>
+                    </div>
+                </div>
+
+                <!-- 2. USEFUL INFO LIST -->
+                <div class="info-panel rounded-2xl flex-1 flex flex-col overflow-hidden relative text-center">
+                    <!-- Title Header -->
+                    <div class="bg-blue-900/30 p-5 border-b border-white/10 flex items-center justify-center">
+                        <h2 class="text-4xl font-black text-white flex items-center gap-3">
+                            <span class="text-5xl">ℹ️</span> מידע לדייר
+                        </h2>
+                    </div>
+
+                    <!-- List -->
+                    <div class="p-5 space-y-5 overflow-y-auto">
+                        <div
+                            class="flex items-center justify-between p-4 rounded-lg bg-white/5 border border-white/5 hover:bg-white/10 transition text-right">
+                            <div>
+                                <div class="font-black text-3xl mb-1">פינוי אשפה</div>
+                                <div class="text-2xl text-blue-200 font-medium">ראשון, שלישי וחמישי</div>
+                            </div>
+                            <div class="text-5xl opacity-90">🗑️</div>
+                        </div>
+                        <div
+                            class="flex items-center justify-between p-4 rounded-lg bg-white/5 border border-white/5 hover:bg-white/10 transition text-right">
+                            <div>
+                                <div class="font-black text-3xl mb-1">ניקיון</div>
+                                <div class="text-2xl text-blue-200 font-medium">קומות: שני, חמישי ושישי | מדרגות שלישי
+                                </div>
+                            </div>
+                            <div class="text-5xl opacity-90">🧹</div>
+                        </div>
+                        <div
+                            class="flex items-center justify-between p-4 rounded-lg bg-white/5 border border-white/5 hover:bg-white/10 transition text-right">
+                            <div>
+                                <div class="font-black text-3xl mb-1">גזם</div>
+                                <div class="text-2xl text-blue-200 font-medium">שלישי</div>
+                            </div>
+                            <div class="text-5xl opacity-90">🌿</div>
+                        </div>
+                        <div
+                            class="flex items-center justify-between p-4 rounded-lg bg-white/5 border border-white/5 hover:bg-white/10 transition text-right">
+                            <div>
+                                <div class="font-black text-3xl mb-1">מוקד עירוני</div>
+                                <div class="text-3xl text-blue-200 font-mono font-black">106</div>
+                            </div>
+                            <div class="text-5xl opacity-90">📞</div>
+                        </div>
+                        <div
+                            class="flex items-center justify-between p-4 rounded-lg bg-white/5 border border-white/5 hover:bg-white/10 transition text-right">
+                            <div>
+                                <div class="font-black text-3xl mb-1">שרות גביה DING</div>
+                                <div class="text-2xl text-blue-200 font-medium">וואטסאפ - 051-5246200</div>
+                            </div>
+                            <div class="text-5xl opacity-90">💳</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 3. SHABBAT / HOLIDAY WIDGET -->
+                <div id="shabbat-widget"
+                    class="info-panel rounded-2xl p-5 relative overflow-hidden bg-gradient-to-b from-slate-900 to-indigo-950/50 cursor-pointer hover:opacity-90 transition hover:shadow-lg hover:border-gold/30 text-center"
+                    onclick="window.open('https://www.hebcal.com/', '_blank')" title="פתח זמני שבת ב-Hebcal">
+                    <!-- Shabbat Content -->
+                    <div class="relative z-10">
+                        <div class="flex items-center justify-center gap-3 mb-3">
+                            <span class="text-4xl">🕯️</span>
+                            <h3 id="shabbat-title" class="text-3xl font-bold text-gold">זמני השבת</h3>
+                        </div>
+                        <div class="text-2xl text-blue-200 mb-4 border-b border-white/10 pb-2 font-medium">
+                            <span id="shabbat-date-display">--.--.--</span>
+                        </div>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div class="bg-black/30 p-3 rounded-xl text-center border border-white/10 shadow-inner">
+                                <span class="block text-3xl text-blue-300 mb-1">כניסה</span>
+                                <span id="shabbat-in"
+                                    class="text-3xl font-black text-white tabular-nums tracking-wide">--:--</span>
+                            </div>
+                            <div class="bg-black/30 p-3 rounded-xl text-center border border-white/10 shadow-inner">
+                                <span class="block text-3xl text-blue-300 mb-1">יציאה</span>
+                                <span id="shabbat-out"
+                                    class="text-3xl font-black text-white tabular-nums tracking-wide">--:--</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </aside>
+
+            <!-- CENTER COLUMN: Notice Board -->
+            <section class="col-span-8 flex flex-col h-full relative">
+                <div
+                    class="info-panel rounded-3xl flex-1 flex flex-col overflow-hidden relative border-t-4 border-t-accent/50">
+
+                    <!-- Notice Board Header -->
+                    <div class="bg-white/5 p-6 border-b border-white/10 flex items-center justify-between z-10">
+                        <h2 class="text-4xl font-black text-white flex items-center gap-4 drop-shadow-md">
+                            <span class="text-accent text-5xl">📣</span> לוח מודעות
+                        </h2>
+
+                        <div class="flex items-center gap-4">
+                            <!-- Hanukkah Menorah (moved here) -->
+                            <div class="flex items-center gap-3 bg-indigo-900/40 px-4 py-2 rounded-2xl border border-white/5 shadow-xl"
+                                title="חנוכה 2025">
+                                <span class="text-gold font-black text-2xl">חנוכה</span>
+                                <div id="hanukkah-container" class="flex items-end gap-2">
+                                    <!-- Candles injected by JS -->
+                                </div>
+                            </div>
+
+                            <span id="notice-counter"
+                                class="bg-white/10 px-4 py-2 rounded-full text-2xl font-black text-blue-100">טוען...</span>
+                            <!-- Add Button -->
+                            <button onclick="openAdmin()"
+                                class="w-10 h-10 rounded-full bg-white/5 hover:bg-accent/20 flex items-center justify-center text-white/50 hover:text-white transition">
+                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M12 4v16m8-8H4"></path>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Notices Container -->
+                    <div id="notices-area" class="flex-1 relative p-8 flex flex-col justify-center items-center">
+                        <!-- Content injected via JS -->
+                        <div id="empty-state" class="text-center opacity-30">
+                            <div class="text-8xl mb-4">📭</div>
+                            <div class="text-2xl">אין הודעות חדשות</div>
+                        </div>
+                    </div>
+
+                    <!-- Progress Bar -->
+                    <div class="h-1 bg-white/5 w-full absolute bottom-0 left-0">
+                        <div id="notice-progress" class="h-full bg-accent w-0 transition-all duration-100 ease-linear">
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+        </main>
+
+        <!-- FOOTER: News Ticker -->
+        <footer class="h-20 bg-dark border-t border-white/10 flex items-center relative z-30 shadow-2xl">
+            <!-- Badge (clickable) -->
+            <a href="https://www.ynet.co.il/news/category/184" target="_blank" rel="noopener noreferrer"
+                class="bg-red-600 h-full px-10 flex items-center justify-center gap-3 z-20 shadow-[4px_0_10px_rgba(0,0,0,0.5)] hover:bg-red-700 transition-colors">
+                <span class="font-black text-white text-2xl tracking-wider uppercase">מבזקים</span>
+                <span class="w-2 h-2 bg-white rounded-full animate-pulse"></span>
+            </a>
+
+            <!-- Ticker Content -->
+            <div class="marquee-container flex-1 h-full flex items-center bg-slate-900 text-2xl">
+                <div id="ticker-track" class="marquee-content flex items-center" style="direction: ltr;">
+                    <!-- LTR container for transform logic -->
+                    <!-- JS will duplicate content here -->
+                    <span class="text-white/50 mx-4">מערכת החדשות מתעדכנת...</span>
                 </div>
             </div>
+        </footer>
 
-            <!-- 2. USEFUL INFO LIST -->
-            <div class="info-panel rounded-2xl flex-1 flex flex-col overflow-hidden relative">
-                <!-- Title Header -->
-                <div class="bg-blue-900/30 p-4 border-b border-white/10 flex items-center justify-between">
-                    <h2 class="text-3xl font-bold text-white flex items-center gap-2">
-                        <span class="text-4xl">ℹ️</span> מידע לדייר
-                    </h2>
-                </div>
-
-                <!-- List -->
-                <div class="p-4 space-y-4 overflow-y-auto">
-                    <div
-                        class="flex items-center justify-between p-4 rounded-lg bg-white/5 border border-white/5 hover:bg-white/10 transition">
-                        <div>
-                            <div class="font-bold text-2xl mb-1">פינוי אשפה</div>
-                            <div class="text-xl text-blue-200">ראשון, שלישי וחמישי</div>
-                        </div>
-                        <div class="text-3xl opacity-80">🗑️</div>
-                    </div>
-                    <div
-                        class="flex items-center justify-between p-4 rounded-lg bg-white/5 border border-white/5 hover:bg-white/10 transition">
-                        <div>
-                            <div class="font-bold text-2xl mb-1">ניקיון</div>
-                            <div class="text-xl text-blue-200">קומות: שני וחמישי | מדרגות שלישי</div>
-                        </div>
-                        <div class="text-3xl opacity-80">🧹</div>
-                    </div>
-                    <div
-                        class="flex items-center justify-between p-4 rounded-lg bg-white/5 border border-white/5 hover:bg-white/10 transition">
-                        <div>
-                            <div class="font-bold text-2xl mb-1">גזם</div>
-                            <div class="text-xl text-blue-200">שלישי</div>
-                        </div>
-                        <div class="text-3xl opacity-80">🌿</div>
-                    </div>
-                    <div
-                        class="flex items-center justify-between p-4 rounded-lg bg-white/5 border border-white/5 hover:bg-white/10 transition">
-                        <div>
-                            <div class="font-bold text-2xl mb-1">מוקד עירוני</div>
-                            <div class="text-xl text-blue-200 font-mono text-xl">106</div>
-                        </div>
-                        <div class="text-3xl opacity-80">📞</div>
-                    </div>
-                    <div
-                        class="flex items-center justify-between p-4 rounded-lg bg-white/5 border border-white/5 hover:bg-white/10 transition">
-                        <div>
-                            <div class="font-bold text-2xl mb-1">שרות גביה DING</div>
-                            <div class="text-xl text-blue-200">וואטסאפ - 051-5246200</div>
-                        </div>
-                        <div class="text-3xl opacity-80">💳</div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- 3. SHABBAT / HOLIDAY WIDGET -->
-            <div id="shabbat-widget"
-                class="info-panel rounded-2xl p-5 relative overflow-hidden bg-gradient-to-b from-slate-900 to-indigo-950/50 cursor-pointer hover:opacity-90 transition hover:shadow-lg hover:border-gold/30"
-                onclick="window.open('https://www.hebcal.com/', '_blank')" title="פתח זמני שבת ב-Hebcal">
-                <!-- Shabbat Content -->
-                <div class="relative z-10">
-                    <div class="flex items-center justify-between mb-3">
-                        <h3 id="shabbat-title" class="text-3xl font-bold text-gold">זמני השבת</h3>
-                        <span class="text-4xl">🕯️</span>
-                    </div>
-                    <div class="text-2xl text-blue-200 mb-4 border-b border-white/10 pb-2 font-medium">
-                        <span id="shabbat-date-display">--.--.--</span>
-                    </div>
-                    <div class="grid grid-cols-2 gap-4">
-                        <div class="bg-black/30 p-3 rounded-xl text-center border border-white/10 shadow-inner">
-                            <span class="block text-sm text-blue-300 mb-1">כניסה</span>
-                            <span id="shabbat-in"
-                                class="text-3xl font-black text-white tabular-nums tracking-wide">--:--</span>
-                        </div>
-                        <div class="bg-black/30 p-3 rounded-xl text-center border border-white/10 shadow-inner">
-                            <span class="block text-sm text-blue-300 mb-1">יציאה</span>
-                            <span id="shabbat-out"
-                                class="text-3xl font-black text-white tabular-nums tracking-wide">--:--</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-        </aside>
-
-        <!-- CENTER COLUMN: Notice Board -->
-        <section class="col-span-9 flex flex-col h-full relative">
-            <div
-                class="info-panel rounded-3xl flex-1 flex flex-col overflow-hidden relative border-t-4 border-t-accent/50">
-
-                <!-- Notice Board Header -->
-                <div class="bg-white/5 p-6 border-b border-white/10 flex items-center justify-between z-10">
-                    <h2 class="text-4xl font-black text-white flex items-center gap-4 drop-shadow-md">
-                        <span class="text-accent text-5xl">📣</span> לוח מודעות
-                    </h2>
-
-                    <div class="flex items-center gap-4">
-                        <span id="notice-counter"
-                            class="bg-white/10 px-3 py-1 rounded-full text-sm font-bold text-blue-200">טוען...</span>
-                        <!-- Add Button -->
-                        <button onclick="openAdmin()"
-                            class="w-10 h-10 rounded-full bg-white/5 hover:bg-accent/20 flex items-center justify-center text-white/50 hover:text-white transition">
-                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M12 4v16m8-8H4"></path>
-                            </svg>
-                        </button>
-                    </div>
-                </div>
-
-                <!-- Notices Container -->
-                <div id="notices-area" class="flex-1 relative p-10 flex flex-col justify-center items-center">
-                    <!-- Content injected via JS -->
-                    <div id="empty-state" class="text-center opacity-30">
-                        <div class="text-8xl mb-4">📭</div>
-                        <div class="text-2xl">אין הודעות חדשות</div>
-                    </div>
-                </div>
-
-                <!-- Progress Bar -->
-                <div class="h-1 bg-white/5 w-full absolute bottom-0 left-0">
-                    <div id="notice-progress" class="h-full bg-accent w-0 transition-all duration-100 ease-linear">
-                    </div>
-                </div>
-            </div>
-        </section>
-
-    </main>
-
-    <!-- FOOTER: News Ticker -->
-    <footer class="h-16 bg-dark border-t border-white/10 flex items-center relative z-30 shadow-2xl">
-        <!-- Badge (clickable) -->
-        <a href="https://www.ynet.co.il/news/category/184" target="_blank" rel="noopener noreferrer"
-            class="bg-red-600 h-full px-8 flex items-center justify-center gap-2 z-20 shadow-[4px_0_10px_rgba(0,0,0,0.5)] hover:bg-red-700 transition-colors">
-            <span class="font-black text-white text-xl tracking-wider uppercase">מבזקים</span>
-            <span class="w-2 h-2 bg-white rounded-full animate-pulse"></span>
-        </a>
-
-        <!-- Ticker Content -->
-        <div class="marquee-container flex-1 h-full flex items-center bg-slate-900 text-lg">
-            <div id="ticker-track" class="marquee-content flex items-center" style="direction: ltr;">
-                <!-- LTR container for transform logic -->
-                <!-- JS will duplicate content here -->
-                <span class="text-white/50 mx-4">מערכת החדשות מתעדכנת...</span>
-            </div>
-        </div>
-    </footer>
+    </div>
 
     <!-- ADMIN MODAL -->
     <div id="admin-modal"
@@ -485,18 +502,66 @@
         }
 
         // --- WEATHER ---
-        // --- WEATHER ---
         async function fetchWeather() {
             try {
-                const res = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${CITY_LAT}&longitude=${CITY_LON}&current_weather=true`);
+                // Simplified API call: Current weather only
+                const url = `https://api.open-meteo.com/v1/forecast` +
+                    `?latitude=${CITY_LAT}&longitude=${CITY_LON}` +
+                    `&current_weather=true` +
+                    `&timezone=Asia%2FJerusalem`;
+
+                const res = await fetch(url);
                 const data = await res.json();
+
                 const temp = Math.round(data.current_weather.temperature);
                 const code = data.current_weather.weathercode;
-                const isDay = data.current_weather.is_day;
+                const isDay = data.current_weather.is_day; // 1 or 0 directly works
 
                 document.getElementById('weather-temp').textContent = `${temp}°`;
                 document.getElementById('weather-icon').textContent = getWeatherIcon(code, isDay);
-            } catch (e) { console.error('Weather error', e); }
+
+                const descEl = document.getElementById('weather-desc');
+                if (descEl) {
+                    // Using local mapping based only on WMO code
+                    descEl.textContent = getWeatherHebrewSummary({ code, isDay });
+                }
+            } catch (e) {
+                console.error('Weather error', e);
+                const descEl = document.getElementById('weather-desc');
+                if (descEl) descEl.textContent = 'מזג אוויר';
+            }
+        }
+
+        function getWeatherHebrewSummary({ code, cloud, pop, precip, isDay }) {
+            // Precipitation first (closest to AccuWeather-style phrasing)
+            const hasPrecip = (typeof precip === 'number' && precip > 0.0) || (typeof pop === 'number' && pop >= 50);
+            if (hasPrecip) {
+                if ([80, 81, 82].includes(code)) return 'ממטרים קצרים';
+                if ([61, 63, 65, 66, 67].includes(code)) return 'גשום';
+                if ([51, 53, 55].includes(code)) return 'טפטוף';
+                if ([95, 96, 99].includes(code)) return 'סופות רעמים';
+                return 'ממטרים קצרים';
+            }
+
+            // Cloud-based sky description
+            if (typeof cloud === 'number') {
+                if (cloud >= 85) return 'מעונן';
+                if (cloud >= 45) return 'מעונן חלקית';
+                if (cloud >= 20) return isDay ? 'שמשי בעיקר' : 'בהיר בעיקר';
+                return isDay ? 'שמשי' : 'בהיר';
+            }
+
+            // Fallback to weathercode only
+            if (code === 0) return isDay ? 'שמשי' : 'בהיר';
+            if (code === 1) return isDay ? 'שמשי בעיקר' : 'בהיר בעיקר';
+            if (code === 2) return 'מעונן חלקית';
+            if (code === 3) return 'מעונן';
+            if ([45, 48].includes(code)) return 'ערפילי';
+            if ([51, 53, 55].includes(code)) return 'טפטוף';
+            if ([61, 63, 65].includes(code)) return 'גשום';
+            if ([80, 81, 82].includes(code)) return 'ממטרים קצרים';
+            if ([95, 96, 99].includes(code)) return 'סופות רעמים';
+            return 'מזג אוויר';
         }
 
         function getWeatherIcon(code, isDay) {
@@ -615,8 +680,8 @@
                         const link = i.link || '#';
                         return `
                             <a href="${link}" target="_blank" class="inline-flex items-center gap-3 px-8 flex-row-reverse hover:bg-white/10 transition rounded-lg py-1" dir="rtl" title="לחץ לקריאה">
-                                <span class="text-accent font-bold tabular-nums">${time}</span>
-                                <span class="text-white font-medium text-xl hover:text-accent transition">${title}</span>
+                                <span class="text-accent font-black tabular-nums text-2xl">${time}</span>
+                                <span class="text-white font-semibold text-3xl hover:text-accent transition">${title}</span>
                                 <span class="text-white/20">|</span>
                             </a>
                         `;
