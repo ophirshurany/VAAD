@@ -231,7 +231,10 @@
                     </div>
 
                     <div class="h-px w-32 bg-white/20 my-2"></div>
-                    <div id="clock-day" class="text-3xl font-black text-accent">---</div>
+                    <div id="clock-day" class="text-3xl font-black text-accent inline-flex items-center justify-center gap-3" dir="ltr">
+                        <span id="clock-day-icon" class="text-4xl leading-none" dir="ltr" aria-hidden="true">📅</span>
+                        <span id="clock-day-text" dir="rtl">---</span>
+                    </div>
                     <div class="flex items-center gap-3 mt-1">
                         <div id="clock-date" class="text-2xl text-blue-100/80 tracking-widest font-bold">--.--.----
                         </div>
@@ -497,7 +500,23 @@
         function updateTime() {
             const now = new Date();
             document.getElementById('clock-time').textContent = now.toLocaleTimeString('he-IL', { hour: '2-digit', minute: '2-digit' });
-            document.getElementById('clock-day').textContent = now.toLocaleDateString('he-IL', { weekday: 'long' });
+            const weekday = now.toLocaleDateString('he-IL', { weekday: 'long' });
+
+            // Weekday icons (0=Sunday .. 6=Saturday)
+            const weekdayIcons = ['☕', '💼', '✨', '🐪', '🍻', '🍷', '🛋️'];
+            const icon = weekdayIcons[now.getDay()] || '';
+
+            const dayTextEl = document.getElementById('clock-day-text');
+            const dayIconEl = document.getElementById('clock-day-icon');
+            const dayContainerEl = document.getElementById('clock-day');
+
+            if (dayTextEl && dayIconEl) {
+                dayTextEl.textContent = weekday;
+                dayIconEl.textContent = icon;
+            } else if (dayContainerEl) {
+                // Fallback if markup changes
+                dayContainerEl.textContent = icon ? `${icon} ${weekday}` : weekday;
+            }
             document.getElementById('clock-date').textContent = now.toLocaleDateString('he-IL', { day: 'numeric', month: 'numeric', year: 'numeric' });
         }
 
