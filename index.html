@@ -197,7 +197,19 @@
             .menorah-candle.lit .menorah-flame {
                 opacity: 1;
                 transform: translateX(-50%) scale(1);
-                animation: flame-flicker 1.5s infinite alternate;
+                animation: menorah-flicker 1.5s infinite alternate;
+            }
+
+            @keyframes menorah-flicker {
+                0% {
+                    opacity: 0.8;
+                    transform: translateX(-50%) scale(0.95);
+                }
+
+                100% {
+                    opacity: 1;
+                    transform: translateX(-50%) scale(1.05);
+                }
             }
 
             /* Shamash (Helper) - Optional, but keeping 8 as requested. 
