@@ -193,6 +193,29 @@
                 transform: translateX(-50%) scale(1.05);
             }
         }
+
+        /* Useful info carousel: fade between pages */
+        .ui-fade-enter {
+            opacity: 0;
+            transform: translateY(8px);
+        }
+
+        .ui-fade-enter-active {
+            opacity: 1;
+            transform: translateY(0);
+            transition: opacity 350ms ease, transform 350ms ease;
+        }
+
+        .ui-fade-exit {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .ui-fade-exit-active {
+            opacity: 0;
+            transform: translateY(-8px);
+            transition: opacity 250ms ease, transform 250ms ease;
+        }
     </style>
 </head>
 
@@ -281,49 +304,10 @@
                         </h2>
                     </div>
 
-                    <!-- List -->
-                    <div class="p-5 lg:p-6 space-y-5 lg:space-y-6 overflow-y-auto">
-                        <div
-                            class="flex items-center justify-between p-3 lg:p-4 rounded-lg bg-white/5 border border-white/5 hover:bg-white/10 transition text-right">
-                            <div>
-                                <div class="font-black text-xl lg:text-4xl mb-1">פינוי אשפה</div>
-                                <div class="text-lg lg:text-4xl text-blue-200 font-medium">ראשון, שלישי וחמישי</div>
-                            </div>
-                            <div class="text-3xl lg:text-5xl opacity-90">🗑️</div>
-                        </div>
-                        <div
-                            class="flex items-center justify-between p-3 lg:p-4 rounded-lg bg-white/5 border border-white/5 hover:bg-white/10 transition text-right">
-                            <div>
-                                <div class="font-black text-xl lg:text-4xl mb-1">ניקיון</div>
-                                <div class="text-lg lg:text-4xl text-blue-200 font-medium">קומות: שני, חמישי ושישי |
-                                    מדרגות שלישי
-                                </div>
-                            </div>
-                            <div class="text-3xl lg:text-5xl opacity-90">🧹</div>
-                        </div>
-                        <div
-                            class="flex items-center justify-between p-3 lg:p-4 rounded-lg bg-white/5 border border-white/5 hover:bg-white/10 transition text-right">
-                            <div>
-                                <div class="font-black text-xl lg:text-4xl mb-1">גזם</div>
-                                <div class="text-lg lg:text-4xl text-blue-200 font-medium">שלישי</div>
-                            </div>
-                            <div class="text-3xl lg:text-5xl opacity-90">🌿</div>
-                        </div>
-                        <div
-                            class="flex items-center justify-between p-3 lg:p-4 rounded-lg bg-white/5 border border-white/5 hover:bg-white/10 transition text-right">
-                            <div>
-                                <div class="font-black text-xl lg:text-4xl mb-1">מוקד עירוני</div>
-                                <div class="text-3xl lg:text-4xl text-blue-200 font-mono font-black">106</div>
-                            </div>
-                            <div class="text-3xl lg:text-5xl opacity-90">📞</div>
-                        </div>
-                        <div
-                            class="flex items-center justify-between p-3 lg:p-4 rounded-lg bg-white/5 border border-white/5 hover:bg-white/10 transition text-right">
-                            <div>
-                                <div class="font-black text-xl lg:text-4xl mb-1">שרות גביה DING</div>
-                                <div class="text-lg lg:text-4xl text-blue-200 font-medium">וואטסאפ - 051-5246200</div>
-                            </div>
-                            <div class="text-3xl lg:text-5xl opacity-90">💳</div>
+                    <!-- List (Carousel: 3 rows visible) -->
+                    <div class="p-5 lg:p-6 overflow-hidden flex-1 min-h-0">
+                        <div id="useful-info-list" class="flex flex-col gap-5 lg:gap-6">
+                            <!-- Injected by JS -->
                         </div>
                     </div>
                 </div>
@@ -491,11 +475,47 @@
         const CITY_LON = 34.8391;
         const ROTATION_TIME = 6000; // 6 seconds per slide
 
+        // Useful info carousel settings
+        const USEFUL_INFO_PAGE_SIZE = 3;
+        const USEFUL_INFO_ROTATION_TIME = 8000; // 8 seconds per page
+
         let notices = [];
 
         let currentIndex = 0;
         let rotationTimer;
         let progressTimer;
+
+        let usefulInfoTimer;
+        let usefulInfoIndex = 0;
+
+        const usefulInfoItems = [
+            {
+                title: 'פינוי אשפה',
+                value: "ראשון, שלישי וחמישי",
+                icon: '🗑️'
+            },
+            {
+                title: 'ניקיון',
+                value: 'קומות: שני, חמישי ושישי | מדרגות שלישי',
+                icon: '🧹'
+            },
+            {
+                title: 'גזם',
+                value: 'שלישי',
+                icon: '🌿'
+            },
+            {
+                title: 'מוקד עירוני',
+                value: '106',
+                valueClass: 'font-mono font-black',
+                icon: '📞'
+            },
+            {
+                title: 'שרות גביה DING',
+                value: 'וואטסאפ - 051-5246200',
+                icon: '💳'
+            }
+        ];
 
         // --- INIT ---
         document.addEventListener('DOMContentLoaded', async () => {
@@ -517,10 +537,71 @@
             fetchNews();
             setInterval(fetchNews, 60000 * 5); // 5 min
 
+            initUsefulInfoCarousel();
+
             await loadNotices();
             renderNotices();
             document.getElementById('input-date').valueAsDate = new Date();
         });
+
+        // --- USEFUL INFO CAROUSEL (3 rows) ---
+        function initUsefulInfoCarousel() {
+            const list = document.getElementById('useful-info-list');
+            if (!list) return;
+
+            // render first page
+            usefulInfoIndex = 0;
+            renderUsefulInfoPage(list);
+
+            clearInterval(usefulInfoTimer);
+            usefulInfoTimer = setInterval(() => {
+                usefulInfoIndex = (usefulInfoIndex + USEFUL_INFO_PAGE_SIZE) % usefulInfoItems.length;
+                renderUsefulInfoPage(list, true);
+            }, USEFUL_INFO_ROTATION_TIME);
+        }
+
+        function renderUsefulInfoPage(listEl, animate = false) {
+            const page = usefulInfoItems.slice(usefulInfoIndex, usefulInfoIndex + USEFUL_INFO_PAGE_SIZE);
+            // Wrap-around if needed
+            if (page.length < USEFUL_INFO_PAGE_SIZE) {
+                page.push(...usefulInfoItems.slice(0, USEFUL_INFO_PAGE_SIZE - page.length));
+            }
+
+            const html = page.map(item => {
+                const valueClass = item.valueClass ? item.valueClass : '';
+                return `
+                    <div class="flex items-center justify-between p-3 lg:p-4 rounded-lg bg-white/5 border border-white/5 hover:bg-white/10 transition text-right">
+                        <div>
+                            <div class="font-black text-xl lg:text-3xl mb-1">${item.title}</div>
+                            <div class="text-lg lg:text-2xl text-blue-200 font-medium ${valueClass}">${item.value}</div>
+                        </div>
+                        <div class="text-4xl lg:text-5xl opacity-90">${item.icon}</div>
+                    </div>
+                `;
+            }).join('');
+
+            if (!animate) {
+                listEl.innerHTML = html;
+                return;
+            }
+
+            // Animate swap
+            listEl.classList.add('ui-fade-exit');
+            requestAnimationFrame(() => {
+                listEl.classList.add('ui-fade-exit-active');
+                setTimeout(() => {
+                    listEl.classList.remove('ui-fade-exit', 'ui-fade-exit-active');
+                    listEl.innerHTML = html;
+                    listEl.classList.add('ui-fade-enter');
+                    requestAnimationFrame(() => {
+                        listEl.classList.add('ui-fade-enter-active');
+                        setTimeout(() => {
+                            listEl.classList.remove('ui-fade-enter', 'ui-fade-enter-active');
+                        }, 360);
+                    });
+                }, 260);
+            });
+        }
 
         // --- CLOCK & DATE ---
         function updateTime() {
@@ -883,11 +964,12 @@
             // Image vs Icon
             let visualContent;
             if (notice.imageUrl) {
-                // Keep correct proportions (no crop / no stretch) and let the image use the available
-                // space inside the notice card (instead of limiting by viewport vh).
+                // Keep correct proportions without allowing the image to change the notice card proportions.
+                // We allocate a fixed media area within the notice card.
                 const hasBody = (notice.content || '').trim().length > 0;
+                const mediaH = hasBody ? 'h-[34vh] lg:h-[38vh]' : 'h-[46vh] lg:h-[52vh]';
                 visualContent = `
-                    <div class="w-full flex-1 min-h-0 flex items-center justify-center ${hasBody ? 'mb-4' : 'mb-6'}">
+                    <div class="w-full ${mediaH} flex items-center justify-center ${hasBody ? 'mb-4' : 'mb-6'}">
                         <img
                             src="${notice.imageUrl}"
                             class="max-h-full max-w-full w-auto h-auto rounded-2xl shadow-3xl object-contain bg-black/20 border border-white/10"
