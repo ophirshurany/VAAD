@@ -877,17 +877,19 @@
             // Image vs Icon
             let visualContent;
             if (notice.imageUrl) {
-                // Keep correct proportions (no crop). Use different max-height if there's also text.
-                const hasText = (notice.content || '').trim().length > 0;
-                const maxH = hasText ? 'max-h-[42vh] lg:max-h-[48vh]' : 'max-h-[60vh] lg:max-h-[70vh]';
+                // Keep correct proportions (no crop / no stretch) and let the image use the available
+                // space inside the notice card (instead of limiting by viewport vh).
+                const hasBody = (notice.content || '').trim().length > 0;
                 visualContent = `
-                    <img
-                        src="${notice.imageUrl}"
-                        class="${maxH} w-full max-w-[1200px] h-auto rounded-2xl shadow-3xl mb-4 object-contain bg-black/20 border border-white/10"
-                        alt="Notice Image"
-                        loading="lazy"
-                        decoding="async"
-                    >
+                    <div class="w-full flex-1 min-h-0 flex items-center justify-center ${hasBody ? 'mb-4' : 'mb-6'}">
+                        <img
+                            src="${notice.imageUrl}"
+                            class="max-h-full max-w-full w-auto h-auto rounded-2xl shadow-3xl object-contain bg-black/20 border border-white/10"
+                            alt="Notice Image"
+                            loading="lazy"
+                            decoding="async"
+                        >
+                    </div>
                 `;
             } else {
                 visualContent = `<div class="text-8xl mb-6 filter drop-shadow-lg">${icon}</div>`;
@@ -898,12 +900,12 @@
 
             // Animation classes
             const html = `
-        <div class="w-full h-full flex flex-col items-center justify-center text-center animate-fade-in relative p-4 ${urgencyClass} rounded-3xl bg-white/5">
+        <div class="w-full h-full flex flex-col items-center justify-start text-center animate-fade-in relative p-4 ${urgencyClass} rounded-3xl bg-white/5">
             ${urgencyBadge}
             ${visualContent}
-            <h2 class="text-5xl lg:text-6xl font-black text-white mb-5 leading-tight drop-shadow-md max-w-4xl">${notice.title}</h2>
+            <h2 class="text-4xl lg:text-6xl font-black text-white mb-4 leading-tight drop-shadow-md max-w-5xl">${notice.title}</h2>
             <p class="text-3xl lg:text-4xl text-blue-100 font-light whitespace-pre-line leading-relaxed max-w-5xl">${notice.content}</p>
-            <div class="mt-8 text-blue-300 font-medium text-xl border-t border-white/10 pt-4 px-8">
+            <div class="mt-6 text-blue-300 font-medium text-xl border-t border-white/10 pt-4 px-8">
                 פורסם ב: ${notice.date} • ועד הבית
             </div>
             
