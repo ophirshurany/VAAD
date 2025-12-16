@@ -296,7 +296,7 @@
 
                 <!-- 2. USEFUL INFO LIST -->
                 <div
-                    class="info-panel rounded-3xl flex flex-col overflow-hidden relative text-center h-full min-h-0">
+                    class="info-panel rounded-3xl flex flex-col overflow-hidden relative text-center flex-1 min-h-0">
                     <!-- Title Header -->
                     <div class="bg-blue-900/30 p-3 lg:p-5 border-b border-white/10 flex items-center justify-center">
                         <h2 class="text-3xl lg:text-4xl font-black text-white flex items-center gap-3">
@@ -314,7 +314,7 @@
 
                 <!-- 3. SHABBAT / HOLIDAY WIDGET -->
                 <div id="shabbat-widget"
-                    class="info-panel rounded-3xl p-5 relative overflow-hidden bg-gradient-to-b from-slate-900 to-indigo-950/50 cursor-pointer hover:opacity-90 transition hover:shadow-lg hover:border-gold/30 text-center h-full min-h-0"
+                    class="info-panel rounded-3xl p-4 lg:p-4 relative overflow-hidden bg-gradient-to-b from-slate-900 to-indigo-950/50 cursor-pointer hover:opacity-90 transition hover:shadow-lg hover:border-gold/30 text-center shrink-0"
                     onclick="window.open('https://www.hebcal.com/', '_blank')" title="פתח זמני שבת ב-Hebcal">
                     <!-- Shabbat Content -->
                     <div class="relative z-10">
@@ -322,18 +322,18 @@
                             <span class="text-3xl lg:text-4xl">🕯️</span>
                             <h3 id="shabbat-title" class="text-xl lg:text-3xl font-bold text-gold">זמני השבת</h3>
                         </div>
-                        <div class="text-lg lg:text-3xl text-blue-200 mb-4 border-b border-white/10 pb-2 font-medium">
+                        <div class="text-lg lg:text-2xl text-blue-200 mb-3 border-b border-white/10 pb-2 font-medium">
                             <span id="shabbat-date-display">--.--.--</span>
                         </div>
                         <div class="grid grid-cols-2 gap-4">
                             <div
-                                class="bg-black/30 p-2 lg:p-3 rounded-xl text-center border border-white/10 shadow-inner">
+                                class="bg-black/30 p-2 lg:p-2 rounded-xl text-center border border-white/10 shadow-inner">
                                 <span class="block text-xl lg:text-4xl text-blue-300 mb-1">כניסה</span>
                                 <span id="shabbat-in"
                                     class="text-xl lg:text-3xl font-black text-white tabular-nums tracking-wide">--:--</span>
                             </div>
                             <div
-                                class="bg-black/30 p-2 lg:p-3 rounded-xl text-center border border-white/10 shadow-inner">
+                                class="bg-black/30 p-2 lg:p-2 rounded-xl text-center border border-white/10 shadow-inner">
                                 <span class="block text-xl lg:text-4xl text-blue-300 mb-1">יציאה</span>
                                 <span id="shabbat-out"
                                     class="text-xl lg:text-3xl font-black text-white tabular-nums tracking-wide">--:--</span>
@@ -476,8 +476,9 @@
         const ROTATION_TIME = 6000; // 6 seconds per slide
 
         // Useful info carousel settings
-        const USEFUL_INFO_PAGE_SIZE = 3;
-        const USEFUL_INFO_ROTATION_TIME = 8000; // 8 seconds per page
+        // If all rows fit, show all 5 and disable carousel rotation.
+        const USEFUL_INFO_PAGE_SIZE = 5;
+        const USEFUL_INFO_ROTATION_TIME = 8000; // Only relevant if page size < total items
 
         let notices = [];
 
@@ -553,7 +554,10 @@
             usefulInfoIndex = 0;
             renderUsefulInfoPage(list);
 
+            // If everything fits (page >= items), don't rotate.
             clearInterval(usefulInfoTimer);
+            if (USEFUL_INFO_PAGE_SIZE >= usefulInfoItems.length) return;
+
             usefulInfoTimer = setInterval(() => {
                 usefulInfoIndex = (usefulInfoIndex + USEFUL_INFO_PAGE_SIZE) % usefulInfoItems.length;
                 renderUsefulInfoPage(list, true);
