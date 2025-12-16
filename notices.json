@@ -1,6 +1,6 @@
 [
   {
-    "id": "1764961492540",
+    "id": "1",
     "title": "📢 הזמנה לאסיפת דיירים",
     "content": "🗓️ 23.12.25 (יום ג') | 🕗 20:00 | 📍 לובי הבניין\n\nנדון בשיפורים לבניין ונקיים הצבעות. שימו לב: ההצבעה לבעלי דירות בלבד, אך ההחלטות יחייבו את כולם. נוכחותכם חשובה!\n\nועד הבית",
     "category": "vaad",
@@ -10,7 +10,7 @@
     "type": "notice"
   },
   {
-    "id": "1765580000001",
+    "id": "2",
     "title": "חנוכה שמח לכל דיירי הבניין! 🕎",
     "content": "",
     "category": "general",
@@ -19,5 +19,16 @@
     "priority": false,
     "type": "notice",
     "imageUrl": "hannuka.jpg"
-  }
+  },
+  {
+  "id": "3",
+  "title": "לידיעת הנהגים: עבודות בכביש הראשי 🚧",
+  "content": "",
+  "category": "general",
+  "date": "2025-16-25",
+  "color": "#facc15",
+  "priority": true,
+  "type": "notice",
+  "imageUrl": "attention.png"
+}
 ]
