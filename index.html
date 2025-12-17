@@ -479,45 +479,76 @@
             renderNotices();
             document.getElementById('input-date').valueAsDate = new Date();
 
-            // Dynamic Event Loader
+            // Dynamic Event Loader (URL Priority > Date Schedule)
             const params = new URLSearchParams(window.location.search);
-            const eventName = params.get('event');
-            if (eventName) {
-                const script = document.createElement('script');
-                script.src = `${eventName}.js`;
-                document.body.appendChild(script);
+            const urlEvent = params.get('event');
+
+            if (urlEvent) {
+                loadEventScript(urlEvent);
+            } else {
+                checkAndLoadScheduledEvents();
             }
         });
 
-        // --- USEFUL INFO CAROUSEL (3 rows) ---
-        function initUsefulInfoCarousel() {
-            const list = document.getElementById('useful-info-list');
-            if (!list) return;
-
-            // render first page
-            usefulInfoIndex = 0;
-            renderUsefulInfoPage(list);
-
-            // If everything fits (page >= items), don't rotate.
-            clearInterval(usefulInfoTimer);
-            if (USEFUL_INFO_PAGE_SIZE >= usefulInfoItems.length) return;
-
-            usefulInfoTimer = setInterval(() => {
-                usefulInfoIndex = (usefulInfoIndex + USEFUL_INFO_PAGE_SIZE) % usefulInfoItems.length;
-                renderUsefulInfoPage(list, true);
-            }, USEFUL_INFO_ROTATION_TIME);
+        // --- EVENT SYSTEM ---
+        function loadEventScript(eventName) {
+            console.log(`Loading event: ${eventName}`);
+            const script = document.createElement('script');
+            script.src = `${eventName}.js`;
+            script.onerror = () => console.warn(`Could not load event script: ${eventName}.js`);
+            document.body.appendChild(script);
         }
 
-        function renderUsefulInfoPage(listEl, animate = false) {
-            const page = usefulInfoItems.slice(usefulInfoIndex, usefulInfoIndex + USEFUL_INFO_PAGE_SIZE);
-            // Wrap-around if needed
-            if (page.length < USEFUL_INFO_PAGE_SIZE) {
-                page.push(...usefulInfoItems.slice(0, USEFUL_INFO_PAGE_SIZE - page.length));
+        function checkAndLoadScheduledEvents() {
+            // Simple Registry: ID, Start(MM-DD), End(MM-DD)
+            // 2025 Hanukkah: Dec 14 - Dec 22. Range can be wider for "Season".
+            const EVENTS = [
+                { id: 'hanukkah', start: '12-10', end: '12-30' }
+            ];
+
+            const now = new Date();
+            // Format today as MM-DD
+            const month = (now.getMonth() + 1).toString().padStart(2, '0');
+            const day = now.getDate().toString().padStart(2, '0');
+            const todayStr = `${month}-${day}`;
+
+            const activeEvent = EVENTS.find(e => todayStr >= e.start && todayStr <= e.end);
+
+            if (activeEvent) {
+                loadEventScript(activeEvent.id);
             }
 
-            const html = page.map(item => {
-                const valueClass = item.valueClass ? item.valueClass : '';
-                return `
+
+
+            // --- USEFUL INFO CAROUSEL (3 rows) ---
+            function initUsefulInfoCarousel() {
+                const list = document.getElementById('useful-info-list');
+                if (!list) return;
+
+                // render first page
+                usefulInfoIndex = 0;
+                renderUsefulInfoPage(list);
+
+                // If everything fits (page >= items), don't rotate.
+                clearInterval(usefulInfoTimer);
+                if (USEFUL_INFO_PAGE_SIZE >= usefulInfoItems.length) return;
+
+                usefulInfoTimer = setInterval(() => {
+                    usefulInfoIndex = (usefulInfoIndex + USEFUL_INFO_PAGE_SIZE) % usefulInfoItems.length;
+                    renderUsefulInfoPage(list, true);
+                }, USEFUL_INFO_ROTATION_TIME);
+            }
+
+            function renderUsefulInfoPage(listEl, animate = false) {
+                const page = usefulInfoItems.slice(usefulInfoIndex, usefulInfoIndex + USEFUL_INFO_PAGE_SIZE);
+                // Wrap-around if needed
+                if (page.length < USEFUL_INFO_PAGE_SIZE) {
+                    page.push(...usefulInfoItems.slice(0, USEFUL_INFO_PAGE_SIZE - page.length));
+                }
+
+                const html = page.map(item => {
+                    const valueClass = item.valueClass ? item.valueClass : '';
+                    return `
                     <div class="flex items-center justify-between p-3 lg:p-4 rounded-lg bg-white/5 border border-white/5 hover:bg-white/10 transition text-right">
                         <div>
                             <div class="font-black text-xl lg:text-3xl mb-1">${item.title}</div>
@@ -526,397 +557,397 @@
                         <div class="text-4xl lg:text-5xl opacity-90">${item.icon}</div>
                     </div>
                 `;
-            }).join('');
+                }).join('');
 
-            if (!animate) {
-                listEl.innerHTML = html;
-                return;
-            }
-
-            // Animate swap
-            listEl.classList.add('ui-fade-exit');
-            requestAnimationFrame(() => {
-                listEl.classList.add('ui-fade-exit-active');
-                setTimeout(() => {
-                    listEl.classList.remove('ui-fade-exit', 'ui-fade-exit-active');
+                if (!animate) {
                     listEl.innerHTML = html;
-                    listEl.classList.add('ui-fade-enter');
-                    requestAnimationFrame(() => {
-                        listEl.classList.add('ui-fade-enter-active');
-                        setTimeout(() => {
-                            listEl.classList.remove('ui-fade-enter', 'ui-fade-enter-active');
-                        }, 360);
-                    });
-                }, 260);
-            });
-        }
-
-        // --- CLOCK & DATE ---
-        function updateTime() {
-            const now = new Date();
-            document.getElementById('clock-time').textContent = now.toLocaleTimeString('he-IL', { hour: '2-digit', minute: '2-digit' });
-            const weekday = now.toLocaleDateString('he-IL', { weekday: 'long' });
-
-            // Weekday icons (0=Sunday .. 6=Saturday)
-            const weekdayIcons = ['☕', '💼', '✨', '🐪', '🍻', '🍷', '🛋️'];
-            const icon = weekdayIcons[now.getDay()] || '';
-
-            const dayTextEl = document.getElementById('clock-day-text');
-            const dayIconEl = document.getElementById('clock-day-icon');
-            const dayContainerEl = document.getElementById('clock-day');
-
-            if (dayTextEl && dayIconEl) {
-                dayTextEl.textContent = weekday;
-                dayIconEl.textContent = icon;
-            } else if (dayContainerEl) {
-                // Fallback if markup changes
-                dayContainerEl.textContent = icon ? `${icon} ${weekday}` : weekday;
-            }
-            document.getElementById('clock-date').textContent = now.toLocaleDateString('he-IL', { day: 'numeric', month: 'numeric', year: 'numeric' });
-        }
-
-        // --- WEATHER ---
-        async function fetchWeather() {
-            try {
-                // Simplified API call: Current weather only
-                const url = `https://api.open-meteo.com/v1/forecast` +
-                    `?latitude=${CITY_LAT}&longitude=${CITY_LON}` +
-                    `&current_weather=true` +
-                    `&timezone=Asia%2FJerusalem`;
-
-                const res = await fetch(url);
-                const data = await res.json();
-
-                const temp = Math.round(data.current_weather.temperature);
-                const code = data.current_weather.weathercode;
-                const isDay = data.current_weather.is_day; // 1 or 0 directly works
-
-                document.getElementById('weather-temp').textContent = `${temp}°`;
-                document.getElementById('weather-icon').textContent = getWeatherIcon(code, isDay);
-
-                const descEl = document.getElementById('weather-desc');
-                if (descEl) {
-                    // Using local mapping based only on WMO code
-                    descEl.textContent = getWeatherHebrewSummary({ code, isDay });
+                    return;
                 }
-            } catch (e) {
-                console.error('Weather error', e);
-                const descEl = document.getElementById('weather-desc');
-                if (descEl) descEl.textContent = 'מזג אוויר';
-            }
-        }
 
-        function getWeatherHebrewSummary({ code, cloud, pop, precip, isDay }) {
-            // Precipitation first (closest to AccuWeather-style phrasing)
-            const hasPrecip = (typeof precip === 'number' && precip > 0.0) || (typeof pop === 'number' && pop >= 50);
-            if (hasPrecip) {
-                if ([80, 81, 82].includes(code)) return 'ממטרים קצרים';
-                if ([61, 63, 65, 66, 67].includes(code)) return 'גשום';
-                if ([51, 53, 55].includes(code)) return 'טפטוף';
-                if ([95, 96, 99].includes(code)) return 'סופות רעמים';
-                return 'ממטרים קצרים';
-            }
-
-            // Cloud-based sky description
-            if (typeof cloud === 'number') {
-                if (cloud >= 85) return 'מעונן';
-                if (cloud >= 45) return 'מעונן חלקית';
-                if (cloud >= 20) return isDay ? 'שמשי בעיקר' : 'בהיר בעיקר';
-                return isDay ? 'שמשי' : 'בהיר';
-            }
-
-            // Fallback to weathercode only
-            if (code === 0) return isDay ? 'שמשי' : 'בהיר';
-            if (code === 1) return isDay ? 'שמשי בעיקר' : 'בהיר בעיקר';
-            if (code === 2) return 'מעונן חלקית';
-            if (code === 3) return 'מעונן';
-            if ([45, 48].includes(code)) return 'ערפילי';
-            if ([51, 53, 55].includes(code)) return 'טפטוף';
-            if ([61, 63, 65].includes(code)) return 'גשום';
-            if ([80, 81, 82].includes(code)) return 'ממטרים קצרים';
-            if ([95, 96, 99].includes(code)) return 'סופות רעמים';
-            return 'מזג אוויר';
-        }
-
-        function getWeatherIcon(code, isDay) {
-            const icons = {
-                0: isDay ? '☀️' : '🌙',
-                1: isDay ? '🌤️' : '🌙',
-                2: isDay ? '⛅' : '☁️',
-                3: '☁️',
-                45: '🌫️', 48: '🌫️',
-                51: '🌧️', 53: '🌧️', 55: '🌧️',
-                61: '🌧️', 63: '🌧️', 65: '🌧️',
-                80: '🌦️', 81: '🌦️', 82: '🌦️',
-                95: '⛈️', 96: '⛈️', 99: '⛈️'
-            };
-            return icons[code] || (isDay ? '☀️' : '🌙');
-        }
-
-        // --- SHABBAT ---
-        async function fetchShabbat() {
-            try {
-                const res = await fetch(`https://www.hebcal.com/shabbat?cfg=json&geo=pos&latitude=${CITY_LAT}&longitude=${CITY_LON}&tzid=Asia/Jerusalem&M=on&lg=he`);
-                const data = await res.json();
-
-                // Parse Items
-                let parsha = '', candle = '--:--', havdalah = '--:--';
-                let candleDate = null;
-
-                data.items.forEach(item => {
-                    if (item.category === 'parashat') parsha = item.hebrew;
-                    if (item.category === 'candles') {
-                        candleDate = new Date(item.date);
-                        candle = candleDate.toLocaleTimeString('he-IL', { hour: '2-digit', minute: '2-digit' });
-                    }
-                    if (item.category === 'havdalah') {
-                        havdalah = new Date(item.date).toLocaleTimeString('he-IL', { hour: '2-digit', minute: '2-digit' });
-                    }
+                // Animate swap
+                listEl.classList.add('ui-fade-exit');
+                requestAnimationFrame(() => {
+                    listEl.classList.add('ui-fade-exit-active');
+                    setTimeout(() => {
+                        listEl.classList.remove('ui-fade-exit', 'ui-fade-exit-active');
+                        listEl.innerHTML = html;
+                        listEl.classList.add('ui-fade-enter');
+                        requestAnimationFrame(() => {
+                            listEl.classList.add('ui-fade-enter-active');
+                            setTimeout(() => {
+                                listEl.classList.remove('ui-fade-enter', 'ui-fade-enter-active');
+                            }, 360);
+                        });
+                    }, 260);
                 });
-
-                document.getElementById('shabbat-in').textContent = candle;
-                document.getElementById('shabbat-out').textContent = havdalah;
-
-                // Title: "זמני השבת - פרשת ..."
-                const shabbatTitleEl = document.getElementById('shabbat-title');
-                const cleanParsha = stripHebrewNiqqud(parsha || '').trim();
-                if (shabbatTitleEl) {
-                    shabbatTitleEl.textContent = cleanParsha ? `זמני השבת - ${cleanParsha}` : 'זמני השבת';
-                }
-
-                // Date line should be: "יום שישי, 12 בדצמבר 2025 • כ"ב ... תשפ"ו"
-                // Use the candle lighting date (Friday) as reference.
-                const d = candleDate || new Date();
-                const gy = d.getFullYear();
-                const gm = d.getMonth() + 1;
-                const gd = d.getDate();
-
-                // Fetch full Converter data
-                const dateRes = await fetch(`https://www.hebcal.com/converter?cfg=json&gy=${gy}&gm=${gm}&gd=${gd}&g2h=1&lg=he`);
-                if (dateRes.ok) {
-                    const dateData = await dateRes.json();
-                    const hebrewDate = stripHebrewNiqqud(dateData.hebrew || '').trim();
-
-                    // Format Gregorian Date: "יום שישי, 12 בדצמבר 2025"
-                    const weekday = d.toLocaleDateString('he-IL', { weekday: 'long' });
-                    const weekdayLabel = weekday.startsWith('יום') ? weekday : `יום ${weekday}`;
-                    const gregDate = `${weekdayLabel}, ${d.toLocaleDateString('he-IL', { day: 'numeric', month: 'long', year: 'numeric' })}`;
-
-                    const fullString = hebrewDate ? `${gregDate} • ${hebrewDate}` : gregDate;
-                    document.getElementById('shabbat-date-display').textContent = fullString;
-                } else {
-                    // Fallback
-                    const weekday = d.toLocaleDateString('he-IL', { weekday: 'long' });
-                    const weekdayLabel = weekday.startsWith('יום') ? weekday : `יום ${weekday}`;
-                    const gregDate = `${weekdayLabel}, ${d.toLocaleDateString('he-IL', { day: 'numeric', month: 'long', year: 'numeric' })}`;
-                    document.getElementById('shabbat-date-display').textContent = gregDate;
-                }
-
-            } catch (e) { console.error('Shabbat API error', e); }
-        }
-
-        function stripHebrewNiqqud(text) {
-            return (text || '').replace(/[\u0591-\u05C7]/g, '');
-        }
-
-        async function updateHebrewDateToday() {
-            const el = document.getElementById('clock-hebrew-date');
-            if (!el) return;
-            try {
-                const today = new Date();
-                const gy = today.getFullYear();
-                const gm = today.getMonth() + 1;
-                const gd = today.getDate();
-                const res = await fetch(`https://www.hebcal.com/converter?cfg=json&gy=${gy}&gm=${gm}&gd=${gd}&g2h=1&lg=he`);
-                if (!res.ok) throw new Error('HTTP ' + res.status);
-                const data = await res.json();
-                // Example: "כ״ב כִּסְלֵו תשפ״ו"
-                el.textContent = stripHebrewNiqqud(data.hebrew || '').trim() || '--';
-            } catch (e) {
-                console.warn('Hebrew date fetch failed', e);
-                el.textContent = '--';
             }
-        }
 
-        // --- NEWS TICKER ---
-        async function fetchNews() {
-            const track = document.getElementById('ticker-track');
-            try {
-                // Using Ynet RSS via RSS2JSON proxy
-                const res = await fetch('https://api.rss2json.com/v1/api.json?rss_url=http://www.ynet.co.il/Integration/StoryRss1854.xml');
-                const data = await res.json();
+            // --- CLOCK & DATE ---
+            function updateTime() {
+                const now = new Date();
+                document.getElementById('clock-time').textContent = now.toLocaleTimeString('he-IL', { hour: '2-digit', minute: '2-digit' });
+                const weekday = now.toLocaleDateString('he-IL', { weekday: 'long' });
 
-                if (data.status === 'ok' && data.items.length > 0) {
-                    // Build items with clickable links
-                    const items = data.items.map(i => {
-                        const time = new Date(i.pubDate).toLocaleTimeString('he-IL', { hour: '2-digit', minute: '2-digit' });
-                        const title = i.title.replace(/"/g, '');
-                        const link = i.link || '#';
-                        return `
+                // Weekday icons (0=Sunday .. 6=Saturday)
+                const weekdayIcons = ['☕', '💼', '✨', '🐪', '🍻', '🍷', '🛋️'];
+                const icon = weekdayIcons[now.getDay()] || '';
+
+                const dayTextEl = document.getElementById('clock-day-text');
+                const dayIconEl = document.getElementById('clock-day-icon');
+                const dayContainerEl = document.getElementById('clock-day');
+
+                if (dayTextEl && dayIconEl) {
+                    dayTextEl.textContent = weekday;
+                    dayIconEl.textContent = icon;
+                } else if (dayContainerEl) {
+                    // Fallback if markup changes
+                    dayContainerEl.textContent = icon ? `${icon} ${weekday}` : weekday;
+                }
+                document.getElementById('clock-date').textContent = now.toLocaleDateString('he-IL', { day: 'numeric', month: 'numeric', year: 'numeric' });
+            }
+
+            // --- WEATHER ---
+            async function fetchWeather() {
+                try {
+                    // Simplified API call: Current weather only
+                    const url = `https://api.open-meteo.com/v1/forecast` +
+                        `?latitude=${CITY_LAT}&longitude=${CITY_LON}` +
+                        `&current_weather=true` +
+                        `&timezone=Asia%2FJerusalem`;
+
+                    const res = await fetch(url);
+                    const data = await res.json();
+
+                    const temp = Math.round(data.current_weather.temperature);
+                    const code = data.current_weather.weathercode;
+                    const isDay = data.current_weather.is_day; // 1 or 0 directly works
+
+                    document.getElementById('weather-temp').textContent = `${temp}°`;
+                    document.getElementById('weather-icon').textContent = getWeatherIcon(code, isDay);
+
+                    const descEl = document.getElementById('weather-desc');
+                    if (descEl) {
+                        // Using local mapping based only on WMO code
+                        descEl.textContent = getWeatherHebrewSummary({ code, isDay });
+                    }
+                } catch (e) {
+                    console.error('Weather error', e);
+                    const descEl = document.getElementById('weather-desc');
+                    if (descEl) descEl.textContent = 'מזג אוויר';
+                }
+            }
+
+            function getWeatherHebrewSummary({ code, cloud, pop, precip, isDay }) {
+                // Precipitation first (closest to AccuWeather-style phrasing)
+                const hasPrecip = (typeof precip === 'number' && precip > 0.0) || (typeof pop === 'number' && pop >= 50);
+                if (hasPrecip) {
+                    if ([80, 81, 82].includes(code)) return 'ממטרים קצרים';
+                    if ([61, 63, 65, 66, 67].includes(code)) return 'גשום';
+                    if ([51, 53, 55].includes(code)) return 'טפטוף';
+                    if ([95, 96, 99].includes(code)) return 'סופות רעמים';
+                    return 'ממטרים קצרים';
+                }
+
+                // Cloud-based sky description
+                if (typeof cloud === 'number') {
+                    if (cloud >= 85) return 'מעונן';
+                    if (cloud >= 45) return 'מעונן חלקית';
+                    if (cloud >= 20) return isDay ? 'שמשי בעיקר' : 'בהיר בעיקר';
+                    return isDay ? 'שמשי' : 'בהיר';
+                }
+
+                // Fallback to weathercode only
+                if (code === 0) return isDay ? 'שמשי' : 'בהיר';
+                if (code === 1) return isDay ? 'שמשי בעיקר' : 'בהיר בעיקר';
+                if (code === 2) return 'מעונן חלקית';
+                if (code === 3) return 'מעונן';
+                if ([45, 48].includes(code)) return 'ערפילי';
+                if ([51, 53, 55].includes(code)) return 'טפטוף';
+                if ([61, 63, 65].includes(code)) return 'גשום';
+                if ([80, 81, 82].includes(code)) return 'ממטרים קצרים';
+                if ([95, 96, 99].includes(code)) return 'סופות רעמים';
+                return 'מזג אוויר';
+            }
+
+            function getWeatherIcon(code, isDay) {
+                const icons = {
+                    0: isDay ? '☀️' : '🌙',
+                    1: isDay ? '🌤️' : '🌙',
+                    2: isDay ? '⛅' : '☁️',
+                    3: '☁️',
+                    45: '🌫️', 48: '🌫️',
+                    51: '🌧️', 53: '🌧️', 55: '🌧️',
+                    61: '🌧️', 63: '🌧️', 65: '🌧️',
+                    80: '🌦️', 81: '🌦️', 82: '🌦️',
+                    95: '⛈️', 96: '⛈️', 99: '⛈️'
+                };
+                return icons[code] || (isDay ? '☀️' : '🌙');
+            }
+
+            // --- SHABBAT ---
+            async function fetchShabbat() {
+                try {
+                    const res = await fetch(`https://www.hebcal.com/shabbat?cfg=json&geo=pos&latitude=${CITY_LAT}&longitude=${CITY_LON}&tzid=Asia/Jerusalem&M=on&lg=he`);
+                    const data = await res.json();
+
+                    // Parse Items
+                    let parsha = '', candle = '--:--', havdalah = '--:--';
+                    let candleDate = null;
+
+                    data.items.forEach(item => {
+                        if (item.category === 'parashat') parsha = item.hebrew;
+                        if (item.category === 'candles') {
+                            candleDate = new Date(item.date);
+                            candle = candleDate.toLocaleTimeString('he-IL', { hour: '2-digit', minute: '2-digit' });
+                        }
+                        if (item.category === 'havdalah') {
+                            havdalah = new Date(item.date).toLocaleTimeString('he-IL', { hour: '2-digit', minute: '2-digit' });
+                        }
+                    });
+
+                    document.getElementById('shabbat-in').textContent = candle;
+                    document.getElementById('shabbat-out').textContent = havdalah;
+
+                    // Title: "זמני השבת - פרשת ..."
+                    const shabbatTitleEl = document.getElementById('shabbat-title');
+                    const cleanParsha = stripHebrewNiqqud(parsha || '').trim();
+                    if (shabbatTitleEl) {
+                        shabbatTitleEl.textContent = cleanParsha ? `זמני השבת - ${cleanParsha}` : 'זמני השבת';
+                    }
+
+                    // Date line should be: "יום שישי, 12 בדצמבר 2025 • כ"ב ... תשפ"ו"
+                    // Use the candle lighting date (Friday) as reference.
+                    const d = candleDate || new Date();
+                    const gy = d.getFullYear();
+                    const gm = d.getMonth() + 1;
+                    const gd = d.getDate();
+
+                    // Fetch full Converter data
+                    const dateRes = await fetch(`https://www.hebcal.com/converter?cfg=json&gy=${gy}&gm=${gm}&gd=${gd}&g2h=1&lg=he`);
+                    if (dateRes.ok) {
+                        const dateData = await dateRes.json();
+                        const hebrewDate = stripHebrewNiqqud(dateData.hebrew || '').trim();
+
+                        // Format Gregorian Date: "יום שישי, 12 בדצמבר 2025"
+                        const weekday = d.toLocaleDateString('he-IL', { weekday: 'long' });
+                        const weekdayLabel = weekday.startsWith('יום') ? weekday : `יום ${weekday}`;
+                        const gregDate = `${weekdayLabel}, ${d.toLocaleDateString('he-IL', { day: 'numeric', month: 'long', year: 'numeric' })}`;
+
+                        const fullString = hebrewDate ? `${gregDate} • ${hebrewDate}` : gregDate;
+                        document.getElementById('shabbat-date-display').textContent = fullString;
+                    } else {
+                        // Fallback
+                        const weekday = d.toLocaleDateString('he-IL', { weekday: 'long' });
+                        const weekdayLabel = weekday.startsWith('יום') ? weekday : `יום ${weekday}`;
+                        const gregDate = `${weekdayLabel}, ${d.toLocaleDateString('he-IL', { day: 'numeric', month: 'long', year: 'numeric' })}`;
+                        document.getElementById('shabbat-date-display').textContent = gregDate;
+                    }
+
+                } catch (e) { console.error('Shabbat API error', e); }
+            }
+
+            function stripHebrewNiqqud(text) {
+                return (text || '').replace(/[\u0591-\u05C7]/g, '');
+            }
+
+            async function updateHebrewDateToday() {
+                const el = document.getElementById('clock-hebrew-date');
+                if (!el) return;
+                try {
+                    const today = new Date();
+                    const gy = today.getFullYear();
+                    const gm = today.getMonth() + 1;
+                    const gd = today.getDate();
+                    const res = await fetch(`https://www.hebcal.com/converter?cfg=json&gy=${gy}&gm=${gm}&gd=${gd}&g2h=1&lg=he`);
+                    if (!res.ok) throw new Error('HTTP ' + res.status);
+                    const data = await res.json();
+                    // Example: "כ״ב כִּסְלֵו תשפ״ו"
+                    el.textContent = stripHebrewNiqqud(data.hebrew || '').trim() || '--';
+                } catch (e) {
+                    console.warn('Hebrew date fetch failed', e);
+                    el.textContent = '--';
+                }
+            }
+
+            // --- NEWS TICKER ---
+            async function fetchNews() {
+                const track = document.getElementById('ticker-track');
+                try {
+                    // Using Ynet RSS via RSS2JSON proxy
+                    const res = await fetch('https://api.rss2json.com/v1/api.json?rss_url=http://www.ynet.co.il/Integration/StoryRss1854.xml');
+                    const data = await res.json();
+
+                    if (data.status === 'ok' && data.items.length > 0) {
+                        // Build items with clickable links
+                        const items = data.items.map(i => {
+                            const time = new Date(i.pubDate).toLocaleTimeString('he-IL', { hour: '2-digit', minute: '2-digit' });
+                            const title = i.title.replace(/"/g, '');
+                            const link = i.link || '#';
+                            return `
                             <a href="${link}" target="_blank" class="inline-flex items-center gap-3 px-8 flex-row-reverse hover:bg-white/10 transition rounded-lg py-1" dir="rtl" title="לחץ לקריאה">
                                 <span class="text-accent font-black tabular-nums text-3xl">${time}</span>
                                 <span class="text-white font-semibold text-3xl hover:text-accent transition">${title}</span>
                                 <span class="text-white/20">|</span>
                             </a>
                         `;
-                    }).join('');
+                        }).join('');
 
-                    // Insert ONE copy only.
-                    track.innerHTML = items;
+                        // Insert ONE copy only.
+                        track.innerHTML = items;
 
-                    // SAVE FRESH CONTENT for the setup function
+                        // SAVE FRESH CONTENT for the setup function
+                        window.tickerOriginalContent = Array.from(track.children).map(c => c.cloneNode(true));
+
+                        setupTickerAnimation(track);
+                    }
+                } catch (e) {
+                    console.log('News Error, using fallback');
+                    const fallback = `<span class="px-8 text-xl">ברוכים הבאים לאלונים 8 • נשמח לעמוד לשירותכם • יום נעים</span>`;
+                    track.innerHTML = fallback;
+
+                    // SAVE FALLBACK too
                     window.tickerOriginalContent = Array.from(track.children).map(c => c.cloneNode(true));
 
                     setupTickerAnimation(track);
                 }
-            } catch (e) {
-                console.log('News Error, using fallback');
-                const fallback = `<span class="px-8 text-xl">ברוכים הבאים לאלונים 8 • נשמח לעמוד לשירותכם • יום נעים</span>`;
-                track.innerHTML = fallback;
-
-                // SAVE FALLBACK too
-                window.tickerOriginalContent = Array.from(track.children).map(c => c.cloneNode(true));
-
-                setupTickerAnimation(track);
             }
-        }
 
-        // Recalculate ticker when viewport changes (TV/browser resize) to keep the loop seamless.
-        window.addEventListener('resize', () => {
-            const track = document.getElementById('ticker-track');
-            if (track) setupTickerAnimation(track);
-        });
+            // Recalculate ticker when viewport changes (TV/browser resize) to keep the loop seamless.
+            window.addEventListener('resize', () => {
+                const track = document.getElementById('ticker-track');
+                if (track) setupTickerAnimation(track);
+            });
 
-        function setupTickerAnimation(track) {
-            try {
-                // 1. Reset animation
-                track.style.animation = 'none';
-                track.innerHTML = '';
+            function setupTickerAnimation(track) {
+                try {
+                    // 1. Reset animation
+                    track.style.animation = 'none';
+                    track.innerHTML = '';
 
-                // 2. Get the original items
-                if (!window.tickerOriginalContent || window.tickerOriginalContent.length === 0) return;
-                const originals = window.tickerOriginalContent;
+                    // 2. Get the original items
+                    if (!window.tickerOriginalContent || window.tickerOriginalContent.length === 0) return;
+                    const originals = window.tickerOriginalContent;
 
-                // 3. Measure Single Set Width
-                const tempContainer = document.createElement('div');
-                Object.assign(tempContainer.style, {
-                    position: 'absolute', visibility: 'hidden', whiteSpace: 'nowrap', display: 'inline-flex'
-                });
-                originals.forEach(node => tempContainer.appendChild(node.cloneNode(true)));
-                document.body.appendChild(tempContainer);
-                const singleSetWidth = tempContainer.getBoundingClientRect().width;
-                document.body.removeChild(tempContainer);
+                    // 3. Measure Single Set Width
+                    const tempContainer = document.createElement('div');
+                    Object.assign(tempContainer.style, {
+                        position: 'absolute', visibility: 'hidden', whiteSpace: 'nowrap', display: 'inline-flex'
+                    });
+                    originals.forEach(node => tempContainer.appendChild(node.cloneNode(true)));
+                    document.body.appendChild(tempContainer);
+                    const singleSetWidth = tempContainer.getBoundingClientRect().width;
+                    document.body.removeChild(tempContainer);
 
-                if (singleSetWidth === 0) return;
+                    if (singleSetWidth === 0) return;
 
-                // 4. For seamless RTL carousel:
-                // We need content to START from the right edge (off-screen) and scroll left.
-                // Then loop back seamlessly.
-                const screenWidth = window.innerWidth;
+                    // 4. For seamless RTL carousel:
+                    // We need content to START from the right edge (off-screen) and scroll left.
+                    // Then loop back seamlessly.
+                    const screenWidth = window.innerWidth;
 
-                // Build enough content to fill: screen + one full set (for seamless loop)
-                const nodesToAppend = [];
-                let currentWidth = 0;
-                const targetWidth = screenWidth + singleSetWidth * 2; // Extra buffer for smooth loop
+                    // Build enough content to fill: screen + one full set (for seamless loop)
+                    const nodesToAppend = [];
+                    let currentWidth = 0;
+                    const targetWidth = screenWidth + singleSetWidth * 2; // Extra buffer for smooth loop
 
-                while (currentWidth < targetWidth) {
-                    originals.forEach(node => nodesToAppend.push(node.cloneNode(true)));
-                    currentWidth += singleSetWidth;
+                    while (currentWidth < targetWidth) {
+                        originals.forEach(node => nodesToAppend.push(node.cloneNode(true)));
+                        currentWidth += singleSetWidth;
+                    }
+
+                    // 5. Append content to track
+                    const fragment = document.createDocumentFragment();
+                    nodesToAppend.forEach(node => fragment.appendChild(node));
+                    track.appendChild(fragment);
+
+                    // 6. Calculate animation values
+                    const totalWidth = track.scrollWidth;
+                    const scrollDistance = singleSetWidth; // Scroll exactly one set for seamless loop
+
+                    // 7. Set CSS Variables
+                    // --ticker-start: Start position (screen width = off-screen right)
+                    // --ticker-distance: How far to scroll (one set width for seamless loop)
+                    track.style.setProperty('--ticker-start', `${screenWidth}px`);
+                    track.style.setProperty('--ticker-distance', `${scrollDistance}px`);
+
+                    // Duration based on total travel distance
+                    const pxPerSec = 80;
+                    const totalTravel = screenWidth + scrollDistance;
+                    const duration = totalTravel / pxPerSec;
+                    track.style.setProperty('--ticker-duration', `${duration}s`);
+
+                    // 8. Force reflow and restart animation
+                    void track.offsetHeight;
+                    track.style.animation = '';
+
+                } catch (e) {
+                    console.warn('Ticker setup failed', e);
                 }
-
-                // 5. Append content to track
-                const fragment = document.createDocumentFragment();
-                nodesToAppend.forEach(node => fragment.appendChild(node));
-                track.appendChild(fragment);
-
-                // 6. Calculate animation values
-                const totalWidth = track.scrollWidth;
-                const scrollDistance = singleSetWidth; // Scroll exactly one set for seamless loop
-
-                // 7. Set CSS Variables
-                // --ticker-start: Start position (screen width = off-screen right)
-                // --ticker-distance: How far to scroll (one set width for seamless loop)
-                track.style.setProperty('--ticker-start', `${screenWidth}px`);
-                track.style.setProperty('--ticker-distance', `${scrollDistance}px`);
-
-                // Duration based on total travel distance
-                const pxPerSec = 80;
-                const totalTravel = screenWidth + scrollDistance;
-                const duration = totalTravel / pxPerSec;
-                track.style.setProperty('--ticker-duration', `${duration}s`);
-
-                // 8. Force reflow and restart animation
-                void track.offsetHeight;
-                track.style.animation = '';
-
-            } catch (e) {
-                console.warn('Ticker setup failed', e);
             }
-        }
 
 
-        // --- NOTICES LOGIC ---
-        function renderNotices() {
-            const area = document.getElementById('notices-area');
-            const counter = document.getElementById('notice-counter');
+            // --- NOTICES LOGIC ---
+            function renderNotices() {
+                const area = document.getElementById('notices-area');
+                const counter = document.getElementById('notice-counter');
 
-            clearInterval(rotationTimer);
-            clearInterval(progressTimer);
+                clearInterval(rotationTimer);
+                clearInterval(progressTimer);
 
-            if (notices.length === 0) {
-                // Do not rely on #empty-state existing (it can be replaced once notices render).
-                area.innerHTML = `
+                if (notices.length === 0) {
+                    // Do not rely on #empty-state existing (it can be replaced once notices render).
+                    area.innerHTML = `
                     <div id="empty-state" class="text-center opacity-30">
                         <div class="text-9xl mb-4">📭</div>
                         <div class="text-4xl font-light">אין הודעות חדשות</div>
                     </div>
                 `;
-                if (counter) counter.textContent = 'אין הודעות';
-                return;
+                    if (counter) counter.textContent = 'אין הודעות';
+                    return;
+                }
+
+                if (counter) counter.textContent = `${notices.length} הודעות`;
+
+                // Start Rotation
+                showNotice(0);
+                startRotation();
             }
 
-            if (counter) counter.textContent = `${notices.length} הודעות`;
+            function startRotation() {
+                const bar = document.getElementById('notice-progress');
+                let width = 0;
+                const step = 100 / (ROTATION_TIME / 50); // Update every 50ms
 
-            // Start Rotation
-            showNotice(0);
-            startRotation();
-        }
+                progressTimer = setInterval(() => {
+                    width += step;
+                    if (width >= 100) width = 100;
+                    bar.style.width = width + '%';
+                }, 50);
 
-        function startRotation() {
-            const bar = document.getElementById('notice-progress');
-            let width = 0;
-            const step = 100 / (ROTATION_TIME / 50); // Update every 50ms
+                rotationTimer = setInterval(() => {
+                    currentIndex = (currentIndex + 1) % notices.length;
+                    showNotice(currentIndex);
+                    width = 0;
+                    bar.style.width = '0%';
+                }, ROTATION_TIME);
+            }
 
-            progressTimer = setInterval(() => {
-                width += step;
-                if (width >= 100) width = 100;
-                bar.style.width = width + '%';
-            }, 50);
+            function showNotice(index) {
+                const area = document.getElementById('notices-area');
+                const notice = notices[index];
+                const iconMap = {
+                    'welcome': '👋', 'event': '🎉', 'important': '⚠️', 'maintenance': '🔧', 'general': '📢'
+                };
+                const icon = iconMap[notice.type] || '📢';
 
-            rotationTimer = setInterval(() => {
-                currentIndex = (currentIndex + 1) % notices.length;
-                showNotice(currentIndex);
-                width = 0;
-                bar.style.width = '0%';
-            }, ROTATION_TIME);
-        }
-
-        function showNotice(index) {
-            const area = document.getElementById('notices-area');
-            const notice = notices[index];
-            const iconMap = {
-                'welcome': '👋', 'event': '🎉', 'important': '⚠️', 'maintenance': '🔧', 'general': '📢'
-            };
-            const icon = iconMap[notice.type] || '📢';
-
-            // Image vs Icon
-            let visualContent;
-            if (notice.imageUrl) {
-                // Keep correct proportions without allowing the image to change the notice card proportions.
-                // We allocate a fixed media area within the notice card.
-                const hasBody = (notice.content || '').trim().length > 0;
-                const mediaH = hasBody ? 'h-[34vh] lg:h-[38vh]' : 'h-[46vh] lg:h-[52vh]';
-                visualContent = `
+                // Image vs Icon
+                let visualContent;
+                if (notice.imageUrl) {
+                    // Keep correct proportions without allowing the image to change the notice card proportions.
+                    // We allocate a fixed media area within the notice card.
+                    const hasBody = (notice.content || '').trim().length > 0;
+                    const mediaH = hasBody ? 'h-[34vh] lg:h-[38vh]' : 'h-[46vh] lg:h-[52vh]';
+                    visualContent = `
                     <div class="w-full ${mediaH} flex items-center justify-center ${hasBody ? 'mb-4' : 'mb-6'}">
                         <img
                             src="${notice.imageUrl}"
@@ -927,15 +958,15 @@
                         >
                     </div>
                 `;
-            } else {
-                visualContent = `<div class="text-8xl mb-6 filter drop-shadow-lg">${icon}</div>`;
-            }
+                } else {
+                    visualContent = `<div class="text-8xl mb-6 filter drop-shadow-lg">${icon}</div>`;
+                }
 
-            const urgencyClass = notice.urgent ? 'border-2 border-red-500 shadow-[0_0_50px_rgba(239,68,68,0.2)]' : '';
-            const urgencyBadge = notice.urgent ? '<div class="absolute top-4 left-4 bg-red-600 text-white px-3 py-1 rounded-full text-sm font-bold animate-pulse">דחוף</div>' : '';
+                const urgencyClass = notice.urgent ? 'border-2 border-red-500 shadow-[0_0_50px_rgba(239,68,68,0.2)]' : '';
+                const urgencyBadge = notice.urgent ? '<div class="absolute top-4 left-4 bg-red-600 text-white px-3 py-1 rounded-full text-sm font-bold animate-pulse">דחוף</div>' : '';
 
-            // Animation classes
-            const html = `
+                // Animation classes
+                const html = `
         <div class="w-full h-full flex flex-col items-center justify-start text-center animate-fade-in relative p-4 ${urgencyClass} rounded-3xl bg-white/5">
             ${urgencyBadge}
             ${visualContent}
@@ -951,111 +982,111 @@
         </div>
     `;
 
-            area.innerHTML = html;
-        }
+                area.innerHTML = html;
+            }
 
-        // --- ADMIN FUNCTIONS ---
-        function openAdmin() { document.getElementById('admin-modal').classList.remove('hidden'); }
-        function closeAdmin() { document.getElementById('admin-modal').classList.add('hidden'); }
-        function clearInputs() {
-            document.getElementById('input-title').value = '';
-            document.getElementById('input-content').value = '';
-            document.getElementById('input-urgent').checked = false;
-        }
+            // --- ADMIN FUNCTIONS ---
+            function openAdmin() { document.getElementById('admin-modal').classList.remove('hidden'); }
+            function closeAdmin() { document.getElementById('admin-modal').classList.add('hidden'); }
+            function clearInputs() {
+                document.getElementById('input-title').value = '';
+                document.getElementById('input-content').value = '';
+                document.getElementById('input-urgent').checked = false;
+            }
 
-        function saveNotice() {
-            const title = document.getElementById('input-title').value;
-            const content = document.getElementById('input-content').value;
-            if (!title) return alert('נא להזין כותרת');
+            function saveNotice() {
+                const title = document.getElementById('input-title').value;
+                const content = document.getElementById('input-content').value;
+                if (!title) return alert('נא להזין כותרת');
 
-            const newNotice = {
-                id: Date.now().toString(),
-                title: title,
-                content: content,
-                type: document.getElementById('input-type').value,
-                date: document.getElementById('input-date').value,
-                urgent: document.getElementById('input-urgent').checked
-            };
+                const newNotice = {
+                    id: Date.now().toString(),
+                    title: title,
+                    content: content,
+                    type: document.getElementById('input-type').value,
+                    date: document.getElementById('input-date').value,
+                    urgent: document.getElementById('input-urgent').checked
+                };
 
-            notices.unshift(newNotice); // Add to top
-            saveNotices(); // Save to storage
-            renderNotices();
-            closeAdmin();
-            clearInputs();
-        }
-
-        function deleteNotice(id) {
-            if (confirm('למחוק הודעה זו?')) {
-                notices = notices.filter(n => n.id !== id.toString()); // Ensure string comparison
+                notices.unshift(newNotice); // Add to top
                 saveNotices(); // Save to storage
                 renderNotices();
-            }
-        }
-
-        // --- PERSISTENCE ---
-        // Load from notices.json (shared), fallback to localStorage (local edits)
-        async function loadNotices() {
-            // If opened directly from disk (file://), browsers often block fetch() to local json.
-            // In that case we'll fall back to localStorage, which may look "stuck" if you edit notices.json.
-            if (window.location.protocol === 'file:') {
-                console.warn('Running from file:// - notices.json fetch may be blocked. Start a local HTTP server to load notices.json reliably.');
+                closeAdmin();
+                clearInputs();
             }
 
-            // 1) Try notices.json (works when served over HTTP)
-            try {
-                const res = await fetch('notices.json?_=' + Date.now());
-                if (res.ok) {
-                    const json = await res.json();
-                    if (Array.isArray(json)) {
-                        notices = mapNoticesFromJson(json);
-                        // Cache locally so the TV can still work offline later
-                        saveNotices();
-                        const counter = document.getElementById('notice-counter');
-                        if (counter) counter.textContent = `${notices.length} הודעות`;
-                        return;
-                    }
+            function deleteNotice(id) {
+                if (confirm('למחוק הודעה זו?')) {
+                    notices = notices.filter(n => n.id !== id.toString()); // Ensure string comparison
+                    saveNotices(); // Save to storage
+                    renderNotices();
                 }
-            } catch (e) {
-                console.warn('Could not load notices.json, falling back to localStorage', e);
             }
 
-            // 2) Fallback to localStorage
-            const stored = localStorage.getItem('lobby-notices');
-            notices = stored ? JSON.parse(stored) : [];
-            const counter = document.getElementById('notice-counter');
-            if (counter) counter.textContent = `${notices.length} הודעות`;
-        }
+            // --- PERSISTENCE ---
+            // Load from notices.json (shared), fallback to localStorage (local edits)
+            async function loadNotices() {
+                // If opened directly from disk (file://), browsers often block fetch() to local json.
+                // In that case we'll fall back to localStorage, which may look "stuck" if you edit notices.json.
+                if (window.location.protocol === 'file:') {
+                    console.warn('Running from file:// - notices.json fetch may be blocked. Start a local HTTP server to load notices.json reliably.');
+                }
 
-        function mapNoticesFromJson(items) {
-            // Your notices.json schema:
-            // { id, title, content, category, date, color, priority, type, imageUrl }
-            // Current UI expects:
-            // { id, title, content, type, date, urgent, imageUrl }
-            const mapType = {
-                general: 'general',
-                important: 'important',
-                event: 'event',
-                welcome: 'welcome',
-                maintenance: 'maintenance',
-                vaad: 'important',
-                holiday: 'event'
-            };
-            return items
-                // Only show notice-board items here; ignore "news" entries
-                .filter(n => (n.type || 'notice') === 'notice')
-                .map(n => ({
-                    id: String(n.id ?? Date.now()),
-                    title: n.title || '',
-                    content: n.content || '',
-                    type: mapType[n.category] || mapType[n.type] || 'general',
-                    date: n.date || new Date().toISOString().split('T')[0],
-                    urgent: Boolean(n.priority),
-                    imageUrl: n.imageUrl ?? null
-                }));
-        }
-        function saveNotices() {
-            localStorage.setItem('lobby-notices', JSON.stringify(notices));
-        }
+                // 1) Try notices.json (works when served over HTTP)
+                try {
+                    const res = await fetch('notices.json?_=' + Date.now());
+                    if (res.ok) {
+                        const json = await res.json();
+                        if (Array.isArray(json)) {
+                            notices = mapNoticesFromJson(json);
+                            // Cache locally so the TV can still work offline later
+                            saveNotices();
+                            const counter = document.getElementById('notice-counter');
+                            if (counter) counter.textContent = `${notices.length} הודעות`;
+                            return;
+                        }
+                    }
+                } catch (e) {
+                    console.warn('Could not load notices.json, falling back to localStorage', e);
+                }
+
+                // 2) Fallback to localStorage
+                const stored = localStorage.getItem('lobby-notices');
+                notices = stored ? JSON.parse(stored) : [];
+                const counter = document.getElementById('notice-counter');
+                if (counter) counter.textContent = `${notices.length} הודעות`;
+            }
+
+            function mapNoticesFromJson(items) {
+                // Your notices.json schema:
+                // { id, title, content, category, date, color, priority, type, imageUrl }
+                // Current UI expects:
+                // { id, title, content, type, date, urgent, imageUrl }
+                const mapType = {
+                    general: 'general',
+                    important: 'important',
+                    event: 'event',
+                    welcome: 'welcome',
+                    maintenance: 'maintenance',
+                    vaad: 'important',
+                    holiday: 'event'
+                };
+                return items
+                    // Only show notice-board items here; ignore "news" entries
+                    .filter(n => (n.type || 'notice') === 'notice')
+                    .map(n => ({
+                        id: String(n.id ?? Date.now()),
+                        title: n.title || '',
+                        content: n.content || '',
+                        type: mapType[n.category] || mapType[n.type] || 'general',
+                        date: n.date || new Date().toISOString().split('T')[0],
+                        urgent: Boolean(n.priority),
+                        imageUrl: n.imageUrl ?? null
+                    }));
+            }
+            function saveNotices() {
+                localStorage.setItem('lobby-notices', JSON.stringify(notices));
+            }
 
     </script>
 </body>
