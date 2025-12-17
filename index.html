@@ -491,33 +491,50 @@
         });
 
         // --- EVENT SYSTEM ---
-        function loadEventScript(eventName) {
-            console.log(`Loading event: ${eventName}`);
+        // Schedule uses month-day strings (MM-DD) to keep it simple.
+        // NOTE: String comparison works because values are zero-padded.
+        const EVENTS_SCHEDULE = [
+            { id: 'hanukkah', src: 'hanukkah.js', start: '12-01', end: '12-30' }
+        ];
+
+        function loadEventScript(eventId) {
+            // URL param is for testing, but keep it safe: only allow known event IDs.
+            const ev = EVENTS_SCHEDULE.find(e => e.id === eventId);
+            if (!ev) {
+                console.warn(`Unknown event id: ${eventId}`);
+                return;
+            }
+            loadEventScriptSrc(ev.src, ev.id);
+        }
+
+        function loadEventScriptSrc(src, eventId) {
+            if (!src) return;
+
+            // Avoid duplicates
+            if (eventId && document.querySelector(`script[data-event-id="${eventId}"]`)) return;
+            if (!eventId && document.querySelector(`script[src="${src}"]`)) return;
+
+            console.log(`Loading event: ${eventId || src}`);
             const script = document.createElement('script');
-            script.src = `${eventName}.js`;
-            script.onerror = () => console.warn(`Could not load event script: ${eventName}.js`);
+            script.src = src;
+            if (eventId) script.dataset.eventId = eventId;
+            script.onerror = () => console.warn(`Could not load event script: ${src}`);
             document.body.appendChild(script);
         }
 
         function checkAndLoadScheduledEvents() {
-            // Simple Registry: ID, Start(MM-DD), End(MM-DD)
-            // 2025 Hanukkah: Dec 14 - Dec 22. Range can be wider for "Season".
-            const EVENTS = [
-                { id: 'hanukkah', start: '12-10', end: '12-30' }
-            ];
-
             const now = new Date();
             // Format today as MM-DD
             const month = (now.getMonth() + 1).toString().padStart(2, '0');
             const day = now.getDate().toString().padStart(2, '0');
             const todayStr = `${month}-${day}`;
 
-            const activeEvent = EVENTS.find(e => todayStr >= e.start && todayStr <= e.end);
+            const activeEvent = EVENTS_SCHEDULE.find(e => todayStr >= e.start && todayStr <= e.end);
 
             if (activeEvent) {
-                loadEventScript(activeEvent.id);
+                loadEventScriptSrc(activeEvent.src, activeEvent.id);
             }
-
+        }
 
 
             // --- USEFUL INFO CAROUSEL (3 rows) ---
