@@ -11,24 +11,13 @@
   },
   {
     "id": "2",
-    "title": "חנוכה שמח לכל דיירי הבניין! 🕎",
+    "title": "",
     "content": "",
     "category": "general",
     "date": "2025-12-25",
     "color": "#facc15",
     "priority": false,
     "type": "notice",
-    "imageUrl": "hannuka.jpg"
-  },
-  {
-  "id": "3",
-  "title": "",
-  "content": "",
-  "category": "general",
-  "date": "2025-16-25",
-  "color": "#facc15",
-  "priority": true,
-  "type": "notice",
-  "imageUrl": "attention.png"
-}
+    "imageUrl": "greeting24.jpg"
+  }
 ]

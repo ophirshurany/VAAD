@@ -136,27 +136,46 @@
             color: white !important;
         }
 
-        /* Useful info carousel: fade between pages */
-        .ui-fade-enter {
-            opacity: 0;
-            transform: translateY(8px);
+        /* Useful info vertical scroll marquee */
+        .useful-info-scroll-container {
+            overflow: hidden;
+            position: relative;
+            height: 100%;
         }
 
-        .ui-fade-enter-active {
-            opacity: 1;
-            transform: translateY(0);
-            transition: opacity 350ms ease, transform 350ms ease;
+        .useful-info-scroll-track {
+            display: flex;
+            flex-direction: column;
+            animation: useful-info-scroll var(--scroll-duration, 20s) linear infinite;
+            max-height: 100%;
         }
 
-        .ui-fade-exit {
-            opacity: 1;
-            transform: translateY(0);
+        .useful-info-scroll-track:hover {
+            animation-play-state: paused;
         }
 
-        .ui-fade-exit-active {
-            opacity: 0;
-            transform: translateY(-8px);
-            transition: opacity 250ms ease, transform 250ms ease;
+        @keyframes useful-info-scroll {
+            0% {
+                transform: translateY(0);
+            }
+            100% {
+                transform: translateY(-50%);
+            }
+        }
+
+        .useful-info-item {
+            flex-shrink: 0;
+        }
+
+        /* Global readability boosts */
+        .news-time {
+            font-size: clamp(1.6rem, 2.2vw, 2.6rem);
+            line-height: 1.05;
+        }
+
+        .news-title {
+            font-size: clamp(1.7rem, 2.4vw, 2.9rem);
+            line-height: 1.1;
         }
     </style>
 </head>
@@ -166,29 +185,54 @@
     <!-- App frame (adds top/bottom/side border like the panels) -->
     <div class="info-panel rounded-xl lg:rounded-3xl overflow-hidden flex flex-col w-full h-full shadow-3xl">
 
-        <!-- TOP HEADER: Weather (Right), Title (Center), Hanukkah (Left) -->
+        <!-- TOP HEADER: Weather (Right), Title (Center), Holiday Events (Left) -->
         <header
-            class="flex flex-col lg:flex-row items-center justify-between py-2 px-4 lg:py-0 lg:px-8 border-b border-white/10 bg-dark/50 z-20 shrink-0 lg:h-28 relative">
+            class="flex flex-col lg:flex-row items-center justify-between py-2 px-4 lg:py-3 lg:px-8 border-b border-white/10 bg-dark/50 z-20 shrink-0 relative">
 
-            <!-- RIGHT: Weather Widget -->
-            <div class="order-2 lg:order-1 flex items-center justify-start w-full lg:w-1/4 pt-2 lg:pt-0">
-                <div class="flex items-center gap-4 bg-white/5 px-6 py-3 rounded-2xl border border-white/10 cursor-pointer hover:bg-white/10 transition"
+            <!-- RIGHT: Weather Widget (3-Day Forecast) -->
+            <div class="order-2 lg:order-1 flex items-center justify-start w-full lg:w-auto pt-2 lg:pt-0">
+                <div id="weather-widget" class="flex items-center gap-2 lg:gap-4 bg-white/5 px-4 lg:px-6 py-2 lg:py-3 rounded-2xl border border-white/10 cursor-pointer hover:bg-white/10 transition"
                     onclick="window.open('https://www.accuweather.com/he/il/beer-yaaqov/1281409/weather-forecast/1281409', '_blank')"
                     title="פתח תחזית ב-AccuWeather">
-                    <span id="weather-icon" class="text-5xl lg:text-6xl">☀️</span>
-                    <div class="flex items-center gap-3 leading-none">
-                        <span id="weather-temp" class="text-4xl lg:text-5xl font-black tabular-nums">--°</span>
-                        <span class="text-white/20 text-4xl hidden lg:inline">|</span>
-                        <span id="weather-desc"
-                            class="text-2xl lg:text-3xl font-semibold text-blue-100 hidden xl:block">--</span>
+                    <!-- 3-day forecast injected by JS -->
+                    <div class="flex items-center gap-4 lg:gap-6">
+                        <div id="weather-day-0" class="flex flex-col items-center">
+                            <span class="text-sm lg:text-lg text-blue-200 font-medium">היום</span>
+                            <span class="weather-icon text-3xl lg:text-5xl my-1">☀️</span>
+                            <div class="flex items-center gap-1 text-lg lg:text-2xl font-bold">
+                                <span class="weather-high text-white">--°</span>
+                                <span class="text-white/30">|</span>
+                                <span class="weather-low text-blue-300">--°</span>
+                            </div>
+                        </div>
+                        <div class="w-px h-12 lg:h-16 bg-white/10"></div>
+                        <div id="weather-day-1" class="flex flex-col items-center">
+                            <span class="text-sm lg:text-lg text-blue-200 font-medium">מחר</span>
+                            <span class="weather-icon text-3xl lg:text-5xl my-1">☀️</span>
+                            <div class="flex items-center gap-1 text-lg lg:text-2xl font-bold">
+                                <span class="weather-high text-white">--°</span>
+                                <span class="text-white/30">|</span>
+                                <span class="weather-low text-blue-300">--°</span>
+                            </div>
+                        </div>
+                        <div class="w-px h-12 lg:h-16 bg-white/10"></div>
+                        <div id="weather-day-2" class="flex flex-col items-center">
+                            <span class="text-sm lg:text-lg text-blue-200 font-medium">--</span>
+                            <span class="weather-icon text-3xl lg:text-5xl my-1">☀️</span>
+                            <div class="flex items-center gap-1 text-lg lg:text-2xl font-bold">
+                                <span class="weather-high text-white">--°</span>
+                                <span class="text-white/30">|</span>
+                                <span class="weather-low text-blue-300">--°</span>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
 
             <!-- CENTER: Title -->
-            <div class="order-1 lg:order-2 text-center w-full lg:w-1/2">
+            <div class="order-1 lg:order-2 text-center flex-1">
                 <h1
-                    class="text-5xl lg:text-7xl font-black tracking-tight text-white header-glow drop-shadow-xl whitespace-nowrap">
+                    class="text-4xl lg:text-6xl font-black tracking-tight text-white header-glow drop-shadow-xl whitespace-nowrap">
                     ברוכים הבאים לאלונים 8
                 </h1>
             </div>
@@ -205,74 +249,72 @@
 
             <!-- RIGHT SIDEBAR (3 Columns / ~25%) -->
             <aside
-                class="w-full lg:col-span-3 flex flex-col gap-4 lg:gap-5 lg:h-full shrink-0 lg:grid lg:grid-rows-[auto,1fr,auto]">
+                class="w-full lg:col-span-3 flex flex-col gap-4 lg:gap-5 lg:h-full shrink-0 lg:grid lg:grid-rows-[auto,0.4fr,0.6fr]">
 
-                <!-- 1. CLOCK & DATE (Enlarged) -->
+                <!-- 1. CLOCK & DATE (Clean & Prominent) -->
                 <div
-                    class="info-panel rounded-3xl p-4 flex flex-col items-center justify-center bg-gradient-to-br from-blue-900/40 to-slate-900/40">
+                    class="info-panel rounded-3xl p-5 lg:p-6 flex flex-col items-center justify-center bg-gradient-to-br from-blue-900/50 to-slate-900/50">
+                    <!-- Time Display -->
                     <div id="clock-time"
-                        class="text-6xl lg:text-7xl xl:text-8xl font-black text-white tabular-nums leading-none drop-shadow-lg tracking-tight mb-2">
+                        class="text-7xl lg:text-8xl xl:text-9xl font-black text-white tabular-nums leading-none drop-shadow-lg tracking-tight">
                         --:--
                     </div>
 
-                    <div class="h-px w-28 bg-white/20 my-3"></div>
-
-                    <div id="clock-day" class="text-3xl lg:text-4xl font-bold text-accent mb-2" dir="rtl">
-                        <span id="clock-day-icon" class="hidden" aria-hidden="true"></span>
+                    <!-- Day of Week -->
+                    <div id="clock-day" class="text-2xl lg:text-3xl font-bold text-accent mt-3" dir="rtl">
                         <span id="clock-day-text">---</span>
                     </div>
 
+                    <div class="h-px w-24 bg-white/20 my-3"></div>
+
+                    <!-- Dates -->
                     <div class="flex flex-col items-center gap-1">
-                        <div id="clock-date" class="text-2xl lg:text-3xl text-blue-100/90 tracking-widest font-medium">
+                        <div id="clock-date" class="text-xl lg:text-2xl text-white/80 font-medium">
                             --.--.----
                         </div>
-                        <div id="clock-hebrew-date" class="text-2xl lg:text-3xl text-blue-200 font-medium">--</div>
+                        <div id="clock-hebrew-date" class="text-xl lg:text-2xl text-gold font-bold">--</div>
                     </div>
                 </div>
 
-                <!-- 2. USEFUL INFO LIST -->
+                <!-- 2. USEFUL INFO LIST (Scrolling Marquee) -->
                 <div
-                    class="info-panel rounded-3xl flex flex-col overflow-hidden relative text-center flex-1 min-h-0">
+                    class="info-panel rounded-3xl flex flex-col overflow-hidden relative text-center min-h-0">
                     <!-- Title Header -->
-                    <div class="bg-blue-900/30 p-3 lg:p-5 border-b border-white/10 flex items-center justify-center">
+                    <div class="bg-blue-900/30 p-3 lg:p-4 border-b border-white/10 flex items-center justify-center shrink-0">
                         <h2 class="text-3xl lg:text-4xl font-black text-white flex items-center gap-3">
                             <span class="text-3xl lg:text-5xl">ℹ️</span> מידע לדייר
                         </h2>
                     </div>
 
-                    <!-- List (Show all 5 rows) -->
-                    <div class="p-4 lg:p-5 overflow-hidden flex-1 min-h-0">
-                        <div id="useful-info-list" class="flex flex-col gap-3 lg:gap-4">
-                            <!-- Injected by JS -->
+                    <!-- Scrolling List -->
+                    <div class="useful-info-scroll-container flex-1 min-h-0 p-3 lg:p-4">
+                        <div id="useful-info-list" class="useful-info-scroll-track">
+                            <!-- Injected by JS (duplicated for seamless loop) -->
                         </div>
                     </div>
                 </div>
 
-                <!-- 3. SHABBAT / HOLIDAY WIDGET -->
+                <!-- 3. SHABBAT / HOLIDAY WIDGET (below Useful Info) -->
                 <div id="shabbat-widget"
-                    class="info-panel rounded-3xl p-4 lg:p-4 relative overflow-hidden bg-gradient-to-b from-slate-900 to-indigo-950/50 cursor-pointer hover:opacity-90 transition hover:shadow-lg hover:border-gold/30 text-center shrink-0"
+                    class="info-panel rounded-3xl p-4 lg:p-5 relative overflow-hidden bg-gradient-to-b from-slate-900 to-indigo-950/50 cursor-pointer hover:opacity-90 transition hover:shadow-lg hover:border-gold/30 text-center min-h-0"
                     onclick="window.open('https://www.hebcal.com/', '_blank')" title="פתח זמני שבת ב-Hebcal">
                     <!-- Shabbat Content -->
                     <div class="relative z-10">
                         <div class="flex items-center justify-center gap-3 mb-3">
-                            <span class="text-3xl lg:text-4xl">🕯️</span>
-                            <h3 id="shabbat-title" class="text-xl lg:text-3xl font-bold text-gold">זמני השבת</h3>
+                            <span class="text-4xl lg:text-5xl">🕯️</span>
+                            <h3 id="shabbat-title" class="text-2xl lg:text-3xl font-black text-gold">זמני השבת</h3>
                         </div>
-                        <div class="text-lg lg:text-2xl text-blue-200 mb-3 border-b border-white/10 pb-2 font-medium">
+                        <div class="text-xl lg:text-2xl text-blue-200 mb-3 border-b border-white/10 pb-2 font-semibold leading-snug">
                             <span id="shabbat-date-display">--.--.--</span>
                         </div>
                         <div class="grid grid-cols-2 gap-4">
-                            <div
-                                class="bg-black/30 p-2 lg:p-2 rounded-xl text-center border border-white/10 shadow-inner">
-                                <span class="block text-xl lg:text-4xl text-blue-300 mb-1">כניסה</span>
-                                <span id="shabbat-in"
-                                    class="text-xl lg:text-3xl font-black text-white tabular-nums tracking-wide">--:--</span>
+                            <div class="bg-black/30 p-3 rounded-2xl text-center border border-white/10 shadow-inner">
+                                <span class="block text-2xl lg:text-3xl text-blue-300 mb-2 font-bold">כניסה</span>
+                                <span id="shabbat-in" class="text-3xl lg:text-4xl font-black text-white tabular-nums tracking-wide">--:--</span>
                             </div>
-                            <div
-                                class="bg-black/30 p-2 lg:p-2 rounded-xl text-center border border-white/10 shadow-inner">
-                                <span class="block text-xl lg:text-4xl text-blue-300 mb-1">יציאה</span>
-                                <span id="shabbat-out"
-                                    class="text-xl lg:text-3xl font-black text-white tabular-nums tracking-wide">--:--</span>
+                            <div class="bg-black/30 p-3 rounded-2xl text-center border border-white/10 shadow-inner">
+                                <span class="block text-2xl lg:text-3xl text-blue-300 mb-2 font-bold">יציאה</span>
+                                <span id="shabbat-out" class="text-3xl lg:text-4xl font-black text-white tabular-nums tracking-wide">--:--</span>
                             </div>
                         </div>
                     </div>
@@ -329,16 +371,16 @@
 
         <!-- FOOTER: News Ticker -->
         <footer
-            class="h-16 lg:h-24 bg-dark border-t border-white/10 flex items-center relative z-30 shadow-3xl shrink-0">
+            class="h-24 lg:h-32 bg-slate-900 border-t border-white/10 flex items-center relative z-30 shadow-3xl shrink-0">
             <!-- Badge (clickable) -->
             <a href="https://www.ynet.co.il/news/category/184" target="_blank" rel="noopener noreferrer"
-                class="bg-red-600 h-full px-8 lg:px-12 flex items-center justify-center gap-3 z-20 shadow-[4px_0_10px_rgba(0,0,0,0.5)] hover:bg-red-700 transition-colors">
-                <span class="font-black text-white text-3xl lg:text-4xl tracking-wider uppercase">מבזקים</span>
-                <span class="w-3 h-3 bg-white rounded-full animate-pulse"></span>
+                class="bg-red-600 h-full px-6 lg:px-10 flex items-center justify-center gap-2 z-20 shadow-[4px_0_15px_rgba(0,0,0,0.6)] hover:bg-red-700 transition-colors">
+                <span class="font-black text-white text-3xl lg:text-5xl tracking-wider">מבזקים</span>
+                <span class="w-3 h-3 lg:w-4 lg:h-4 bg-white rounded-full animate-pulse"></span>
             </a>
 
             <!-- Ticker Content -->
-            <div class="marquee-container flex-1 h-full flex items-center bg-slate-900 text-xl lg:text-4xl">
+            <div class="marquee-container flex-1 h-full flex items-center bg-slate-900/95">
                 <div id="ticker-track" class="marquee-content flex items-center" style="direction: ltr;">
                     <!-- LTR container for transform logic -->
                     <!-- JS will duplicate content here -->
@@ -410,12 +452,7 @@
         // CONFIG
         const CITY_LAT = 31.9424; // Beer Yaakov
         const CITY_LON = 34.8391;
-        const ROTATION_TIME = 6000; // 6 seconds per slide
-
-        // Useful info list settings
-        // If all rows fit (page size >= items), show all and disable rotation.
-        const USEFUL_INFO_PAGE_SIZE = 5;
-        const USEFUL_INFO_ROTATION_TIME = 8000; // Only relevant if page size < total items
+        const ROTATION_TIME = 6000; // 6 seconds per notice slide
 
         let notices = [];
 
@@ -423,9 +460,7 @@
         let rotationTimer;
         let progressTimer;
 
-        let usefulInfoTimer;
-        let usefulInfoIndex = 0;
-
+        // Useful info items - can be moved to a separate JSON file for easier editing
         const usefulInfoItems = [
             {
                 title: 'פינוי אשפה',
@@ -445,7 +480,7 @@
             {
                 title: 'מוקד עירוני',
                 value: '106',
-                valueClass: 'font-mono font-black',
+                valueClass: 'font-mono font-black text-2xl',
                 icon: '📞'
             },
             {
@@ -493,20 +528,47 @@
         });
 
         // --- EVENT SYSTEM ---
-        // Schedule uses month-day strings (MM-DD) to keep it simple.
-        // NOTE: String comparison works because values are zero-padded.
-        const EVENTS_SCHEDULE = [
-            { id: 'hanukkah', src: 'hanukkah.js', start: '12-01', end: '12-30' }
-        ];
+        // Holiday events are now detected via Hebcal API
+        // Each holiday can have an optional JS file for custom decorations
+        const HOLIDAY_SCRIPTS = {
+            // Map Hebrew holiday names to their script files
+            // 'חנוכה': 'hanukkah.js',  // Uncomment when Hanukkah comes around
+            // 'פורים': 'purim.js',
+            // 'פסח': 'pesach.js',
+            // 'סוכות': 'sukkot.js',
+        };
 
-        function loadEventScript(eventId) {
-            // URL param is for testing, but keep it safe: only allow known event IDs.
-            const ev = EVENTS_SCHEDULE.find(e => e.id === eventId);
-            if (!ev) {
-                console.warn(`Unknown event id: ${eventId}`);
-                return;
+        // Check for holidays via Hebcal and load appropriate decorations
+        async function checkAndLoadScheduledEvents() {
+            try {
+                // Fetch today's Hebrew calendar info including holidays
+                const today = new Date();
+                const gy = today.getFullYear();
+                const gm = today.getMonth() + 1;
+                const gd = today.getDate();
+                
+                const res = await fetch(`https://www.hebcal.com/converter?cfg=json&gy=${gy}&gm=${gm}&gd=${gd}&g2h=1&lg=he`);
+                if (!res.ok) return;
+                
+                const data = await res.json();
+                
+                // Check if there are any holidays today
+                if (data.events && data.events.length > 0) {
+                    for (const event of data.events) {
+                        const holidayName = event.replace(/[\u0591-\u05C7]/g, '').trim(); // Strip niqqud
+                        
+                        // Check if we have a script for this holiday
+                        for (const [name, src] of Object.entries(HOLIDAY_SCRIPTS)) {
+                            if (holidayName.includes(name)) {
+                                loadEventScriptSrc(src, name);
+                                break;
+                            }
+                        }
+                    }
+                }
+            } catch (e) {
+                console.warn('Could not check for holidays', e);
             }
-            loadEventScriptSrc(ev.src, ev.id);
         }
 
         function loadEventScriptSrc(src, eventId) {
@@ -516,7 +578,7 @@
             if (eventId && document.querySelector(`script[data-event-id="${eventId}"]`)) return;
             if (!eventId && document.querySelector(`script[src="${src}"]`)) return;
 
-            console.log(`Loading event: ${eventId || src}`);
+            console.log(`Loading holiday event: ${eventId || src}`);
             const script = document.createElement('script');
             script.src = src;
             if (eventId) script.dataset.eventId = eventId;
@@ -524,80 +586,47 @@
             document.body.appendChild(script);
         }
 
-        function checkAndLoadScheduledEvents() {
-            const now = new Date();
-            // Format today as MM-DD
-            const month = (now.getMonth() + 1).toString().padStart(2, '0');
-            const day = now.getDate().toString().padStart(2, '0');
-            const todayStr = `${month}-${day}`;
-
-            const activeEvent = EVENTS_SCHEDULE.find(e => todayStr >= e.start && todayStr <= e.end);
-
-            if (activeEvent) {
-                loadEventScriptSrc(activeEvent.src, activeEvent.id);
+        // For testing: allow URL param to force load an event
+        function loadEventScript(eventId) {
+            const src = HOLIDAY_SCRIPTS[eventId];
+            if (src) {
+                loadEventScriptSrc(src, eventId);
+            } else {
+                console.warn(`Unknown event id: ${eventId}`);
             }
         }
 
 
-            // --- USEFUL INFO CAROUSEL (3 rows) ---
+            // --- USEFUL INFO SCROLLING MARQUEE ---
             function initUsefulInfoCarousel() {
                 const list = document.getElementById('useful-info-list');
                 if (!list) return;
 
-                // render first page
-                usefulInfoIndex = 0;
-                renderUsefulInfoPage(list);
-
-                // If everything fits (page >= items), don't rotate.
-                clearInterval(usefulInfoTimer);
-                if (USEFUL_INFO_PAGE_SIZE >= usefulInfoItems.length) return;
-
-                usefulInfoTimer = setInterval(() => {
-                    usefulInfoIndex = (usefulInfoIndex + USEFUL_INFO_PAGE_SIZE) % usefulInfoItems.length;
-                    renderUsefulInfoPage(list, true);
-                }, USEFUL_INFO_ROTATION_TIME);
-            }
-
-            function renderUsefulInfoPage(listEl, animate = false) {
-                const page = usefulInfoItems.slice(usefulInfoIndex, usefulInfoIndex + USEFUL_INFO_PAGE_SIZE);
-                // Wrap-around if needed
-                if (page.length < USEFUL_INFO_PAGE_SIZE) {
-                    page.push(...usefulInfoItems.slice(0, USEFUL_INFO_PAGE_SIZE - page.length));
-                }
-
-                const html = page.map(item => {
+                // Build items HTML
+                const buildItemsHtml = () => usefulInfoItems.map(item => {
                     const valueClass = item.valueClass ? item.valueClass : '';
                     return `
-                    <div class="flex items-center justify-between p-2 lg:p-3 rounded-lg bg-white/5 border border-white/5 hover:bg-white/10 transition text-right">
-                        <div>
-                            <div class="font-black text-lg lg:text-2xl mb-0.5">${item.title}</div>
-                            <div class="text-base lg:text-xl text-blue-200 font-medium ${valueClass}">${item.value}</div>
+                    <div class="useful-info-item flex items-center justify-between p-3 lg:p-4 rounded-2xl bg-white/5 border border-white/5 hover:bg-white/10 transition text-right mb-4">
+                        <div class="flex-1 min-w-0">
+                            <div class="font-black text-xl lg:text-2xl mb-1">${item.title}</div>
+                            <div class="text-lg lg:text-xl text-blue-200 font-semibold ${valueClass}">${item.value}</div>
                         </div>
-                        <div class="text-3xl lg:text-4xl opacity-90">${item.icon}</div>
+                        <div class="text-4xl lg:text-5xl opacity-90 mr-3">${item.icon}</div>
                     </div>
                 `;
                 }).join('');
 
-                if (!animate) {
-                    listEl.innerHTML = html;
-                    return;
-                }
+                // Duplicate content for seamless loop
+                const itemsHtml = buildItemsHtml();
+                list.innerHTML = itemsHtml + itemsHtml;
 
-                // Animate swap
-                listEl.classList.add('ui-fade-exit');
+                // Calculate scroll duration based on content height
+                // Slower = more readable
+                const scrollSpeed = 30; // pixels per second
                 requestAnimationFrame(() => {
-                    listEl.classList.add('ui-fade-exit-active');
-                    setTimeout(() => {
-                        listEl.classList.remove('ui-fade-exit', 'ui-fade-exit-active');
-                        listEl.innerHTML = html;
-                        listEl.classList.add('ui-fade-enter');
-                        requestAnimationFrame(() => {
-                            listEl.classList.add('ui-fade-enter-active');
-                            setTimeout(() => {
-                                listEl.classList.remove('ui-fade-enter', 'ui-fade-enter-active');
-                            }, 360);
-                        });
-                    }, 260);
+                    const singleSetHeight = list.scrollHeight / 2;
+                    const duration = singleSetHeight / scrollSpeed;
+                    list.style.setProperty('--scroll-duration', `${duration}s`);
                 });
             }
 
@@ -607,52 +636,67 @@
                 document.getElementById('clock-time').textContent = now.toLocaleTimeString('he-IL', { hour: '2-digit', minute: '2-digit' });
                 const weekday = now.toLocaleDateString('he-IL', { weekday: 'long' });
 
-                // Weekday icons (0=Sunday .. 6=Saturday)
-                const weekdayIcons = ['☕', '💼', '✨', '🐪', '🍻', '🍷', '🛋️'];
-                const icon = weekdayIcons[now.getDay()] || '';
-
                 const dayTextEl = document.getElementById('clock-day-text');
-                const dayIconEl = document.getElementById('clock-day-icon');
-                const dayContainerEl = document.getElementById('clock-day');
-
-                if (dayTextEl && dayIconEl) {
+                if (dayTextEl) {
                     dayTextEl.textContent = weekday;
-                    dayIconEl.textContent = icon;
-                } else if (dayContainerEl) {
-                    // Fallback if markup changes
-                    dayContainerEl.textContent = icon ? `${icon} ${weekday}` : weekday;
                 }
-                document.getElementById('clock-date').textContent = now.toLocaleDateString('he-IL', { day: 'numeric', month: 'numeric', year: 'numeric' });
+
+                // Format date as DD.MM.YYYY
+                const dateStr = now.toLocaleDateString('he-IL', { day: '2-digit', month: '2-digit', year: 'numeric' });
+                document.getElementById('clock-date').textContent = dateStr;
             }
 
-            // --- WEATHER ---
+            // --- WEATHER (3-Day Forecast) ---
             async function fetchWeather() {
                 try {
-                    // Simplified API call: Current weather only
+                    // 3-day forecast API call
                     const url = `https://api.open-meteo.com/v1/forecast` +
                         `?latitude=${CITY_LAT}&longitude=${CITY_LON}` +
-                        `&current_weather=true` +
+                        `&daily=temperature_2m_max,temperature_2m_min,weathercode` +
+                        `&forecast_days=3` +
                         `&timezone=Asia%2FJerusalem`;
 
                     const res = await fetch(url);
                     const data = await res.json();
 
-                    const temp = Math.round(data.current_weather.temperature);
-                    const code = data.current_weather.weathercode;
-                    const isDay = data.current_weather.is_day; // 1 or 0 directly works
+                    const daily = data.daily;
+                    const hebrewDays = ['ראשון', 'שני', 'שלישי', 'רביעי', 'חמישי', 'שישי', 'שבת'];
+                    const today = new Date();
 
-                    document.getElementById('weather-temp').textContent = `${temp}°`;
-                    document.getElementById('weather-icon').textContent = getWeatherIcon(code, isDay);
+                    for (let i = 0; i < 3; i++) {
+                        const dayEl = document.getElementById(`weather-day-${i}`);
+                        if (!dayEl) continue;
 
-                    const descEl = document.getElementById('weather-desc');
-                    if (descEl) {
-                        // Using local mapping based only on WMO code
-                        descEl.textContent = getWeatherHebrewSummary({ code, isDay });
+                        const high = Math.round(daily.temperature_2m_max[i]);
+                        const low = Math.round(daily.temperature_2m_min[i]);
+                        const code = daily.weathercode[i];
+
+                        // Day name
+                        const dayNameEl = dayEl.querySelector('span:first-child');
+                        if (dayNameEl) {
+                            if (i === 0) {
+                                dayNameEl.textContent = 'היום';
+                            } else if (i === 1) {
+                                dayNameEl.textContent = 'מחר';
+                            } else {
+                                const futureDate = new Date(today);
+                                futureDate.setDate(today.getDate() + i);
+                                dayNameEl.textContent = hebrewDays[futureDate.getDay()];
+                            }
+                        }
+
+                        // Icon (use daytime icon for forecast)
+                        const iconEl = dayEl.querySelector('.weather-icon');
+                        if (iconEl) iconEl.textContent = getWeatherIcon(code, true);
+
+                        // Temps
+                        const highEl = dayEl.querySelector('.weather-high');
+                        const lowEl = dayEl.querySelector('.weather-low');
+                        if (highEl) highEl.textContent = `${high}°`;
+                        if (lowEl) lowEl.textContent = `${low}°`;
                     }
                 } catch (e) {
                     console.error('Weather error', e);
-                    const descEl = document.getElementById('weather-desc');
-                    if (descEl) descEl.textContent = 'מזג אוויר';
                 }
             }
 
@@ -797,16 +841,16 @@
                     const data = await res.json();
 
                     if (data.status === 'ok' && data.items.length > 0) {
-                        // Build items with clickable links
+                        // Build items with clickable links - improved readability
                         const items = data.items.map(i => {
                             const time = new Date(i.pubDate).toLocaleTimeString('he-IL', { hour: '2-digit', minute: '2-digit' });
                             const title = i.title.replace(/"/g, '');
                             const link = i.link || '#';
                             return `
-                            <a href="${link}" target="_blank" class="inline-flex items-center gap-3 px-8 flex-row-reverse hover:bg-white/10 transition rounded-lg py-1" dir="rtl" title="לחץ לקריאה">
-                                <span class="text-accent font-black tabular-nums text-3xl">${time}</span>
-                                <span class="text-white font-semibold text-3xl hover:text-accent transition">${title}</span>
-                                <span class="text-white/20">|</span>
+                            <a href="${link}" target="_blank" class="inline-flex items-center gap-4 px-8 lg:px-12 flex-row-reverse hover:bg-white/5 transition rounded-2xl py-3" dir="rtl" title="לחץ לקריאה">
+                                <span class="news-time text-red-300 font-black tabular-nums">${time}</span>
+                                <span class="news-title text-white font-semibold hover:text-accent transition">${title}</span>
+                                <span class="text-white/30 text-2xl mx-2">●</span>
                             </a>
                         `;
                         }).join('');
@@ -889,8 +933,8 @@
                     track.style.setProperty('--ticker-start', `${screenWidth}px`);
                     track.style.setProperty('--ticker-distance', `${scrollDistance}px`);
 
-                    // Duration based on total travel distance
-                    const pxPerSec = 80;
+                    // Duration based on total travel distance (slower for readability)
+                    const pxPerSec = 50; // Reduced from 80 for better readability
                     const totalTravel = screenWidth + scrollDistance;
                     const duration = totalTravel / pxPerSec;
                     track.style.setProperty('--ticker-duration', `${duration}s`);
