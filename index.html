@@ -158,6 +158,7 @@
             0% {
                 transform: translateY(0);
             }
+
             100% {
                 transform: translateY(-50%);
             }
@@ -191,7 +192,8 @@
 
             <!-- RIGHT: Weather Widget (3-Day Forecast) -->
             <div class="order-2 lg:order-1 flex items-center justify-start w-full lg:w-auto pt-2 lg:pt-0">
-                <div id="weather-widget" class="flex items-center gap-2 lg:gap-4 bg-white/5 px-4 lg:px-6 py-2 lg:py-3 rounded-2xl border border-white/10 cursor-pointer hover:bg-white/10 transition"
+                <div id="weather-widget"
+                    class="flex items-center gap-2 lg:gap-4 bg-white/5 px-4 lg:px-6 py-2 lg:py-3 rounded-2xl border border-white/10 cursor-pointer hover:bg-white/10 transition"
                     onclick="window.open('https://www.accuweather.com/he/il/beer-yaaqov/1281409/weather-forecast/1281409', '_blank')"
                     title="פתח תחזית ב-AccuWeather">
                     <!-- 3-day forecast injected by JS -->
@@ -277,10 +279,10 @@
                 </div>
 
                 <!-- 2. USEFUL INFO LIST (Scrolling Marquee) -->
-                <div
-                    class="info-panel rounded-3xl flex flex-col overflow-hidden relative text-center min-h-0">
+                <div class="info-panel rounded-3xl flex flex-col overflow-hidden relative text-center min-h-0">
                     <!-- Title Header -->
-                    <div class="bg-blue-900/30 p-3 lg:p-4 border-b border-white/10 flex items-center justify-center shrink-0">
+                    <div
+                        class="bg-blue-900/30 p-3 lg:p-4 border-b border-white/10 flex items-center justify-center shrink-0">
                         <h2 class="text-3xl lg:text-4xl font-black text-white flex items-center gap-3">
                             <span class="text-3xl lg:text-5xl">ℹ️</span> מידע לדייר
                         </h2>
@@ -304,17 +306,20 @@
                             <span class="text-4xl lg:text-5xl">🕯️</span>
                             <h3 id="shabbat-title" class="text-2xl lg:text-3xl font-black text-gold">זמני השבת</h3>
                         </div>
-                        <div class="text-xl lg:text-2xl text-blue-200 mb-3 border-b border-white/10 pb-2 font-semibold leading-snug">
+                        <div
+                            class="text-xl lg:text-2xl text-blue-200 mb-3 border-b border-white/10 pb-2 font-semibold leading-snug">
                             <span id="shabbat-date-display">--.--.--</span>
                         </div>
                         <div class="grid grid-cols-2 gap-4">
                             <div class="bg-black/30 p-3 rounded-2xl text-center border border-white/10 shadow-inner">
                                 <span class="block text-2xl lg:text-3xl text-blue-300 mb-2 font-bold">כניסה</span>
-                                <span id="shabbat-in" class="text-3xl lg:text-4xl font-black text-white tabular-nums tracking-wide">--:--</span>
+                                <span id="shabbat-in"
+                                    class="text-3xl lg:text-4xl font-black text-white tabular-nums tracking-wide">--:--</span>
                             </div>
                             <div class="bg-black/30 p-3 rounded-2xl text-center border border-white/10 shadow-inner">
                                 <span class="block text-2xl lg:text-3xl text-blue-300 mb-2 font-bold">יציאה</span>
-                                <span id="shabbat-out" class="text-3xl lg:text-4xl font-black text-white tabular-nums tracking-wide">--:--</span>
+                                <span id="shabbat-out"
+                                    class="text-3xl lg:text-4xl font-black text-white tabular-nums tracking-wide">--:--</span>
                             </div>
                         </div>
                     </div>
@@ -546,17 +551,17 @@
                 const gy = today.getFullYear();
                 const gm = today.getMonth() + 1;
                 const gd = today.getDate();
-                
+
                 const res = await fetch(`https://www.hebcal.com/converter?cfg=json&gy=${gy}&gm=${gm}&gd=${gd}&g2h=1&lg=he`);
                 if (!res.ok) return;
-                
+
                 const data = await res.json();
-                
+
                 // Check if there are any holidays today
                 if (data.events && data.events.length > 0) {
                     for (const event of data.events) {
                         const holidayName = event.replace(/[\u0591-\u05C7]/g, '').trim(); // Strip niqqud
-                        
+
                         // Check if we have a script for this holiday
                         for (const [name, src] of Object.entries(HOLIDAY_SCRIPTS)) {
                             if (holidayName.includes(name)) {
@@ -597,15 +602,15 @@
         }
 
 
-            // --- USEFUL INFO SCROLLING MARQUEE ---
-            function initUsefulInfoCarousel() {
-                const list = document.getElementById('useful-info-list');
-                if (!list) return;
+        // --- USEFUL INFO SCROLLING MARQUEE ---
+        function initUsefulInfoCarousel() {
+            const list = document.getElementById('useful-info-list');
+            if (!list) return;
 
-                // Build items HTML
-                const buildItemsHtml = () => usefulInfoItems.map(item => {
-                    const valueClass = item.valueClass ? item.valueClass : '';
-                    return `
+            // Build items HTML
+            const buildItemsHtml = () => usefulInfoItems.map(item => {
+                const valueClass = item.valueClass ? item.valueClass : '';
+                return `
                     <div class="useful-info-item flex items-center justify-between p-3 lg:p-4 rounded-2xl bg-white/5 border border-white/5 hover:bg-white/10 transition text-right mb-4">
                         <div class="flex-1 min-w-0">
                             <div class="font-black text-xl lg:text-2xl mb-1">${item.title}</div>
@@ -614,405 +619,416 @@
                         <div class="text-4xl lg:text-5xl opacity-90 mr-3">${item.icon}</div>
                     </div>
                 `;
-                }).join('');
+            }).join('');
 
-                // Duplicate content for seamless loop
-                const itemsHtml = buildItemsHtml();
-                list.innerHTML = itemsHtml + itemsHtml;
+            // Duplicate content for seamless loop
+            const itemsHtml = buildItemsHtml();
+            list.innerHTML = itemsHtml + itemsHtml;
 
-                // Calculate scroll duration based on content height
-                // Slower = more readable
-                const scrollSpeed = 30; // pixels per second
-                requestAnimationFrame(() => {
-                    const singleSetHeight = list.scrollHeight / 2;
-                    const duration = singleSetHeight / scrollSpeed;
-                    list.style.setProperty('--scroll-duration', `${duration}s`);
-                });
+            // Calculate scroll duration based on content height
+            // Slower = more readable
+            const scrollSpeed = 30; // pixels per second
+            requestAnimationFrame(() => {
+                const singleSetHeight = list.scrollHeight / 2;
+                const duration = singleSetHeight / scrollSpeed;
+                list.style.setProperty('--scroll-duration', `${duration}s`);
+            });
+        }
+
+        // --- CLOCK & DATE ---
+        function updateTime() {
+            const now = new Date();
+            document.getElementById('clock-time').textContent = now.toLocaleTimeString('he-IL', { hour: '2-digit', minute: '2-digit' });
+            const weekday = now.toLocaleDateString('he-IL', { weekday: 'long' });
+
+            const dayTextEl = document.getElementById('clock-day-text');
+            if (dayTextEl) {
+                dayTextEl.textContent = weekday;
             }
 
-            // --- CLOCK & DATE ---
-            function updateTime() {
-                const now = new Date();
-                document.getElementById('clock-time').textContent = now.toLocaleTimeString('he-IL', { hour: '2-digit', minute: '2-digit' });
-                const weekday = now.toLocaleDateString('he-IL', { weekday: 'long' });
+            // Format date as DD.MM.YYYY
+            const dateStr = now.toLocaleDateString('he-IL', { day: '2-digit', month: '2-digit', year: 'numeric' });
+            document.getElementById('clock-date').textContent = dateStr;
+        }
 
-                const dayTextEl = document.getElementById('clock-day-text');
-                if (dayTextEl) {
-                    dayTextEl.textContent = weekday;
-                }
+        // --- WEATHER (3-Day Forecast) ---
+        async function fetchWeather() {
+            try {
+                // 3-day forecast API call
+                const url = `https://api.open-meteo.com/v1/forecast` +
+                    `?latitude=${CITY_LAT}&longitude=${CITY_LON}` +
+                    `&daily=temperature_2m_max,temperature_2m_min,weathercode` +
+                    `&forecast_days=3` +
+                    `&timezone=Asia%2FJerusalem`;
 
-                // Format date as DD.MM.YYYY
-                const dateStr = now.toLocaleDateString('he-IL', { day: '2-digit', month: '2-digit', year: 'numeric' });
-                document.getElementById('clock-date').textContent = dateStr;
-            }
+                const res = await fetch(url);
+                const data = await res.json();
 
-            // --- WEATHER (3-Day Forecast) ---
-            async function fetchWeather() {
-                try {
-                    // 3-day forecast API call
-                    const url = `https://api.open-meteo.com/v1/forecast` +
-                        `?latitude=${CITY_LAT}&longitude=${CITY_LON}` +
-                        `&daily=temperature_2m_max,temperature_2m_min,weathercode` +
-                        `&forecast_days=3` +
-                        `&timezone=Asia%2FJerusalem`;
+                const daily = data.daily;
+                const hebrewDays = ['ראשון', 'שני', 'שלישי', 'רביעי', 'חמישי', 'שישי', 'שבת'];
+                const today = new Date();
 
-                    const res = await fetch(url);
-                    const data = await res.json();
+                for (let i = 0; i < 3; i++) {
+                    const dayEl = document.getElementById(`weather-day-${i}`);
+                    if (!dayEl) continue;
 
-                    const daily = data.daily;
-                    const hebrewDays = ['ראשון', 'שני', 'שלישי', 'רביעי', 'חמישי', 'שישי', 'שבת'];
-                    const today = new Date();
+                    const high = Math.round(daily.temperature_2m_max[i]);
+                    const low = Math.round(daily.temperature_2m_min[i]);
+                    const code = daily.weathercode[i];
 
-                    for (let i = 0; i < 3; i++) {
-                        const dayEl = document.getElementById(`weather-day-${i}`);
-                        if (!dayEl) continue;
-
-                        const high = Math.round(daily.temperature_2m_max[i]);
-                        const low = Math.round(daily.temperature_2m_min[i]);
-                        const code = daily.weathercode[i];
-
-                        // Day name
-                        const dayNameEl = dayEl.querySelector('span:first-child');
-                        if (dayNameEl) {
-                            if (i === 0) {
-                                dayNameEl.textContent = 'היום';
-                            } else if (i === 1) {
-                                dayNameEl.textContent = 'מחר';
-                            } else {
-                                const futureDate = new Date(today);
-                                futureDate.setDate(today.getDate() + i);
-                                dayNameEl.textContent = hebrewDays[futureDate.getDay()];
-                            }
+                    // Day name
+                    const dayNameEl = dayEl.querySelector('span:first-child');
+                    if (dayNameEl) {
+                        if (i === 0) {
+                            dayNameEl.textContent = 'היום';
+                        } else if (i === 1) {
+                            dayNameEl.textContent = 'מחר';
+                        } else {
+                            const futureDate = new Date(today);
+                            futureDate.setDate(today.getDate() + i);
+                            dayNameEl.textContent = hebrewDays[futureDate.getDay()];
                         }
-
-                        // Icon (use daytime icon for forecast)
-                        const iconEl = dayEl.querySelector('.weather-icon');
-                        if (iconEl) iconEl.textContent = getWeatherIcon(code, true);
-
-                        // Temps
-                        const highEl = dayEl.querySelector('.weather-high');
-                        const lowEl = dayEl.querySelector('.weather-low');
-                        if (highEl) highEl.textContent = `${high}°`;
-                        if (lowEl) lowEl.textContent = `${low}°`;
                     }
-                } catch (e) {
-                    console.error('Weather error', e);
+
+                    // Icon (use daytime icon for forecast)
+                    const iconEl = dayEl.querySelector('.weather-icon');
+                    if (iconEl) iconEl.textContent = getWeatherIcon(code, true);
+
+                    // Temps
+                    const highEl = dayEl.querySelector('.weather-high');
+                    const lowEl = dayEl.querySelector('.weather-low');
+                    if (highEl) highEl.textContent = `${high}°`;
+                    if (lowEl) lowEl.textContent = `${low}°`;
                 }
+            } catch (e) {
+                console.error('Weather error', e);
             }
+        }
 
-            function getWeatherHebrewSummary({ code, cloud, pop, precip, isDay }) {
-                // Precipitation first (closest to AccuWeather-style phrasing)
-                const hasPrecip = (typeof precip === 'number' && precip > 0.0) || (typeof pop === 'number' && pop >= 50);
-                if (hasPrecip) {
-                    if ([80, 81, 82].includes(code)) return 'ממטרים קצרים';
-                    if ([61, 63, 65, 66, 67].includes(code)) return 'גשום';
-                    if ([51, 53, 55].includes(code)) return 'טפטוף';
-                    if ([95, 96, 99].includes(code)) return 'סופות רעמים';
-                    return 'ממטרים קצרים';
-                }
-
-                // Cloud-based sky description
-                if (typeof cloud === 'number') {
-                    if (cloud >= 85) return 'מעונן';
-                    if (cloud >= 45) return 'מעונן חלקית';
-                    if (cloud >= 20) return isDay ? 'שמשי בעיקר' : 'בהיר בעיקר';
-                    return isDay ? 'שמשי' : 'בהיר';
-                }
-
-                // Fallback to weathercode only
-                if (code === 0) return isDay ? 'שמשי' : 'בהיר';
-                if (code === 1) return isDay ? 'שמשי בעיקר' : 'בהיר בעיקר';
-                if (code === 2) return 'מעונן חלקית';
-                if (code === 3) return 'מעונן';
-                if ([45, 48].includes(code)) return 'ערפילי';
-                if ([51, 53, 55].includes(code)) return 'טפטוף';
-                if ([61, 63, 65].includes(code)) return 'גשום';
+        function getWeatherHebrewSummary({ code, cloud, pop, precip, isDay }) {
+            // Precipitation first (closest to AccuWeather-style phrasing)
+            const hasPrecip = (typeof precip === 'number' && precip > 0.0) || (typeof pop === 'number' && pop >= 50);
+            if (hasPrecip) {
                 if ([80, 81, 82].includes(code)) return 'ממטרים קצרים';
+                if ([61, 63, 65, 66, 67].includes(code)) return 'גשום';
+                if ([51, 53, 55].includes(code)) return 'טפטוף';
                 if ([95, 96, 99].includes(code)) return 'סופות רעמים';
-                return 'מזג אוויר';
+                return 'ממטרים קצרים';
             }
 
-            function getWeatherIcon(code, isDay) {
-                const icons = {
-                    0: isDay ? '☀️' : '🌙',
-                    1: isDay ? '🌤️' : '🌙',
-                    2: isDay ? '⛅' : '☁️',
-                    3: '☁️',
-                    45: '🌫️', 48: '🌫️',
-                    51: '🌧️', 53: '🌧️', 55: '🌧️',
-                    61: '🌧️', 63: '🌧️', 65: '🌧️',
-                    80: '🌦️', 81: '🌦️', 82: '🌦️',
-                    95: '⛈️', 96: '⛈️', 99: '⛈️'
-                };
-                return icons[code] || (isDay ? '☀️' : '🌙');
+            // Cloud-based sky description
+            if (typeof cloud === 'number') {
+                if (cloud >= 85) return 'מעונן';
+                if (cloud >= 45) return 'מעונן חלקית';
+                if (cloud >= 20) return isDay ? 'שמשי בעיקר' : 'בהיר בעיקר';
+                return isDay ? 'שמשי' : 'בהיר';
             }
 
-            // --- SHABBAT ---
-            async function fetchShabbat() {
-                try {
-                    const res = await fetch(`https://www.hebcal.com/shabbat?cfg=json&geo=pos&latitude=${CITY_LAT}&longitude=${CITY_LON}&tzid=Asia/Jerusalem&M=on&lg=he`);
-                    const data = await res.json();
+            // Fallback to weathercode only
+            if (code === 0) return isDay ? 'שמשי' : 'בהיר';
+            if (code === 1) return isDay ? 'שמשי בעיקר' : 'בהיר בעיקר';
+            if (code === 2) return 'מעונן חלקית';
+            if (code === 3) return 'מעונן';
+            if ([45, 48].includes(code)) return 'ערפילי';
+            if ([51, 53, 55].includes(code)) return 'טפטוף';
+            if ([61, 63, 65].includes(code)) return 'גשום';
+            if ([80, 81, 82].includes(code)) return 'ממטרים קצרים';
+            if ([95, 96, 99].includes(code)) return 'סופות רעמים';
+            return 'מזג אוויר';
+        }
 
-                    // Parse Items
-                    let parsha = '', candle = '--:--', havdalah = '--:--';
-                    let candleDate = null;
+        function getWeatherIcon(code, isDay) {
+            const icons = {
+                0: isDay ? '☀️' : '🌙',
+                1: isDay ? '🌤️' : '🌙',
+                2: isDay ? '⛅' : '☁️',
+                3: '☁️',
+                45: '🌫️', 48: '🌫️',
+                51: '🌧️', 53: '🌧️', 55: '🌧️',
+                61: '🌧️', 63: '🌧️', 65: '🌧️',
+                80: '🌦️', 81: '🌦️', 82: '🌦️',
+                95: '⛈️', 96: '⛈️', 99: '⛈️'
+            };
+            return icons[code] || (isDay ? '☀️' : '🌙');
+        }
 
-                    data.items.forEach(item => {
-                        if (item.category === 'parashat') parsha = item.hebrew;
-                        if (item.category === 'candles') {
-                            candleDate = new Date(item.date);
-                            candle = candleDate.toLocaleTimeString('he-IL', { hour: '2-digit', minute: '2-digit' });
-                        }
-                        if (item.category === 'havdalah') {
-                            havdalah = new Date(item.date).toLocaleTimeString('he-IL', { hour: '2-digit', minute: '2-digit' });
-                        }
-                    });
+        // --- SHABBAT ---
+        async function fetchShabbat() {
+            try {
+                const res = await fetch(`https://www.hebcal.com/shabbat?cfg=json&geo=pos&latitude=${CITY_LAT}&longitude=${CITY_LON}&tzid=Asia/Jerusalem&M=on&lg=he`);
+                const data = await res.json();
 
-                    document.getElementById('shabbat-in').textContent = candle;
-                    document.getElementById('shabbat-out').textContent = havdalah;
+                // Parse Items
+                let parsha = '', candle = '--:--', havdalah = '--:--';
+                let candleDate = null;
 
-                    // Title: "זמני השבת - פרשת ..."
-                    const shabbatTitleEl = document.getElementById('shabbat-title');
-                    const cleanParsha = stripHebrewNiqqud(parsha || '').trim();
-                    if (shabbatTitleEl) {
-                        shabbatTitleEl.textContent = cleanParsha ? `זמני השבת - ${cleanParsha}` : 'זמני השבת';
+                data.items.forEach(item => {
+                    if (item.category === 'parashat') parsha = item.hebrew;
+                    if (item.category === 'candles') {
+                        candleDate = new Date(item.date);
+                        candle = candleDate.toLocaleTimeString('he-IL', { hour: '2-digit', minute: '2-digit' });
                     }
-
-                    // Date line should be: "יום שישי, 12 בדצמבר 2025 • כ"ב ... תשפ"ו"
-                    // Use the candle lighting date (Friday) as reference.
-                    const d = candleDate || new Date();
-                    const gy = d.getFullYear();
-                    const gm = d.getMonth() + 1;
-                    const gd = d.getDate();
-
-                    // Fetch full Converter data
-                    const dateRes = await fetch(`https://www.hebcal.com/converter?cfg=json&gy=${gy}&gm=${gm}&gd=${gd}&g2h=1&lg=he`);
-                    if (dateRes.ok) {
-                        const dateData = await dateRes.json();
-                        const hebrewDate = stripHebrewNiqqud(dateData.hebrew || '').trim();
-
-                        // Format Gregorian Date: "יום שישי, 12 בדצמבר 2025"
-                        const weekday = d.toLocaleDateString('he-IL', { weekday: 'long' });
-                        const weekdayLabel = weekday.startsWith('יום') ? weekday : `יום ${weekday}`;
-                        const gregDate = `${weekdayLabel}, ${d.toLocaleDateString('he-IL', { day: 'numeric', month: 'long', year: 'numeric' })}`;
-
-                        const fullString = hebrewDate ? `${gregDate} • ${hebrewDate}` : gregDate;
-                        document.getElementById('shabbat-date-display').textContent = fullString;
-                    } else {
-                        // Fallback
-                        const weekday = d.toLocaleDateString('he-IL', { weekday: 'long' });
-                        const weekdayLabel = weekday.startsWith('יום') ? weekday : `יום ${weekday}`;
-                        const gregDate = `${weekdayLabel}, ${d.toLocaleDateString('he-IL', { day: 'numeric', month: 'long', year: 'numeric' })}`;
-                        document.getElementById('shabbat-date-display').textContent = gregDate;
+                    if (item.category === 'havdalah') {
+                        havdalah = new Date(item.date).toLocaleTimeString('he-IL', { hour: '2-digit', minute: '2-digit' });
                     }
+                });
 
-                } catch (e) { console.error('Shabbat API error', e); }
-            }
+                document.getElementById('shabbat-in').textContent = candle;
+                document.getElementById('shabbat-out').textContent = havdalah;
 
-            function stripHebrewNiqqud(text) {
-                return (text || '').replace(/[\u0591-\u05C7]/g, '');
-            }
-
-            async function updateHebrewDateToday() {
-                const el = document.getElementById('clock-hebrew-date');
-                if (!el) return;
-                try {
-                    const today = new Date();
-                    const gy = today.getFullYear();
-                    const gm = today.getMonth() + 1;
-                    const gd = today.getDate();
-                    const res = await fetch(`https://www.hebcal.com/converter?cfg=json&gy=${gy}&gm=${gm}&gd=${gd}&g2h=1&lg=he`);
-                    if (!res.ok) throw new Error('HTTP ' + res.status);
-                    const data = await res.json();
-                    // Example: "כ״ב כִּסְלֵו תשפ״ו"
-                    el.textContent = stripHebrewNiqqud(data.hebrew || '').trim() || '--';
-                } catch (e) {
-                    console.warn('Hebrew date fetch failed', e);
-                    el.textContent = '--';
+                // Title: "זמני השבת - פרשת ..."
+                const shabbatTitleEl = document.getElementById('shabbat-title');
+                const cleanParsha = stripHebrewNiqqud(parsha || '').trim();
+                if (shabbatTitleEl) {
+                    shabbatTitleEl.textContent = cleanParsha ? `זמני השבת - ${cleanParsha}` : 'זמני השבת';
                 }
+
+                // Date line should be: "יום שישי, 12 בדצמבר 2025 • כ"ב ... תשפ"ו"
+                // Use the candle lighting date (Friday) as reference.
+                const d = candleDate || new Date();
+                const gy = d.getFullYear();
+                const gm = d.getMonth() + 1;
+                const gd = d.getDate();
+
+                // Fetch full Converter data
+                const dateRes = await fetch(`https://www.hebcal.com/converter?cfg=json&gy=${gy}&gm=${gm}&gd=${gd}&g2h=1&lg=he`);
+                if (dateRes.ok) {
+                    const dateData = await dateRes.json();
+                    const hebrewDate = stripHebrewNiqqud(dateData.hebrew || '').trim();
+
+                    // Format Gregorian Date: "יום שישי, 12 בדצמבר 2025"
+                    const weekday = d.toLocaleDateString('he-IL', { weekday: 'long' });
+                    const weekdayLabel = weekday.startsWith('יום') ? weekday : `יום ${weekday}`;
+                    const gregDate = `${weekdayLabel}, ${d.toLocaleDateString('he-IL', { day: 'numeric', month: 'long', year: 'numeric' })}`;
+
+                    const fullString = hebrewDate ? `${gregDate} • ${hebrewDate}` : gregDate;
+                    document.getElementById('shabbat-date-display').textContent = fullString;
+                } else {
+                    // Fallback
+                    const weekday = d.toLocaleDateString('he-IL', { weekday: 'long' });
+                    const weekdayLabel = weekday.startsWith('יום') ? weekday : `יום ${weekday}`;
+                    const gregDate = `${weekdayLabel}, ${d.toLocaleDateString('he-IL', { day: 'numeric', month: 'long', year: 'numeric' })}`;
+                    document.getElementById('shabbat-date-display').textContent = gregDate;
+                }
+
+            } catch (e) { console.error('Shabbat API error', e); }
+        }
+
+        function stripHebrewNiqqud(text) {
+            return (text || '').replace(/[\u0591-\u05C7]/g, '');
+        }
+
+        async function updateHebrewDateToday() {
+            const el = document.getElementById('clock-hebrew-date');
+            if (!el) return;
+            try {
+                const today = new Date();
+                const gy = today.getFullYear();
+                const gm = today.getMonth() + 1;
+                const gd = today.getDate();
+                const res = await fetch(`https://www.hebcal.com/converter?cfg=json&gy=${gy}&gm=${gm}&gd=${gd}&g2h=1&lg=he`);
+                if (!res.ok) throw new Error('HTTP ' + res.status);
+                const data = await res.json();
+                // Example: "כ״ב כִּסְלֵו תשפ״ו"
+                el.textContent = stripHebrewNiqqud(data.hebrew || '').trim() || '--';
+            } catch (e) {
+                console.warn('Hebrew date fetch failed', e);
+                el.textContent = '--';
             }
+        }
 
-            // --- NEWS TICKER ---
-            async function fetchNews() {
-                const track = document.getElementById('ticker-track');
-                try {
-                    // Using Ynet RSS via RSS2JSON proxy
-                    const res = await fetch('https://api.rss2json.com/v1/api.json?rss_url=http://www.ynet.co.il/Integration/StoryRss1854.xml');
-                    const data = await res.json();
+        // --- NEWS TICKER ---
+        async function fetchNews() {
+            const track = document.getElementById('ticker-track');
+            try {
+                // Using Ynet RSS via RSS2JSON proxy
+                const res = await fetch('https://api.rss2json.com/v1/api.json?rss_url=http://www.ynet.co.il/Integration/StoryRss1854.xml');
+                const data = await res.json();
 
-                    if (data.status === 'ok' && data.items.length > 0) {
-                        // Build items with clickable links - improved readability
-                        const items = data.items.map(i => {
-                            const time = new Date(i.pubDate).toLocaleTimeString('he-IL', { hour: '2-digit', minute: '2-digit' });
-                            const title = i.title.replace(/"/g, '');
-                            const link = i.link || '#';
-                            return `
+                if (data.status === 'ok' && data.items.length > 0) {
+                    // Build items with clickable links - improved readability
+                    const items = data.items.map(i => {
+                        const time = new Date(i.pubDate).toLocaleTimeString('he-IL', { hour: '2-digit', minute: '2-digit' });
+                        const title = i.title.replace(/"/g, '');
+                        const link = i.link || '#';
+                        return `
                             <a href="${link}" target="_blank" class="inline-flex items-center gap-4 px-8 lg:px-12 flex-row-reverse hover:bg-white/5 transition rounded-2xl py-3" dir="rtl" title="לחץ לקריאה">
                                 <span class="news-time text-red-300 font-black tabular-nums">${time}</span>
                                 <span class="news-title text-white font-semibold hover:text-accent transition">${title}</span>
                                 <span class="text-white/30 text-2xl mx-2">●</span>
                             </a>
                         `;
-                        }).join('');
+                    }).join('');
 
-                        // Insert ONE copy only.
-                        track.innerHTML = items;
+                    // Insert ONE copy only.
+                    track.innerHTML = items;
 
-                        // SAVE FRESH CONTENT for the setup function
-                        window.tickerOriginalContent = Array.from(track.children).map(c => c.cloneNode(true));
-
-                        setupTickerAnimation(track);
-                    }
-                } catch (e) {
-                    console.log('News Error, using fallback');
-                    const fallback = `<span class="px-8 text-xl">ברוכים הבאים לאלונים 8 • נשמח לעמוד לשירותכם • יום נעים</span>`;
-                    track.innerHTML = fallback;
-
-                    // SAVE FALLBACK too
+                    // SAVE FRESH CONTENT for the setup function
                     window.tickerOriginalContent = Array.from(track.children).map(c => c.cloneNode(true));
 
                     setupTickerAnimation(track);
                 }
+            } catch (e) {
+                console.log('News Error, using fallback');
+                const fallback = `<span class="px-8 text-xl">ברוכים הבאים לאלונים 8 • נשמח לעמוד לשירותכם • יום נעים</span>`;
+                track.innerHTML = fallback;
+
+                // SAVE FALLBACK too
+                window.tickerOriginalContent = Array.from(track.children).map(c => c.cloneNode(true));
+
+                setupTickerAnimation(track);
             }
+        }
 
-            // Recalculate ticker when viewport changes (TV/browser resize) to keep the loop seamless.
-            window.addEventListener('resize', () => {
-                const track = document.getElementById('ticker-track');
-                if (track) setupTickerAnimation(track);
-            });
+        // Recalculate ticker when viewport changes (TV/browser resize) to keep the loop seamless.
+        window.addEventListener('resize', () => {
+            const track = document.getElementById('ticker-track');
+            if (track) setupTickerAnimation(track);
+        });
 
-            function setupTickerAnimation(track) {
-                try {
-                    // 1. Reset animation
-                    track.style.animation = 'none';
-                    track.innerHTML = '';
+        function setupTickerAnimation(track) {
+            try {
+                // 1. Reset animation
+                track.style.animation = 'none';
+                track.innerHTML = '';
 
-                    // 2. Get the original items
-                    if (!window.tickerOriginalContent || window.tickerOriginalContent.length === 0) return;
-                    const originals = window.tickerOriginalContent;
+                // 2. Get the original items
+                if (!window.tickerOriginalContent || window.tickerOriginalContent.length === 0) return;
+                const originals = window.tickerOriginalContent;
 
-                    // 3. Measure Single Set Width
-                    const tempContainer = document.createElement('div');
-                    Object.assign(tempContainer.style, {
-                        position: 'absolute', visibility: 'hidden', whiteSpace: 'nowrap', display: 'inline-flex'
-                    });
-                    originals.forEach(node => tempContainer.appendChild(node.cloneNode(true)));
-                    document.body.appendChild(tempContainer);
-                    const singleSetWidth = tempContainer.getBoundingClientRect().width;
-                    document.body.removeChild(tempContainer);
+                // 3. Measure Single Set Width
+                const tempContainer = document.createElement('div');
+                Object.assign(tempContainer.style, {
+                    position: 'absolute', visibility: 'hidden', whiteSpace: 'nowrap', display: 'inline-flex'
+                });
+                originals.forEach(node => tempContainer.appendChild(node.cloneNode(true)));
+                document.body.appendChild(tempContainer);
+                const singleSetWidth = tempContainer.getBoundingClientRect().width;
+                document.body.removeChild(tempContainer);
 
-                    if (singleSetWidth === 0) return;
+                if (singleSetWidth === 0) return;
 
-                    // 4. For seamless RTL carousel:
-                    // We need content to START from the right edge (off-screen) and scroll left.
-                    // Then loop back seamlessly.
-                    const screenWidth = window.innerWidth;
+                // 4. For seamless RTL carousel:
+                // We need content to START from the right edge (off-screen) and scroll left.
+                // Then loop back seamlessly.
+                const screenWidth = window.innerWidth;
 
-                    // Build enough content to fill: screen + one full set (for seamless loop)
-                    const nodesToAppend = [];
-                    let currentWidth = 0;
-                    const targetWidth = screenWidth + singleSetWidth * 2; // Extra buffer for smooth loop
+                // Build enough content to fill: screen + one full set (for seamless loop)
+                const nodesToAppend = [];
+                let currentWidth = 0;
+                const targetWidth = screenWidth + singleSetWidth * 2; // Extra buffer for smooth loop
 
-                    while (currentWidth < targetWidth) {
-                        originals.forEach(node => nodesToAppend.push(node.cloneNode(true)));
-                        currentWidth += singleSetWidth;
-                    }
-
-                    // 5. Append content to track
-                    const fragment = document.createDocumentFragment();
-                    nodesToAppend.forEach(node => fragment.appendChild(node));
-                    track.appendChild(fragment);
-
-                    // 6. Calculate animation values
-                    const totalWidth = track.scrollWidth;
-                    const scrollDistance = singleSetWidth; // Scroll exactly one set for seamless loop
-
-                    // 7. Set CSS Variables
-                    // --ticker-start: Start position (screen width = off-screen right)
-                    // --ticker-distance: How far to scroll (one set width for seamless loop)
-                    track.style.setProperty('--ticker-start', `${screenWidth}px`);
-                    track.style.setProperty('--ticker-distance', `${scrollDistance}px`);
-
-                    // Duration based on total travel distance (slower for readability)
-                    const pxPerSec = 50; // Reduced from 80 for better readability
-                    const totalTravel = screenWidth + scrollDistance;
-                    const duration = totalTravel / pxPerSec;
-                    track.style.setProperty('--ticker-duration', `${duration}s`);
-
-                    // 8. Force reflow and restart animation
-                    void track.offsetHeight;
-                    track.style.animation = '';
-
-                } catch (e) {
-                    console.warn('Ticker setup failed', e);
+                while (currentWidth < targetWidth) {
+                    originals.forEach(node => nodesToAppend.push(node.cloneNode(true)));
+                    currentWidth += singleSetWidth;
                 }
+
+                // 5. Append content to track
+                const fragment = document.createDocumentFragment();
+                nodesToAppend.forEach(node => fragment.appendChild(node));
+                track.appendChild(fragment);
+
+                // 6. Calculate animation values
+                const totalWidth = track.scrollWidth;
+                const scrollDistance = singleSetWidth; // Scroll exactly one set for seamless loop
+
+                // 7. Set CSS Variables
+                // --ticker-start: Start position (screen width = off-screen right)
+                // --ticker-distance: How far to scroll (one set width for seamless loop)
+                track.style.setProperty('--ticker-start', `${screenWidth}px`);
+                track.style.setProperty('--ticker-distance', `${scrollDistance}px`);
+
+                // Duration based on total travel distance (slower for readability)
+                const pxPerSec = 50; // Reduced from 80 for better readability
+                const totalTravel = screenWidth + scrollDistance;
+                const duration = totalTravel / pxPerSec;
+                track.style.setProperty('--ticker-duration', `${duration}s`);
+
+                // 8. Force reflow and restart animation
+                void track.offsetHeight;
+                track.style.animation = '';
+
+            } catch (e) {
+                console.warn('Ticker setup failed', e);
             }
+        }
 
 
-            // --- NOTICES LOGIC ---
-            function renderNotices() {
-                const area = document.getElementById('notices-area');
-                const counter = document.getElementById('notice-counter');
+        // --- NOTICES LOGIC ---
+        function renderNotices() {
+            const area = document.getElementById('notices-area');
+            const counter = document.getElementById('notice-counter');
 
-                clearInterval(rotationTimer);
-                clearInterval(progressTimer);
+            clearInterval(rotationTimer);
+            clearInterval(progressTimer);
 
-                if (notices.length === 0) {
-                    // Do not rely on #empty-state existing (it can be replaced once notices render).
-                    area.innerHTML = `
+            if (notices.length === 0) {
+                // Do not rely on #empty-state existing (it can be replaced once notices render).
+                area.innerHTML = `
                     <div id="empty-state" class="text-center opacity-30">
                         <div class="text-9xl mb-4">📭</div>
                         <div class="text-4xl font-light">אין הודעות חדשות</div>
                     </div>
                 `;
-                    if (counter) counter.textContent = 'אין הודעות';
-                    return;
-                }
-
-                if (counter) counter.textContent = `${notices.length} הודעות`;
-
-                // Start Rotation
-                showNotice(0);
-                startRotation();
+                if (counter) counter.textContent = 'אין הודעות';
+                return;
             }
 
-            function startRotation() {
-                const bar = document.getElementById('notice-progress');
-                let width = 0;
-                const step = 100 / (ROTATION_TIME / 50); // Update every 50ms
+            if (counter) counter.textContent = `${notices.length} הודעות`;
 
-                progressTimer = setInterval(() => {
-                    width += step;
-                    if (width >= 100) width = 100;
-                    bar.style.width = width + '%';
-                }, 50);
+            // Start Rotation
+            showNotice(0);
+            startRotation();
+        }
 
-                rotationTimer = setInterval(() => {
-                    currentIndex = (currentIndex + 1) % notices.length;
-                    showNotice(currentIndex);
-                    width = 0;
-                    bar.style.width = '0%';
-                }, ROTATION_TIME);
-            }
+        function startRotation() {
+            const bar = document.getElementById('notice-progress');
+            let width = 0;
+            const step = 100 / (ROTATION_TIME / 50); // Update every 50ms
 
-            function showNotice(index) {
-                const area = document.getElementById('notices-area');
-                const notice = notices[index];
-                const iconMap = {
-                    'welcome': '👋', 'event': '🎉', 'important': '⚠️', 'maintenance': '🔧', 'general': '📢'
-                };
-                const icon = iconMap[notice.type] || '📢';
+            progressTimer = setInterval(() => {
+                width += step;
+                if (width >= 100) width = 100;
+                bar.style.width = width + '%';
+            }, 50);
 
-                // Image vs Icon
-                let visualContent;
-                if (notice.imageUrl) {
-                    // Keep correct proportions without allowing the image to change the notice card proportions.
-                    // We allocate a fixed media area within the notice card.
-                    const hasBody = (notice.content || '').trim().length > 0;
-                    // Use container-relative sizing so the notice uses its own layout,
-                    // independent of other blocks (avoid viewport-height coupling).
-                    const mediaH = hasBody ? 'h-[45%]' : 'h-[60%]';
-                    visualContent = `
+            rotationTimer = setInterval(() => {
+                currentIndex = (currentIndex + 1) % notices.length;
+                showNotice(currentIndex);
+                width = 0;
+                bar.style.width = '0%';
+            }, ROTATION_TIME);
+        }
+
+        function showNotice(index) {
+            const area = document.getElementById('notices-area');
+            const notice = notices[index];
+            const iconMap = {
+                'welcome': '👋', 'event': '🎉', 'important': '⚠️', 'maintenance': '🔧', 'general': '📢'
+            };
+            const icon = iconMap[notice.type] || '📢';
+
+            // Image vs Iframe vs Icon
+            let visualContent;
+            if (notice.iframeUrl) {
+                visualContent = `
+                    <div class="w-full h-[400px] mb-6 rounded-2xl overflow-hidden border border-white/10 shadow-3xl bg-white">
+                        <iframe 
+                            src="${notice.iframeUrl}" 
+                            class="w-full h-full"
+                            title="${notice.title || 'Notice Content'}"
+                            loading="lazy"
+                        ></iframe>
+                    </div>
+                `;
+            } else if (notice.imageUrl) {
+                // Keep correct proportions without allowing the image to change the notice card proportions.
+                // We allocate a fixed media area within the notice card.
+                const hasBody = (notice.content || '').trim().length > 0;
+                // Use container-relative sizing so the notice uses its own layout,
+                // independent of other blocks (avoid viewport-height coupling).
+                const mediaH = hasBody ? 'h-[45%]' : 'h-[60%]';
+                visualContent = `
                     <div class="w-full ${mediaH} flex items-center justify-center ${hasBody ? 'mb-4' : 'mb-6'}">
                         <img
                             src="${notice.imageUrl}"
@@ -1023,20 +1039,20 @@
                         >
                     </div>
                 `;
-                } else {
-                    visualContent = `<div class="text-8xl mb-6 filter drop-shadow-lg">${icon}</div>`;
-                }
+            } else {
+                visualContent = `<div class="text-8xl mb-6 filter drop-shadow-lg">${icon}</div>`;
+            }
 
-                const urgencyClass = notice.urgent ? 'border-2 border-red-500 shadow-[0_0_50px_rgba(239,68,68,0.2)]' : '';
-                const urgencyBadge = notice.urgent ? '<div class="absolute top-4 left-4 bg-red-600 text-white px-3 py-1 rounded-full text-sm font-bold animate-pulse">דחוף</div>' : '';
+            const urgencyClass = notice.urgent ? 'border-2 border-red-500 shadow-[0_0_50px_rgba(239,68,68,0.2)]' : '';
+            const urgencyBadge = notice.urgent ? '<div class="absolute top-4 left-4 bg-red-600 text-white px-3 py-1 rounded-full text-sm font-bold animate-pulse">דחוף</div>' : '';
 
-                // Animation classes
-                const html = `
+            // Animation classes
+            const html = `
         <div class="w-full h-full flex flex-col items-center justify-start text-center animate-fade-in relative p-4 ${urgencyClass} rounded-3xl bg-white/5">
             ${urgencyBadge}
             ${visualContent}
-            <h2 class="text-4xl lg:text-6xl font-black text-white mb-4 leading-tight drop-shadow-md max-w-5xl">${notice.title}</h2>
-            <p class="text-3xl lg:text-4xl text-blue-100 font-light whitespace-pre-line leading-relaxed max-w-5xl">${notice.content}</p>
+            ${notice.title ? `<h2 class="text-4xl lg:text-6xl font-black text-white mb-4 leading-tight drop-shadow-md max-w-5xl">${notice.title}</h2>` : ''}
+            ${notice.content ? `<p class="text-3xl lg:text-4xl text-blue-100 font-light whitespace-pre-line leading-relaxed max-w-5xl">${notice.content}</p>` : ''}
             <div class="mt-6 text-blue-300 font-medium text-xl border-t border-white/10 pt-4 px-8">
                 פורסם ב: ${notice.date} • ועד הבית
             </div>
@@ -1047,111 +1063,112 @@
         </div>
     `;
 
-                area.innerHTML = html;
-            }
+            area.innerHTML = html;
+        }
 
-            // --- ADMIN FUNCTIONS ---
-            function openAdmin() { document.getElementById('admin-modal').classList.remove('hidden'); }
-            function closeAdmin() { document.getElementById('admin-modal').classList.add('hidden'); }
-            function clearInputs() {
-                document.getElementById('input-title').value = '';
-                document.getElementById('input-content').value = '';
-                document.getElementById('input-urgent').checked = false;
-            }
+        // --- ADMIN FUNCTIONS ---
+        function openAdmin() { document.getElementById('admin-modal').classList.remove('hidden'); }
+        function closeAdmin() { document.getElementById('admin-modal').classList.add('hidden'); }
+        function clearInputs() {
+            document.getElementById('input-title').value = '';
+            document.getElementById('input-content').value = '';
+            document.getElementById('input-urgent').checked = false;
+        }
 
-            function saveNotice() {
-                const title = document.getElementById('input-title').value;
-                const content = document.getElementById('input-content').value;
-                if (!title) return alert('נא להזין כותרת');
+        function saveNotice() {
+            const title = document.getElementById('input-title').value;
+            const content = document.getElementById('input-content').value;
+            if (!title) return alert('נא להזין כותרת');
 
-                const newNotice = {
-                    id: Date.now().toString(),
-                    title: title,
-                    content: content,
-                    type: document.getElementById('input-type').value,
-                    date: document.getElementById('input-date').value,
-                    urgent: document.getElementById('input-urgent').checked
-                };
+            const newNotice = {
+                id: Date.now().toString(),
+                title: title,
+                content: content,
+                type: document.getElementById('input-type').value,
+                date: document.getElementById('input-date').value,
+                urgent: document.getElementById('input-urgent').checked
+            };
 
-                notices.unshift(newNotice); // Add to top
+            notices.unshift(newNotice); // Add to top
+            saveNotices(); // Save to storage
+            renderNotices();
+            closeAdmin();
+            clearInputs();
+        }
+
+        function deleteNotice(id) {
+            if (confirm('למחוק הודעה זו?')) {
+                notices = notices.filter(n => n.id !== id.toString()); // Ensure string comparison
                 saveNotices(); // Save to storage
                 renderNotices();
-                closeAdmin();
-                clearInputs();
+            }
+        }
+
+        // --- PERSISTENCE ---
+        // Load from notices.json (shared), fallback to localStorage (local edits)
+        async function loadNotices() {
+            // If opened directly from disk (file://), browsers often block fetch() to local json.
+            // In that case we'll fall back to localStorage, which may look "stuck" if you edit notices.json.
+            if (window.location.protocol === 'file:') {
+                console.warn('Running from file:// - notices.json fetch may be blocked. Start a local HTTP server to load notices.json reliably.');
             }
 
-            function deleteNotice(id) {
-                if (confirm('למחוק הודעה זו?')) {
-                    notices = notices.filter(n => n.id !== id.toString()); // Ensure string comparison
-                    saveNotices(); // Save to storage
-                    renderNotices();
-                }
-            }
-
-            // --- PERSISTENCE ---
-            // Load from notices.json (shared), fallback to localStorage (local edits)
-            async function loadNotices() {
-                // If opened directly from disk (file://), browsers often block fetch() to local json.
-                // In that case we'll fall back to localStorage, which may look "stuck" if you edit notices.json.
-                if (window.location.protocol === 'file:') {
-                    console.warn('Running from file:// - notices.json fetch may be blocked. Start a local HTTP server to load notices.json reliably.');
-                }
-
-                // 1) Try notices.json (works when served over HTTP)
-                try {
-                    const res = await fetch('notices.json?_=' + Date.now());
-                    if (res.ok) {
-                        const json = await res.json();
-                        if (Array.isArray(json)) {
-                            notices = mapNoticesFromJson(json);
-                            // Cache locally so the TV can still work offline later
-                            saveNotices();
-                            const counter = document.getElementById('notice-counter');
-                            if (counter) counter.textContent = `${notices.length} הודעות`;
-                            return;
-                        }
+            // 1) Try notices.json (works when served over HTTP)
+            try {
+                const res = await fetch('notices.json?_=' + Date.now());
+                if (res.ok) {
+                    const json = await res.json();
+                    if (Array.isArray(json)) {
+                        notices = mapNoticesFromJson(json);
+                        // Cache locally so the TV can still work offline later
+                        saveNotices();
+                        const counter = document.getElementById('notice-counter');
+                        if (counter) counter.textContent = `${notices.length} הודעות`;
+                        return;
                     }
-                } catch (e) {
-                    console.warn('Could not load notices.json, falling back to localStorage', e);
                 }
-
-                // 2) Fallback to localStorage
-                const stored = localStorage.getItem('lobby-notices');
-                notices = stored ? JSON.parse(stored) : [];
-                const counter = document.getElementById('notice-counter');
-                if (counter) counter.textContent = `${notices.length} הודעות`;
+            } catch (e) {
+                console.warn('Could not load notices.json, falling back to localStorage', e);
             }
 
-            function mapNoticesFromJson(items) {
-                // Your notices.json schema:
-                // { id, title, content, category, date, color, priority, type, imageUrl }
-                // Current UI expects:
-                // { id, title, content, type, date, urgent, imageUrl }
-                const mapType = {
-                    general: 'general',
-                    important: 'important',
-                    event: 'event',
-                    welcome: 'welcome',
-                    maintenance: 'maintenance',
-                    vaad: 'important',
-                    holiday: 'event'
-                };
-                return items
-                    // Only show notice-board items here; ignore "news" entries
-                    .filter(n => (n.type || 'notice') === 'notice')
-                    .map(n => ({
-                        id: String(n.id ?? Date.now()),
-                        title: n.title || '',
-                        content: n.content || '',
-                        type: mapType[n.category] || mapType[n.type] || 'general',
-                        date: n.date || new Date().toISOString().split('T')[0],
-                        urgent: Boolean(n.priority),
-                        imageUrl: n.imageUrl ?? null
-                    }));
-            }
-            function saveNotices() {
-                localStorage.setItem('lobby-notices', JSON.stringify(notices));
-            }
+            // 2) Fallback to localStorage
+            const stored = localStorage.getItem('lobby-notices');
+            notices = stored ? JSON.parse(stored) : [];
+            const counter = document.getElementById('notice-counter');
+            if (counter) counter.textContent = `${notices.length} הודעות`;
+        }
+
+        function mapNoticesFromJson(items) {
+            // Your notices.json schema:
+            // { id, title, content, category, date, color, priority, type, imageUrl }
+            // Current UI expects:
+            // { id, title, content, type, date, urgent, imageUrl }
+            const mapType = {
+                general: 'general',
+                important: 'important',
+                event: 'event',
+                welcome: 'welcome',
+                maintenance: 'maintenance',
+                vaad: 'important',
+                holiday: 'event'
+            };
+            return items
+                // Only show notice-board items here; ignore "news" entries
+                .filter(n => (n.type || 'notice') === 'notice')
+                .map(n => ({
+                    id: String(n.id ?? Date.now()),
+                    title: n.title || '',
+                    content: n.content || '',
+                    type: mapType[n.category] || mapType[n.type] || 'general',
+                    date: n.date || new Date().toISOString().split('T')[0],
+                    urgent: Boolean(n.priority),
+                    imageUrl: n.imageUrl ?? null,
+                    iframeUrl: n.iframeUrl ?? null
+                }));
+        }
+        function saveNotices() {
+            localStorage.setItem('lobby-notices', JSON.stringify(notices));
+        }
 
     </script>
 </body>
