@@ -453,6 +453,7 @@
     </div>
 
     <!-- SCRIPTS -->
+    <script src="./weather.js" defer></script>
     <script>
         // CONFIG
         const CITY_LAT = 31.9424; // Beer Yaakov
@@ -499,8 +500,12 @@
 
 
 
-            fetchWeather();
-            setInterval(fetchWeather, 600000); // 10 min
+            if (window.VAAD && VAAD.weather && typeof VAAD.weather.fetchWeather === 'function') {
+                VAAD.weather.fetchWeather({ lat: CITY_LAT, lon: CITY_LON });
+                setInterval(() => VAAD.weather.fetchWeather({ lat: CITY_LAT, lon: CITY_LON }), 600000); // 10 min
+            } else {
+                console.warn('weather.js not loaded; weather widget will not update');
+            }
 
             fetchShabbat(); // Once is usually enough for a lobby screen that refreshes, or refresh daily
 
@@ -655,106 +660,8 @@
             document.getElementById('clock-date').textContent = dateStr;
         }
 
-        // --- WEATHER (3-Day Forecast) ---
-        async function fetchWeather() {
-            try {
-                // 3-day forecast API call
-                const url = `https://api.open-meteo.com/v1/forecast` +
-                    `?latitude=${CITY_LAT}&longitude=${CITY_LON}` +
-                    `&daily=temperature_2m_max,temperature_2m_min,weathercode` +
-                    `&forecast_days=3` +
-                    `&timezone=Asia%2FJerusalem`;
-
-                const res = await fetch(url);
-                const data = await res.json();
-
-                const daily = data.daily;
-                const hebrewDays = ['ראשון', 'שני', 'שלישי', 'רביעי', 'חמישי', 'שישי', 'שבת'];
-                const today = new Date();
-
-                for (let i = 0; i < 3; i++) {
-                    const dayEl = document.getElementById(`weather-day-${i}`);
-                    if (!dayEl) continue;
-
-                    const high = Math.round(daily.temperature_2m_max[i]);
-                    const low = Math.round(daily.temperature_2m_min[i]);
-                    const code = daily.weathercode[i];
-
-                    // Day name
-                    const dayNameEl = dayEl.querySelector('span:first-child');
-                    if (dayNameEl) {
-                        if (i === 0) {
-                            dayNameEl.textContent = 'היום';
-                        } else if (i === 1) {
-                            dayNameEl.textContent = 'מחר';
-                        } else {
-                            const futureDate = new Date(today);
-                            futureDate.setDate(today.getDate() + i);
-                            dayNameEl.textContent = hebrewDays[futureDate.getDay()];
-                        }
-                    }
-
-                    // Icon (use daytime icon for forecast)
-                    const iconEl = dayEl.querySelector('.weather-icon');
-                    if (iconEl) iconEl.textContent = getWeatherIcon(code, true);
-
-                    // Temps
-                    const highEl = dayEl.querySelector('.weather-high');
-                    const lowEl = dayEl.querySelector('.weather-low');
-                    if (highEl) highEl.textContent = `${high}°`;
-                    if (lowEl) lowEl.textContent = `${low}°`;
-                }
-            } catch (e) {
-                console.error('Weather error', e);
-            }
-        }
-
-        function getWeatherHebrewSummary({ code, cloud, pop, precip, isDay }) {
-            // Precipitation first (closest to AccuWeather-style phrasing)
-            const hasPrecip = (typeof precip === 'number' && precip > 0.0) || (typeof pop === 'number' && pop >= 50);
-            if (hasPrecip) {
-                if ([80, 81, 82].includes(code)) return 'ממטרים קצרים';
-                if ([61, 63, 65, 66, 67].includes(code)) return 'גשום';
-                if ([51, 53, 55].includes(code)) return 'טפטוף';
-                if ([95, 96, 99].includes(code)) return 'סופות רעמים';
-                return 'ממטרים קצרים';
-            }
-
-            // Cloud-based sky description
-            if (typeof cloud === 'number') {
-                if (cloud >= 85) return 'מעונן';
-                if (cloud >= 45) return 'מעונן חלקית';
-                if (cloud >= 20) return isDay ? 'שמשי בעיקר' : 'בהיר בעיקר';
-                return isDay ? 'שמשי' : 'בהיר';
-            }
-
-            // Fallback to weathercode only
-            if (code === 0) return isDay ? 'שמשי' : 'בהיר';
-            if (code === 1) return isDay ? 'שמשי בעיקר' : 'בהיר בעיקר';
-            if (code === 2) return 'מעונן חלקית';
-            if (code === 3) return 'מעונן';
-            if ([45, 48].includes(code)) return 'ערפילי';
-            if ([51, 53, 55].includes(code)) return 'טפטוף';
-            if ([61, 63, 65].includes(code)) return 'גשום';
-            if ([80, 81, 82].includes(code)) return 'ממטרים קצרים';
-            if ([95, 96, 99].includes(code)) return 'סופות רעמים';
-            return 'מזג אוויר';
-        }
-
-        function getWeatherIcon(code, isDay) {
-            const icons = {
-                0: isDay ? '☀️' : '🌙',
-                1: isDay ? '🌤️' : '🌙',
-                2: isDay ? '⛅' : '☁️',
-                3: '☁️',
-                45: '🌫️', 48: '🌫️',
-                51: '🌧️', 53: '🌧️', 55: '🌧️',
-                61: '🌧️', 63: '🌧️', 65: '🌧️',
-                80: '🌦️', 81: '🌦️', 82: '🌦️',
-                95: '⛈️', 96: '⛈️', 99: '⛈️'
-            };
-            return icons[code] || (isDay ? '☀️' : '🌙');
-        }
+        // --- WEATHER ---
+        // Moved to weather.js (loaded via the external script tag above)
 
         // --- SHABBAT ---
         async function fetchShabbat() {
@@ -1054,18 +961,24 @@
         <div class="w-full h-full flex flex-col items-center justify-start text-center animate-fade-in relative p-4 ${urgencyClass} rounded-3xl bg-white/5">
             ${urgencyBadge}
             ${visualContent} 
-            ${!notice.wikiUrl && notice.title ? `<h2 class="text-5xl lg:text-7xl font-black text-white mb-4 leading-tight drop-shadow-md max-w-5xl">${notice.title}</h2>` : ''}
-            ${!notice.wikiUrl && notice.content ? `<p class="text-4xl lg:text-5xl text-blue-100 font-light whitespace-pre-line leading-relaxed max-w-5xl">${notice.content}</p>` : ''}
+            ${(!notice.wikiUrl && notice.title) ? ('<h2 class="text-5xl lg:text-7xl font-black text-white mb-4 leading-tight drop-shadow-md max-w-5xl">' + notice.title + '</h2>') : ''}
+            ${(!notice.wikiUrl && notice.content) ? ('<p class="text-4xl lg:text-5xl text-blue-100 font-light whitespace-pre-line leading-relaxed max-w-5xl">' + notice.content + '</p>') : ''}
             <div class="mt-6 text-blue-300 font-medium text-xl border-t border-white/10 pt-4 px-8">
                 פורסם ב: ${notice.date} • ועד הבית
             </div>
             
-            <button onclick="deleteNotice(${notice.id})" class="absolute bottom-4 left-4 text-white/10 hover:text-red-500 transition p-2">
+            <button data-action="delete-notice" class="absolute bottom-4 left-4 text-white/10 hover:text-red-500 transition p-2">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
             </button>
         </div>
     `;
             area.innerHTML = html;
+
+            // Wire delete button (avoid inline onclick inside template literal)
+            const delBtn = area.querySelector('button[data-action="delete-notice"]');
+            if (delBtn) {
+                delBtn.addEventListener('click', () => deleteNotice(notice.id));
+            }
 
             // Fetch AFTER adding to DOM
             if (notice.wikiUrl) {
