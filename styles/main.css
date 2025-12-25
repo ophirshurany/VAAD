@@ -1,0 +1,131 @@
+/* CSS Reset & Basics */
+body {
+    font-family: 'Heebo', sans-serif;
+    background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 50%, #172554 100%);
+    color: #ffffff;
+    margin: 0;
+}
+
+/* Scrollbar hiding (TV clean UI) */
+.scrollbar-hide::-webkit-scrollbar {
+    display: none;
+}
+
+.scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
+
+/* Scroller Animation Setup */
+.marquee-container {
+    overflow: hidden;
+    white-space: nowrap;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    /* RTL: start from right edge */
+}
+
+.marquee-content {
+    display: inline-flex;
+    align-items: center;
+    direction: ltr;
+    will-change: transform;
+    width: max-content;
+    /* Start off-screen to the right, then scroll left */
+    animation: ticker-scroll var(--ticker-duration, 60s) linear infinite;
+}
+
+/* RTL Carousel Animation: Start from right edge, scroll left */
+@keyframes ticker-scroll {
+    0% {
+        /* Start with content positioned at the right edge (positive X) */
+        transform: translateX(var(--ticker-start, 100%));
+    }
+
+    100% {
+        /* End when content has scrolled fully left */
+        transform: translateX(calc(var(--ticker-start, 0px) - var(--ticker-distance, 0px)));
+    }
+}
+
+/* Panel Styling - Removed Blur, Added Contrast */
+.info-panel {
+    background-color: rgba(15, 23, 42, 0.7);
+    /* Dark semi-transparent */
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    backdrop-filter: none;
+    /* Removed blur per request */
+}
+
+.header-glow {
+    text-shadow: 0 0 20px rgba(56, 189, 248, 0.5);
+}
+
+/* Custom Scrollbar for Notices */
+.custom-scroll::-webkit-scrollbar {
+    width: 6px;
+}
+
+.custom-scroll::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.custom-scroll::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 10px;
+}
+
+/* Form Elements */
+input,
+select,
+textarea {
+    background: rgba(0, 0, 0, 0.3) !important;
+    border: 1px solid rgba(255, 255, 255, 0.2) !important;
+    color: white !important;
+}
+
+/* Useful info vertical scroll marquee */
+.useful-info-scroll-container {
+    overflow: hidden;
+    position: relative;
+    height: 100%;
+}
+
+.useful-info-scroll-track {
+    display: flex;
+    flex-direction: column;
+    animation: useful-info-scroll var(--scroll-duration, 20s) linear infinite;
+    max-height: 100%;
+}
+
+.useful-info-scroll-track:hover {
+    animation-play-state: paused;
+}
+
+@keyframes useful-info-scroll {
+    0% {
+        transform: translateY(0);
+    }
+
+    100% {
+        transform: translateY(-50%);
+    }
+}
+
+.useful-info-item {
+    flex-shrink: 0;
+}
+
+/* Global readability boosts */
+.news-time {
+    font-size: clamp(1.6rem, 2.2vw, 2.6rem);
+    line-height: 1.05;
+}
+
+.news-title {
+    font-size: clamp(1.7rem, 2.4vw, 2.9rem);
+    line-height: 1.1;
+}

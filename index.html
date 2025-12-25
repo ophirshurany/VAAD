@@ -15,10 +15,10 @@
                 extend: {
                     colors: {
                         dark: '#0f172a',
-                        cardBg: 'rgba(15, 23, 42, 0.85)', // Solid dark background, no blur needed
+                        cardBg: 'rgba(15, 23, 42, 0.85)',
                         cardBorder: 'rgba(255, 255, 255, 0.1)',
-                        accent: '#38bdf8', // Sky 400
-                        gold: '#fbbf24', // Amber 400
+                        accent: '#38bdf8',
+                        gold: '#fbbf24',
                     },
                     fontFamily: {
                         heebo: ['Heebo', 'sans-serif'],
@@ -35,166 +35,29 @@
                         },
                         marquee: {
                             '0%': { transform: 'translateX(0)' },
-                            '100%': { transform: 'translateX(50%)' } // RTL: Starts at 0, moves right (which reveals left content visually if row-reverse) 
-                            // Correction for RTL ticker logic:
-                            // We want text to enter from Left and exit Right? Or Enter Right and exit Left?
-                            // Standard news ticker: Enters Right, Exits Left.
-                            // In CSS translate, negative X moves left.
+                            '100%': { transform: 'translateX(50%)' }
                         }
                     }
                 }
             }
         }
     </script>
-    <style>
-        /* CSS Reset & Basics */
-        body {
-            font-family: 'Heebo', sans-serif;
-            background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 50%, #172554 100%);
-            color: #ffffff;
-            margin: 0;
-        }
-
-        /* Scrollbar hiding (TV clean UI) */
-        .scrollbar-hide::-webkit-scrollbar {
-            display: none;
-        }
-
-        .scrollbar-hide {
-            -ms-overflow-style: none;
-            scrollbar-width: none;
-        }
-
-        /* Scroller Animation Setup */
-        .marquee-container {
-            overflow: hidden;
-            white-space: nowrap;
-            position: relative;
-            display: flex;
-            align-items: center;
-            justify-content: flex-end;
-            /* RTL: start from right edge */
-        }
-
-        .marquee-content {
-            display: inline-flex;
-            align-items: center;
-            direction: ltr;
-            will-change: transform;
-            width: max-content;
-            /* Start off-screen to the right, then scroll left */
-            animation: ticker-scroll var(--ticker-duration, 60s) linear infinite;
-        }
-
-        /* RTL Carousel Animation: Start from right edge, scroll left */
-        @keyframes ticker-scroll {
-            0% {
-                /* Start with content positioned at the right edge (positive X) */
-                transform: translateX(var(--ticker-start, 100%));
-            }
-
-            100% {
-                /* End when content has scrolled fully left */
-                transform: translateX(calc(var(--ticker-start, 0px) - var(--ticker-distance, 0px)));
-            }
-        }
-
-        /* Panel Styling - Removed Blur, Added Contrast */
-        .info-panel {
-            background-color: rgba(15, 23, 42, 0.7);
-            /* Dark semi-transparent */
-            border: 1px solid rgba(255, 255, 255, 0.15);
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
-            backdrop-filter: none;
-            /* Removed blur per request */
-        }
-
-        .header-glow {
-            text-shadow: 0 0 20px rgba(56, 189, 248, 0.5);
-        }
-
-        /* Custom Scrollbar for Notices */
-        .custom-scroll::-webkit-scrollbar {
-            width: 6px;
-        }
-
-        .custom-scroll::-webkit-scrollbar-track {
-            background: rgba(255, 255, 255, 0.05);
-        }
-
-        .custom-scroll::-webkit-scrollbar-thumb {
-            background: rgba(255, 255, 255, 0.2);
-            border-radius: 10px;
-        }
-
-        /* Form Elements */
-        input,
-        select,
-        textarea {
-            background: rgba(0, 0, 0, 0.3) !important;
-            border: 1px solid rgba(255, 255, 255, 0.2) !important;
-            color: white !important;
-        }
-
-        /* Useful info vertical scroll marquee */
-        .useful-info-scroll-container {
-            overflow: hidden;
-            position: relative;
-            height: 100%;
-        }
-
-        .useful-info-scroll-track {
-            display: flex;
-            flex-direction: column;
-            animation: useful-info-scroll var(--scroll-duration, 20s) linear infinite;
-            max-height: 100%;
-        }
-
-        .useful-info-scroll-track:hover {
-            animation-play-state: paused;
-        }
-
-        @keyframes useful-info-scroll {
-            0% {
-                transform: translateY(0);
-            }
-
-            100% {
-                transform: translateY(-50%);
-            }
-        }
-
-        .useful-info-item {
-            flex-shrink: 0;
-        }
-
-        /* Global readability boosts */
-        .news-time {
-            font-size: clamp(1.6rem, 2.2vw, 2.6rem);
-            line-height: 1.05;
-        }
-
-        .news-title {
-            font-size: clamp(1.7rem, 2.4vw, 2.9rem);
-            line-height: 1.1;
-        }
-    </style>
+    <link rel="stylesheet" href="styles/main.css">
 </head>
 
 <body class="flex flex-col p-2 lg:p-4 min-h-screen lg:h-screen lg:overflow-hidden">
 
-    <!-- App frame (adds top/bottom/side border like the panels) -->
+    <!-- App frame -->
     <div class="info-panel rounded-xl lg:rounded-3xl overflow-hidden flex flex-col w-full h-full shadow-3xl">
 
-        <!-- TOP HEADER: Weather (Right), Title (Center), Holiday Events (Left) -->
+        <!-- TOP HEADER -->
         <header
             class="flex flex-col lg:flex-row items-center justify-between py-2 px-4 lg:py-3 lg:px-8 border-b border-white/10 bg-dark/50 z-20 shrink-0 relative">
 
-            <!-- RIGHT: Weather Widget (3-Day Forecast) -->
+            <!-- RIGHT: Weather Widget -->
             <div class="order-2 lg:order-1 flex items-center justify-start w-full lg:w-auto pt-2 lg:pt-0">
                 <div id="weather-widget"
                     class="flex items-center gap-2 lg:gap-4 bg-white/5 px-4 lg:px-6 py-2 lg:py-3 rounded-2xl border border-white/10 cursor-pointer hover:bg-white/10 transition"
-                    onclick="window.open('https://www.accuweather.com/he/il/beer-yaaqov/1281409/weather-forecast/1281409', '_blank')"
                     title="פתח תחזית ב-AccuWeather">
                     <!-- 3-day forecast injected by JS -->
                     <div class="flex items-center gap-4 lg:gap-6">
@@ -249,27 +112,21 @@
         <main
             class="flex-1 flex flex-col lg:grid lg:grid-cols-12 gap-4 lg:gap-6 p-4 lg:p-6 lg:pr-10 overflow-y-auto lg:overflow-hidden scrollbar-hide">
 
-            <!-- RIGHT SIDEBAR (3 Columns / ~25%) -->
+            <!-- RIGHT SIDEBAR -->
             <aside
                 class="w-full lg:col-span-3 flex flex-col gap-4 lg:gap-5 lg:h-full shrink-0 lg:grid lg:grid-rows-[auto,0.4fr,0.6fr]">
 
-                <!-- 1. CLOCK & DATE (Clean & Prominent) -->
+                <!-- 1. CLOCK & DATE -->
                 <div
                     class="info-panel rounded-3xl p-5 lg:p-6 flex flex-col items-center justify-center bg-gradient-to-br from-blue-900/50 to-slate-900/50">
-                    <!-- Time Display -->
                     <div id="clock-time"
                         class="text-7xl lg:text-8xl xl:text-9xl font-black text-white tabular-nums leading-none drop-shadow-lg tracking-tight">
                         --:--
                     </div>
-
-                    <!-- Day of Week -->
                     <div id="clock-day" class="text-2xl lg:text-3xl font-bold text-accent mt-3" dir="rtl">
                         <span id="clock-day-text">---</span>
                     </div>
-
                     <div class="h-px w-24 bg-white/20 my-3"></div>
-
-                    <!-- Dates -->
                     <div class="flex flex-col items-center gap-1">
                         <div id="clock-date" class="text-xl lg:text-2xl text-white/80 font-medium">
                             --.--.----
@@ -278,29 +135,25 @@
                     </div>
                 </div>
 
-                <!-- 2. USEFUL INFO LIST (Scrolling Marquee) -->
+                <!-- 2. USEFUL INFO LIST -->
                 <div class="info-panel rounded-3xl flex flex-col overflow-hidden relative text-center min-h-0">
-                    <!-- Title Header -->
                     <div
                         class="bg-blue-900/30 p-3 lg:p-4 border-b border-white/10 flex items-center justify-center shrink-0">
                         <h2 class="text-3xl lg:text-4xl font-black text-white flex items-center gap-3">
                             <span class="text-3xl lg:text-5xl">ℹ️</span> מידע לדייר
                         </h2>
                     </div>
-
-                    <!-- Scrolling List -->
                     <div class="useful-info-scroll-container flex-1 min-h-0 p-3 lg:p-4">
                         <div id="useful-info-list" class="useful-info-scroll-track">
-                            <!-- Injected by JS (duplicated for seamless loop) -->
+                            <!-- Injected by JS -->
                         </div>
                     </div>
                 </div>
 
-                <!-- 3. SHABBAT / HOLIDAY WIDGET (below Useful Info) -->
+                <!-- 3. SHABBAT WIDGET -->
                 <div id="shabbat-widget"
                     class="info-panel rounded-3xl p-4 lg:p-5 relative overflow-hidden bg-gradient-to-b from-slate-900 to-indigo-950/50 cursor-pointer hover:opacity-90 transition hover:shadow-lg hover:border-gold/30 text-center min-h-0"
-                    onclick="window.open('https://www.hebcal.com/', '_blank')" title="פתח זמני שבת ב-Hebcal">
-                    <!-- Shabbat Content -->
+                    title="פתח זמני שבת ב-Hebcal">
                     <div class="relative z-10">
                         <div class="flex items-center justify-center gap-3 mb-3">
                             <span class="text-4xl lg:text-5xl">🕯️</span>
@@ -327,7 +180,7 @@
 
             </aside>
 
-            <!-- CENTER/MAIN COLUMN (9 Columns / ~75%) -->
+            <!-- CENTER/MAIN COLUMN -->
             <section class="w-full lg:col-span-9 flex flex-col h-[500px] lg:h-full relative shrink-0">
                 <div
                     class="info-panel rounded-3xl flex-1 flex flex-col overflow-hidden relative border-t-4 border-t-accent/50">
@@ -343,7 +196,7 @@
                             <span id="notice-counter"
                                 class="bg-white/10 px-4 py-2 rounded-full text-xl font-bold text-blue-100 hidden sm:inline-block">טוען...</span>
                             <!-- Admin Add Button -->
-                            <button onclick="openAdmin()"
+                            <button id="btn-open-admin"
                                 class="w-12 h-12 rounded-full bg-white/10 hover:bg-accent/20 flex items-center justify-center text-white/50 hover:text-white transition border border-white/5">
                                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -356,7 +209,6 @@
                     <!-- Notices Container -->
                     <div id="notices-area"
                         class="flex-1 relative p-8 lg:p-12 flex flex-col justify-center items-center">
-                        <!-- Content injected via JS -->
                         <div id="empty-state" class="text-center opacity-30">
                             <div class="text-9xl mb-4">📭</div>
                             <div class="text-4xl font-light">אין הודעות חדשות</div>
@@ -377,18 +229,14 @@
         <!-- FOOTER: News Ticker -->
         <footer
             class="h-24 lg:h-32 bg-slate-900 border-t border-white/10 flex items-center relative z-30 shadow-3xl shrink-0">
-            <!-- Badge (clickable) -->
             <a href="https://www.ynet.co.il/news/category/184" target="_blank" rel="noopener noreferrer"
                 class="bg-red-600 h-full px-6 lg:px-10 flex items-center justify-center gap-2 z-20 shadow-[4px_0_15px_rgba(0,0,0,0.6)] hover:bg-red-700 transition-colors">
                 <span class="font-black text-white text-3xl lg:text-5xl tracking-wider">מבזקים</span>
                 <span class="w-3 h-3 lg:w-4 lg:h-4 bg-white rounded-full animate-pulse"></span>
             </a>
 
-            <!-- Ticker Content -->
             <div class="marquee-container flex-1 h-full flex items-center bg-slate-900/95">
                 <div id="ticker-track" class="marquee-content flex items-center" style="direction: ltr;">
-                    <!-- LTR container for transform logic -->
-                    <!-- JS will duplicate content here -->
                     <span class="text-white/50 mx-4">מערכת החדשות מתעדכנת...</span>
                 </div>
             </div>
@@ -403,7 +251,7 @@
             class="bg-slate-900 border border-white/20 w-full max-w-lg rounded-3xl shadow-3xl flex flex-col max-h-[90vh]">
             <div class="p-5 border-b border-white/10 flex justify-between items-center bg-white/5 rounded-t-3xl">
                 <h3 class="text-xl font-bold">הוספת הודעה</h3>
-                <button onclick="closeAdmin()" class="text-white/50 hover:text-white">✕</button>
+                <button id="btn-close-admin-top" class="text-white/50 hover:text-white">✕</button>
             </div>
 
             <div class="p-6 space-y-4 overflow-y-auto">
@@ -442,10 +290,10 @@
             </div>
 
             <div class="p-5 border-t border-white/10 bg-white/5 rounded-b-3xl flex justify-between">
-                <button onclick="clearInputs()" class="text-white/50 hover:text-white text-sm">נקה טופס</button>
+                <button id="btn-clear-inputs" class="text-white/50 hover:text-white text-sm">נקה טופס</button>
                 <div class="flex gap-3">
-                    <button onclick="closeAdmin()" class="px-4 py-2 rounded-lg hover:bg-white/10">ביטול</button>
-                    <button onclick="saveNotice()"
+                    <button id="btn-close-admin-bottom" class="px-4 py-2 rounded-lg hover:bg-white/10">ביטול</button>
+                    <button id="btn-save-notice"
                         class="px-6 py-2 bg-accent hover:bg-sky-400 text-slate-900 font-bold rounded-lg shadow-lg">פרסם</button>
                 </div>
             </div>
@@ -454,790 +302,17 @@
 
     <!-- SCRIPTS -->
     <script src="./weather.js" defer></script>
-    <script>
-        // CONFIG
-        const CITY_LAT = 31.9424; // Beer Yaakov
-        const CITY_LON = 34.8391;
-        const ROTATION_TIME = 10000; // 10 seconds per notice slide
-
-        let notices = [];
-
-        let currentIndex = 0;
-        let rotationTimer;
-        let progressTimer;
-
-        let usefulInfoItems = [];
-
-        async function loadUsefulInfoItems() {
-            try {
-                // Note: when opened via file://, fetch() to local files is often blocked.
-                if (window.location.protocol === 'file:') {
-                    console.warn('Running from file:// - residents_info.json fetch may be blocked. Use a local HTTP server for reliable loading.');
-                }
-
-                const response = await fetch('residents_info.json?_=' + Date.now());
-                if (!response.ok) throw new Error(`Failed to load residents_info.json (HTTP ${response.status})`);
-
-                const data = await response.json();
-                usefulInfoItems = Array.isArray(data) ? data : [];
-            } catch (error) {
-                console.error('Error loading useful info items:', error);
-                usefulInfoItems = [];
-            }
-
-            // Render regardless (shows fallback UI if empty)
-            initUsefulInfoCarousel();
-        }
-
-        // --- INIT ---
-        document.addEventListener('DOMContentLoaded', async () => {
-            updateTime();
-            setInterval(updateTime, 1000);
-
-            updateHebrewDateToday();
-            // Refresh Hebrew date occasionally (midnight rollover / long-running screen)
-            setInterval(updateHebrewDateToday, 60 * 60 * 1000);
-
-
-
-            if (window.VAAD && VAAD.weather && typeof VAAD.weather.fetchWeather === 'function') {
-                VAAD.weather.fetchWeather({ lat: CITY_LAT, lon: CITY_LON });
-                setInterval(() => VAAD.weather.fetchWeather({ lat: CITY_LAT, lon: CITY_LON }), 600000); // 10 min
-            } else {
-                console.warn('weather.js not loaded; weather widget will not update');
-            }
-
-            fetchShabbat(); // Once is usually enough for a lobby screen that refreshes, or refresh daily
-
-            fetchNews();
-            setInterval(fetchNews, 60000 * 5); // 5 min
-
-            await loadUsefulInfoItems();
-
-
-            await loadNotices();
-            renderNotices();
-            document.getElementById('input-date').valueAsDate = new Date();
-
-            // Dynamic Event Loader (URL Priority > Date Schedule)
-            const params = new URLSearchParams(window.location.search);
-            const urlEvent = params.get('event');
-
-            if (urlEvent) {
-                loadEventScript(urlEvent);
-            } else {
-                checkAndLoadScheduledEvents();
-            }
-        });
-
-        // --- EVENT SYSTEM ---
-        // Holiday events are now detected via Hebcal API
-        // Each holiday can have an optional JS file for custom decorations
-        const HOLIDAY_SCRIPTS = {
-            // Map Hebrew holiday names to their script files
-            // 'חנוכה': 'hanukkah.js',  // Uncomment when Hanukkah comes around
-            // 'פורים': 'purim.js',
-            // 'פסח': 'pesach.js',
-            // 'סוכות': 'sukkot.js',
-        };
-
-        // Check for holidays via Hebcal and load appropriate decorations
-        async function checkAndLoadScheduledEvents() {
-            try {
-                // Fetch today's Hebrew calendar info including holidays
-                const today = new Date();
-                const gy = today.getFullYear();
-                const gm = today.getMonth() + 1;
-                const gd = today.getDate();
-
-                const res = await fetch(`https://www.hebcal.com/converter?cfg=json&gy=${gy}&gm=${gm}&gd=${gd}&g2h=1&lg=he`);
-                if (!res.ok) return;
-
-                const data = await res.json();
-
-                // Check if there are any holidays today
-                if (data.events && data.events.length > 0) {
-                    for (const event of data.events) {
-                        const holidayName = event.replace(/[\u0591-\u05C7]/g, '').trim(); // Strip niqqud
-
-                        // Check if we have a script for this holiday
-                        for (const [name, src] of Object.entries(HOLIDAY_SCRIPTS)) {
-                            if (holidayName.includes(name)) {
-                                loadEventScriptSrc(src, name);
-                                break;
-                            }
-                        }
-                    }
-                }
-            } catch (e) {
-                console.warn('Could not check for holidays', e);
-            }
-        }
-
-        function loadEventScriptSrc(src, eventId) {
-            if (!src) return;
-
-            // Avoid duplicates
-            if (eventId && document.querySelector(`script[data-event-id="${eventId}"]`)) return;
-            if (!eventId && document.querySelector(`script[src="${src}"]`)) return;
-
-            console.log(`Loading holiday event: ${eventId || src}`);
-            const script = document.createElement('script');
-            script.src = src;
-            if (eventId) script.dataset.eventId = eventId;
-            script.onerror = () => console.warn(`Could not load event script: ${src}`);
-            document.body.appendChild(script);
-        }
-
-        // For testing: allow URL param to force load an event
-        function loadEventScript(eventId) {
-            const src = HOLIDAY_SCRIPTS[eventId];
-            if (src) {
-                loadEventScriptSrc(src, eventId);
-            } else {
-                console.warn(`Unknown event id: ${eventId}`);
-            }
-        }
-
-
-        // --- USEFUL INFO SCROLLING MARQUEE ---
-        function initUsefulInfoCarousel() {
-            const list = document.getElementById('useful-info-list');
-            if (!list) return;
-
-            // If the JSON hasn't loaded yet (or is empty), show a friendly placeholder.
-            if (!Array.isArray(usefulInfoItems) || usefulInfoItems.length === 0) {
-                list.innerHTML = `
-                    <div class="useful-info-item flex items-center justify-center p-4 rounded-2xl bg-white/5 border border-white/5 text-right">
-                        <div class="text-xl xl:text-2xl text-white/70 font-semibold">אין מידע להצגה</div>
-                    </div>
-                `;
-                list.style.setProperty('--scroll-duration', `20s`);
-                return;
-            }
-
-            // Build items HTML
-            const buildItemsHtml = () => usefulInfoItems.map(item => {
-                const valueClass = item.valueClass ? item.valueClass : '';
-                return `
-                    <div class="useful-info-item flex items-center justify-between p-3 3xl:p-4 rounded-2xl bg-white/5 border border-white/5 hover:bg-white/10 transition text-right mb-4">
-                        <div class="flex-1 min-w-0">
-                            <div class="font-black text-4xl 4xl:text-4xl mb-1">${item.title}</div>
-                            <div class="text-4xl 3xl:text-4xl text-blue-200 font-semibold ${valueClass}">${item.value}</div>
-                        </div>
-                        <div class="text-5xl 4xl:text-6xl opacity-90 mr-3">${item.icon}</div>
-                    </div>
-                `;
-            }).join('');
-
-            // Duplicate content for seamless loop
-            const itemsHtml = buildItemsHtml();
-            list.innerHTML = itemsHtml + itemsHtml;
-
-            // Calculate scroll duration based on content height
-            // Slower = more readable
-            const scrollSpeed = 30; // pixels per second
-            requestAnimationFrame(() => {
-                const singleSetHeight = list.scrollHeight / 2;
-                const duration = singleSetHeight / scrollSpeed;
-                list.style.setProperty('--scroll-duration', `${duration}s`);
-            });
-        }
-
-        // --- CLOCK & DATE ---
-        function updateTime() {
-            const now = new Date();
-            document.getElementById('clock-time').textContent = now.toLocaleTimeString('he-IL', { hour: '2-digit', minute: '2-digit' });
-            const weekday = now.toLocaleDateString('he-IL', { weekday: 'long' });
-
-            const dayTextEl = document.getElementById('clock-day-text');
-            if (dayTextEl) {
-                dayTextEl.textContent = weekday;
-            }
-
-            // Format date as DD.MM.YYYY
-            const dateStr = now.toLocaleDateString('he-IL', { day: '2-digit', month: '2-digit', year: 'numeric' });
-            document.getElementById('clock-date').textContent = dateStr;
-        }
-
-        // --- WEATHER ---
-        // Moved to weather.js (loaded via the external script tag above)
-
-        // --- SHABBAT ---
-        async function fetchShabbat() {
-            try {
-                const res = await fetch(`https://www.hebcal.com/shabbat?cfg=json&geo=pos&latitude=${CITY_LAT}&longitude=${CITY_LON}&tzid=Asia/Jerusalem&M=on&lg=he`);
-                const data = await res.json();
-
-                // Parse Items
-                let parsha = '', candle = '--:--', havdalah = '--:--';
-                let candleDate = null;
-
-                data.items.forEach(item => {
-                    if (item.category === 'parashat') parsha = item.hebrew;
-                    if (item.category === 'candles') {
-                        candleDate = new Date(item.date);
-                        candle = candleDate.toLocaleTimeString('he-IL', { hour: '2-digit', minute: '2-digit' });
-                    }
-                    if (item.category === 'havdalah') {
-                        havdalah = new Date(item.date).toLocaleTimeString('he-IL', { hour: '2-digit', minute: '2-digit' });
-                    }
-                });
-
-                document.getElementById('shabbat-in').textContent = candle;
-                document.getElementById('shabbat-out').textContent = havdalah;
-
-                // Title: "זמני השבת - פרשת ..."
-                const shabbatTitleEl = document.getElementById('shabbat-title');
-                const cleanParsha = stripHebrewNiqqud(parsha || '').trim();
-                if (shabbatTitleEl) {
-                    shabbatTitleEl.textContent = cleanParsha ? `זמני השבת - ${cleanParsha}` : 'זמני השבת';
-                }
-
-                // Date line should be: "יום שישי, 12 בדצמבר 2025 • כ"ב ... תשפ"ו"
-                // Use the candle lighting date (Friday) as reference.
-                const d = candleDate || new Date();
-                const gy = d.getFullYear();
-                const gm = d.getMonth() + 1;
-                const gd = d.getDate();
-
-                // Fetch full Converter data
-                const dateRes = await fetch(`https://www.hebcal.com/converter?cfg=json&gy=${gy}&gm=${gm}&gd=${gd}&g2h=1&lg=he`);
-                if (dateRes.ok) {
-                    const dateData = await dateRes.json();
-                    const hebrewDate = stripHebrewNiqqud(dateData.hebrew || '').trim();
-
-                    // Format Gregorian Date: "יום שישי, 12 בדצמבר 2025"
-                    const weekday = d.toLocaleDateString('he-IL', { weekday: 'long' });
-                    const weekdayLabel = weekday.startsWith('יום') ? weekday : `יום ${weekday}`;
-                    const gregDate = `${weekdayLabel}, ${d.toLocaleDateString('he-IL', { day: 'numeric', month: 'long', year: 'numeric' })}`;
-
-                    const fullString = hebrewDate ? `${gregDate} • ${hebrewDate}` : gregDate;
-                    document.getElementById('shabbat-date-display').textContent = fullString;
-                } else {
-                    // Fallback
-                    const weekday = d.toLocaleDateString('he-IL', { weekday: 'long' });
-                    const weekdayLabel = weekday.startsWith('יום') ? weekday : `יום ${weekday}`;
-                    const gregDate = `${weekdayLabel}, ${d.toLocaleDateString('he-IL', { day: 'numeric', month: 'long', year: 'numeric' })}`;
-                    document.getElementById('shabbat-date-display').textContent = gregDate;
-                }
-
-            } catch (e) { console.error('Shabbat API error', e); }
-        }
-
-        function stripHebrewNiqqud(text) {
-            return (text || '').replace(/[\u0591-\u05C7]/g, '');
-        }
-
-        async function updateHebrewDateToday() {
-            const el = document.getElementById('clock-hebrew-date');
-            if (!el) return;
-            try {
-                const today = new Date();
-                const gy = today.getFullYear();
-                const gm = today.getMonth() + 1;
-                const gd = today.getDate();
-                const res = await fetch(`https://www.hebcal.com/converter?cfg=json&gy=${gy}&gm=${gm}&gd=${gd}&g2h=1&lg=he`);
-                if (!res.ok) throw new Error('HTTP ' + res.status);
-                const data = await res.json();
-                // Example: "כ״ב כִּסְלֵו תשפ״ו"
-                el.textContent = stripHebrewNiqqud(data.hebrew || '').trim() || '--';
-            } catch (e) {
-                console.warn('Hebrew date fetch failed', e);
-                el.textContent = '--';
-            }
-        }
-
-        // --- NEWS TICKER ---
-        async function fetchNews() {
-            const track = document.getElementById('ticker-track');
-            try {
-                // Using Ynet RSS via RSS2JSON proxy
-                const res = await fetch('https://api.rss2json.com/v1/api.json?rss_url=http://www.ynet.co.il/Integration/StoryRss1854.xml');
-                const data = await res.json();
-
-                if (data.status === 'ok' && data.items.length > 0) {
-                    // Build items with clickable links - improved readability
-                    const items = data.items.map(i => {
-                        const time = new Date(i.pubDate).toLocaleTimeString('he-IL', { hour: '2-digit', minute: '2-digit' });
-                        const title = i.title.replace(/"/g, '');
-                        const link = i.link || '#';
-                        return `
-                            <a href="${link}" target="_blank" class="inline-flex items-center gap-4 px-8 lg:px-12 flex-row-reverse hover:bg-white/5 transition rounded-2xl py-3" dir="rtl" title="לחץ לקריאה">
-                                <span class="news-time text-red-300 font-black tabular-nums">${time}</span>
-                                <span class="news-title text-white font-semibold hover:text-accent transition">${title}</span>
-                                <span class="text-white/30 text-2xl mx-2">●</span>
-                            </a>
-                        `;
-                    }).join('');
-
-                    // Insert ONE copy only.
-                    track.innerHTML = items;
-
-                    // SAVE FRESH CONTENT for the setup function
-                    window.tickerOriginalContent = Array.from(track.children).map(c => c.cloneNode(true));
-
-                    setupTickerAnimation(track);
-                }
-            } catch (e) {
-                console.log('News Error, using fallback');
-                const fallback = `<span class="px-8 text-xl">ברוכים הבאים לאלונים 8 • נשמח לעמוד לשירותכם • יום נעים</span>`;
-                track.innerHTML = fallback;
-
-                // SAVE FALLBACK too
-                window.tickerOriginalContent = Array.from(track.children).map(c => c.cloneNode(true));
-
-                setupTickerAnimation(track);
-            }
-        }
-
-        // Recalculate ticker when viewport changes (TV/browser resize) to keep the loop seamless.
-        window.addEventListener('resize', () => {
-            const track = document.getElementById('ticker-track');
-            if (track) setupTickerAnimation(track);
-        });
-
-        function setupTickerAnimation(track) {
-            try {
-                // 1. Reset animation
-                track.style.animation = 'none';
-                track.innerHTML = '';
-
-                // 2. Get the original items
-                if (!window.tickerOriginalContent || window.tickerOriginalContent.length === 0) return;
-                const originals = window.tickerOriginalContent;
-
-                // 3. Measure Single Set Width
-                const tempContainer = document.createElement('div');
-                Object.assign(tempContainer.style, {
-                    position: 'absolute', visibility: 'hidden', whiteSpace: 'nowrap', display: 'inline-flex'
-                });
-                originals.forEach(node => tempContainer.appendChild(node.cloneNode(true)));
-                document.body.appendChild(tempContainer);
-                const singleSetWidth = tempContainer.getBoundingClientRect().width;
-                document.body.removeChild(tempContainer);
-
-                if (singleSetWidth === 0) return;
-
-                // 4. For seamless RTL carousel:
-                // We need content to START from the right edge (off-screen) and scroll left.
-                // Then loop back seamlessly.
-                const screenWidth = window.innerWidth;
-
-                // Build enough content to fill: screen + one full set (for seamless loop)
-                const nodesToAppend = [];
-                let currentWidth = 0;
-                const targetWidth = screenWidth + singleSetWidth * 2; // Extra buffer for smooth loop
-
-                while (currentWidth < targetWidth) {
-                    originals.forEach(node => nodesToAppend.push(node.cloneNode(true)));
-                    currentWidth += singleSetWidth;
-                }
-
-                // 5. Append content to track
-                const fragment = document.createDocumentFragment();
-                nodesToAppend.forEach(node => fragment.appendChild(node));
-                track.appendChild(fragment);
-
-                // 6. Calculate animation values
-                const totalWidth = track.scrollWidth;
-                const scrollDistance = singleSetWidth; // Scroll exactly one set for seamless loop
-
-                // 7. Set CSS Variables
-                // --ticker-start: Start position (screen width = off-screen right)
-                // --ticker-distance: How far to scroll (one set width for seamless loop)
-                track.style.setProperty('--ticker-start', `${screenWidth}px`);
-                track.style.setProperty('--ticker-distance', `${scrollDistance}px`);
-
-                // Duration based on total travel distance (slower for readability)
-                const pxPerSec = 50; // Reduced from 80 for better readability
-                const totalTravel = screenWidth + scrollDistance;
-                const duration = totalTravel / pxPerSec;
-                track.style.setProperty('--ticker-duration', `${duration}s`);
-
-                // 8. Force reflow and restart animation
-                void track.offsetHeight;
-                track.style.animation = '';
-
-            } catch (e) {
-                console.warn('Ticker setup failed', e);
-            }
-        }
-
-
-        // --- NOTICES LOGIC ---
-        function renderNotices() {
-            const area = document.getElementById('notices-area');
-            const counter = document.getElementById('notice-counter');
-
-            clearInterval(rotationTimer);
-            clearInterval(progressTimer);
-
-            if (notices.length === 0) {
-                // Do not rely on #empty-state existing (it can be replaced once notices render).
-                area.innerHTML = `
-                    <div id="empty-state" class="text-center opacity-30">
-                        <div class="text-9xl mb-4">📭</div>
-                        <div class="text-4xl font-light">אין הודעות חדשות</div>
-                    </div>
-                `;
-                if (counter) counter.textContent = 'אין הודעות';
-                return;
-            }
-
-            if (counter) counter.textContent = `${notices.length} הודעות`;
-
-            // Start Rotation
-            showNotice(0);
-            startRotation();
-        }
-
-        function startRotation() {
-            const bar = document.getElementById('notice-progress');
-            let width = 0;
-            const step = 100 / (ROTATION_TIME / 50); // Update every 50ms
-
-            progressTimer = setInterval(() => {
-                width += step;
-                if (width >= 100) width = 100;
-                bar.style.width = width + '%';
-            }, 50);
-
-            rotationTimer = setInterval(() => {
-                currentIndex = (currentIndex + 1) % notices.length;
-                showNotice(currentIndex);
-                width = 0;
-                bar.style.width = '0%';
-            }, ROTATION_TIME);
-        }
-
-        function showNotice(index) {
-            const area = document.getElementById('notices-area');
-            const notice = notices[index];
-            const iconMap = {
-                'welcome': '👋', 'event': '🎉', 'important': '⚠️', 'maintenance': '🔧', 'general': '📢'
-            };
-            const icon = iconMap[notice.type] || '📢';
-
-            // Image vs Wiki vs Icon
-            let visualContent = '';
-
-            if (notice.wikiUrl) {
-                // Placeholder while loading
-                visualContent = `
-                        <div id="wiki-content-${notice.id}" class="w-full flex-1 flex flex-col items-center justify-center min-h-[400px]">
-                            <div class="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-accent mb-4"></div>
-                            <div class="text-blue-200 text-xl">טוען פרט מעניין...</div>
-                        </div>
-                    `;
-
-            } else if (notice.imageUrl) {
-                // Keep correct proportions without allowing the image to change the notice card proportions.
-                // We allocate a fixed media area within the notice card.
-                const hasBody = (notice.content || '').trim().length > 0;
-                // Use container-relative sizing so the notice uses its own layout,
-                // independent of other blocks (avoid viewport-height coupling).
-                const mediaH = hasBody ? 'h-[45%]' : 'h-[60%]';
-                visualContent = `
-                    <div class="w-full ${mediaH} flex items-center justify-center ${hasBody ? 'mb-4' : 'mb-6'}">
-                        <img
-                            src="${notice.imageUrl}"
-                            class="max-h-full max-w-full w-auto h-auto rounded-3xl shadow-3xl object-contain bg-black/20 border border-white/10"
-                            alt="Notice Image"
-                            loading="lazy"
-                            decoding="async"
-                        >
-                    </div>
-                `;
-            } else {
-                visualContent = `<div class="text-8xl mb-6 filter drop-shadow-lg">${icon}</div>`;
-            }
-
-            const urgencyClass = notice.urgent ? 'border-2 border-red-500 shadow-[0_0_50px_rgba(239,68,68,0.2)]' : '';
-            const urgencyBadge = notice.urgent ? '<div class="absolute top-4 left-4 bg-red-600 text-white px-3 py-1 rounded-full text-sm font-bold animate-pulse">דחוף</div>' : '';
-
-            // Animation classes
-            const html = `
-        <div class="w-full h-full flex flex-col items-center justify-start text-center animate-fade-in relative p-4 ${urgencyClass} rounded-3xl bg-white/5">
-            ${urgencyBadge}
-            ${visualContent} 
-            ${(!notice.wikiUrl && notice.title) ? ('<h2 class="text-5xl lg:text-7xl font-black text-white mb-4 leading-tight drop-shadow-md max-w-5xl">' + notice.title + '</h2>') : ''}
-            ${(!notice.wikiUrl && notice.content) ? ('<p class="text-4xl lg:text-5xl text-blue-100 font-light whitespace-pre-line leading-relaxed max-w-5xl">' + notice.content + '</p>') : ''}
-            <div class="mt-6 text-blue-300 font-medium text-xl border-t border-white/10 pt-4 px-8">
-                פורסם ב: ${notice.date} • ועד הבית
-            </div>
-            
-            <button data-action="delete-notice" class="absolute bottom-4 left-4 text-white/10 hover:text-red-500 transition p-2">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
-            </button>
-        </div>
-    `;
-            area.innerHTML = html;
-
-            // Wire delete button (avoid inline onclick inside template literal)
-            const delBtn = area.querySelector('button[data-action="delete-notice"]');
-            if (delBtn) {
-                delBtn.addEventListener('click', () => deleteNotice(notice.id));
-            }
-
-            // Fetch AFTER adding to DOM
-            if (notice.wikiUrl) {
-                fetchWikiFact(notice.wikiUrl, `wiki-content-${notice.id}`);
-            }
-
-        }
-
-        // Global cache for Wiki Fact
-        window.wikiCache = { timestamp: 0, html: null, imgSrc: null, textHtml: null };
-
-        async function fetchWikiFact(url, containerId) {
-            try {
-                const now = Date.now();
-                const cacheDuration = 2 * 60 * 60 * 1000; // 2 hours
-
-                // 1. Check Cache
-                if (window.wikiCache && window.wikiCache.timestamp && (now - window.wikiCache.timestamp < cacheDuration)) {
-                    console.log('Using cached Wiki fact');
-                    renderWikiFact(window.wikiCache.html, window.wikiCache.imgSrc, window.wikiCache.textHtml, containerId);
-                    return;
-                }
-
-                // 2. Fetch Fresh
-                console.log('Fetching fresh Wiki fact');
-                // Cache bust using clear URL param
-                const cacheBust = new Date().getTime();
-                const finalUrl = `${url}& cb=${cacheBust} `;
-
-                // Use allorigins to bypass CORS
-                const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(finalUrl)}`;
-
-                const res = await fetch(proxyUrl);
-                if (!res.ok) throw new Error('Proxy error');
-
-                const data = await res.json();
-                const html = data.contents;
-
-                // Parse HTML
-                const parser = new DOMParser();
-                const doc = parser.parseFromString(html, 'text/html');
-
-                // Extract Content
-                // 1. Image
-                const imgEl = doc.querySelector('.mw-file-description img') || doc.querySelector('a.image img');
-                let imgSrc = '';
-                if (imgEl) {
-                    // Fix relative URLs if any (Wikipedia usually gives full connection-relative //)
-                    imgSrc = imgEl.src;
-                    if (imgSrc.startsWith('//')) imgSrc = 'https:' + imgSrc;
-                }
-
-                // 2. Text
-                // Usually in the first few Ps or Divs of mw-parser-output
-                const parserOutput = doc.querySelector('.mw-parser-output');
-                let textHtml = '';
-
-                if (parserOutput) {
-                    // Remove "See also", "References", "External links" etc. if they appear
-                    // Ideally we just want the text up to the "קטע בנושא" line
-
-                    // Simple heuristic: Get text from paragraphs until we hit the bottom links
-                    const paras = Array.from(parserOutput.querySelectorAll('p, div'));
-                    let foundText = false;
-
-                    for (const p of paras) {
-                        let text = p.innerText.trim();
-                        // Skip empty or utility lines
-                        if (!text) continue;
-
-                        const isEndMarker = text.includes('קטע בנושא');
-
-                        // "Did you know that..." usually starts the fact
-                        if (text.includes('הידעת') || foundText || text.length > 20) {
-                            let cleanHtml = p.innerHTML.replace(/\[\d+\]/g, '').replace(/\[HE\]/g, '');
-
-                            if (isEndMarker) {
-                                // Try to strip the marker "קטע בנושא" and anything after
-                                cleanHtml = cleanHtml.replace(/<span[^>]*>קטע בנושא.*<\/span>/i, '');
-                                if (cleanHtml.includes('קטע בנושא')) cleanHtml = cleanHtml.split('קטע בנושא')[0];
-
-                                textHtml += `<div class="mb-4 leading-relaxed">${cleanHtml}</div>`;
-                                break; // End of fact
-                            }
-
-                            textHtml += `<div class="mb-4 leading-relaxed">${cleanHtml}</div>`;
-                            foundText = true;
-                        }
-                    }
-                }
-
-                if (!textHtml) textHtml = '<div class="text-2xl">לא נמצא מידע. נסה שוב מאוחר יותר.</div>';
-
-                // 3. Update Cache
-                window.wikiCache = { timestamp: now, html: html, imgSrc: imgSrc, textHtml: textHtml };
-
-                // 4. Render
-                renderWikiFact(html, imgSrc, textHtml, containerId);
-
-            } catch (e) {
-                console.error('Wiki fetch error', e);
-                const container = document.getElementById(containerId);
-                if (container) {
-                    container.innerHTML = '<div class="text-2xl text-red-300">שגיאה בטעינת הנתונים</div>';
-                }
-            }
-        }
-
-        function renderWikiFact(rawHtml, imgSrc, textHtml, containerId) {
-            const container = document.getElementById(containerId);
-            if (!container) return;
-
-            // Build UI
-            container.innerHTML = `
-                         <div class="w-full flex flex-col h-full bg-slate-800/50 p-6 rounded-2xl border border-white/5 relative overflow-hidden">
-                            <!-- Title -->
-                            <div class="flex items-center justify-center gap-3 mb-6 shrink-0 z-10">
-                                <span class="text-5xl">💡</span>
-                                <h2 class="text-5xl font-black text-gold drop-shadow-md">הידעת?</h2>
-                            </div>
-
-                            <!-- Content Wrapper (Scrollable if needed) -->
-                            <div class="flex-1 overflow-y-auto custom-scroll pr-2 relative z-10 flex flex-col 4xl:flex-row items-center 4xl:items-start gap-6">
-
-                                ${imgSrc ? `
-                                <div class="shrink-0 w-48 h-48 xl:w-64 xl:h-64 rounded-xl overflow-hidden border-2 border-white/20 shadow-xl bg-black/20">
-                                    <img src="${imgSrc}" class="w-full h-full object-cover" alt="Wikipedia Image">
-                                </div>
-                                ` : ''}
-
-                                <div class="text-6xl 2xl:text-5xl text-white font-light text-right leading-relaxed wiki-text">
-                                    ${textHtml}
-                                </div>
-                            </div>
-
-                            <div class="mt-4 text-center text-white/30 text-xl border-t border-white/5 pt-2 z-10">
-                                מתוך ויקיפדיה
-                            </div>
-
-                            <!-- Background Decoration -->
-                            <div class="absolute -bottom-10 -left-10 text-[15rem] opacity-5 select-none pointer-events-none">?</div>
-                        </div>
-                    `;
-
-            // Post-process links to be visible
-            const links = container.querySelectorAll('.wiki-text a');
-            links.forEach(a => {
-                a.style.color = '#7dd3fc'; // Sky 300
-                a.style.textDecoration = 'none';
-                a.style.fontWeight = '500';
-            });
-        }
-
-        // --- ADMIN FUNCTIONS ---
-        function openAdmin() { document.getElementById('admin-modal').classList.remove('hidden'); }
-        function closeAdmin() { document.getElementById('admin-modal').classList.add('hidden'); }
-        function clearInputs() {
-            document.getElementById('input-title').value = '';
-            document.getElementById('input-content').value = '';
-            document.getElementById('input-urgent').checked = false;
-        }
-
-        function saveNotice() {
-            const title = document.getElementById('input-title').value;
-            const content = document.getElementById('input-content').value;
-            if (!title) return alert('נא להזין כותרת');
-
-            const newNotice = {
-                id: Date.now().toString(),
-                title: title,
-                content: content,
-                type: document.getElementById('input-type').value,
-                date: document.getElementById('input-date').value,
-                urgent: document.getElementById('input-urgent').checked
-            };
-
-            notices.unshift(newNotice); // Add to top
-            saveNotices(); // Save to storage
-            renderNotices();
-            closeAdmin();
-            clearInputs();
-        }
-
-        function deleteNotice(id) {
-            if (confirm('למחוק הודעה זו?')) {
-                notices = notices.filter(n => n.id !== id.toString()); // Ensure string comparison
-                saveNotices(); // Save to storage
-                renderNotices();
-            }
-        }
-
-        // --- PERSISTENCE ---
-        // Load from notices.json (shared), fallback to localStorage (local edits)
-        async function loadNotices() {
-            // If opened directly from disk (file://), browsers often block fetch() to local json.
-            // In that case we'll fall back to localStorage, which may look "stuck" if you edit notices.json.
-            if (window.location.protocol === 'file:') {
-                console.warn('Running from file:// - notices.json fetch may be blocked. Start a local HTTP server to load notices.json reliably.');
-            }
-
-            // 1) Try notices.json (works when served over HTTP)
-            try {
-                const res = await fetch('notices.json?_=' + Date.now());
-                if (res.ok) {
-                    const json = await res.json();
-                    if (Array.isArray(json)) {
-                        notices = mapNoticesFromJson(json);
-                        // Cache locally so the TV can still work offline later
-                        saveNotices();
-                        const counter = document.getElementById('notice-counter');
-                        if (counter) counter.textContent = `${notices.length} הודעות`;
-                        return;
-                    }
-                }
-            } catch (e) {
-                console.warn('Could not load notices.json, falling back to localStorage', e);
-            }
-
-            // 2) Fallback to localStorage
-            const stored = localStorage.getItem('lobby-notices');
-            notices = stored ? JSON.parse(stored) : [];
-            const counter = document.getElementById('notice-counter');
-            if (counter) counter.textContent = `${notices.length} הודעות`;
-        }
-
-        function mapNoticesFromJson(items) {
-            // Your notices.json schema:
-            // { id, title, content, category, date, color, priority, type, imageUrl }
-            // Current UI expects:
-            // { id, title, content, type, date, urgent, imageUrl }
-            const mapType = {
-                general: 'general',
-                important: 'important',
-                event: 'event',
-                welcome: 'welcome',
-                maintenance: 'maintenance',
-                vaad: 'important',
-                holiday: 'event'
-            };
-            return items
-                // Only show notice-board items here; ignore "news" entries
-                .filter(n => (n.type || 'notice') === 'notice')
-                .map(n => ({
-                    id: String(n.id ?? Date.now()),
-                    title: n.title || '',
-                    content: n.content || '',
-                    type: mapType[n.category] || mapType[n.type] || 'general',
-                    date: n.date || new Date().toISOString().split('T')[0],
-                    urgent: Boolean(n.priority),
-                    imageUrl: n.imageUrl ?? null,
-                    iframeUrl: n.iframeUrl ?? null,
-                    wikiUrl: n.wikiUrl ?? null
-                }));
-        }
-        function saveNotices() {
-            localStorage.setItem('lobby-notices', JSON.stringify(notices));
-        }
-
-    </script>
+    <script src="js/config.js" defer></script>
+    <script src="js/utils.js" defer></script>
+    <script src="js/time.js" defer></script>
+    <script src="js/hebrewDate.js" defer></script>
+    <script src="js/shabbat.js" defer></script>
+    <script src="js/newsTicker.js" defer></script>
+    <script src="js/usefulInfo.js" defer></script>
+    <script src="js/wiki.js" defer></script>
+    <script src="js/notices.js" defer></script>
+    <script src="js/events.js" defer></script>
+    <script src="js/app.js" defer></script>
 </body>
 
 </html>
