@@ -1,0 +1,401 @@
+{
+    "apartments": {
+        "51": {
+            "familyName": "יגן",
+            "altNames": [
+                "yagan",
+                "יגן"
+            ]
+        },
+        "52": {
+            "familyName": "יחיאל",
+            "altNames": [
+                "yechiel",
+                "יחיאל",
+                "netali",
+                "נטעלי"
+            ]
+        },
+        "53": {
+            "familyName": "אלקובי",
+            "altNames": [
+                "elkobi",
+                "alkobi",
+                "אלקובי"
+            ]
+        },
+        "54": {
+            "familyName": "צ'פלנוב",
+            "altNames": [
+                "chaplanov",
+                "tseplanov",
+                "צ'פלנוב"
+            ]
+        },
+        "55": {
+            "familyName": "פלומבו",
+            "altNames": [
+                "palombo",
+                "פלומבו",
+                "sharon",
+                "שרון"
+            ]
+        },
+        "56": {
+            "familyName": "קובה",
+            "altNames": [
+                "kuba",
+                "koba",
+                "קובה",
+                "avraham",
+                "אברהם"
+            ]
+        },
+        "57": {
+            "familyName": "אורן",
+            "altNames": [
+                "oren",
+                "אורן",
+                "shubalov",
+                "שובלוב"
+            ]
+        },
+        "58": {
+            "familyName": "אורן",
+            "altNames": [
+                "oren",
+                "אורן",
+                "barnes",
+                "brans",
+                "ברנס"
+            ]
+        },
+        "59": {
+            "familyName": "דויג",
+            "altNames": [
+                "doig",
+                "davig",
+                "דויג"
+            ]
+        },
+        "60": {
+            "familyName": "שמעון",
+            "altNames": [
+                "shimon",
+                "שמעון"
+            ]
+        },
+        "61": {
+            "familyName": "בן דוד",
+            "altNames": [
+                "ben david",
+                "בן דוד"
+            ]
+        },
+        "62": {
+            "familyName": "דוידובסקי",
+            "altNames": [
+                "davidovsky",
+                "דוידובסקי"
+            ]
+        },
+        "63": {
+            "familyName": "בז'רנו",
+            "altNames": [
+                "bejarano",
+                "בז'רנו"
+            ]
+        },
+        "64": {
+            "familyName": "ברק-סובול",
+            "altNames": [
+                "barak",
+                "sobol",
+                "ברק",
+                "סובול"
+            ]
+        },
+        "65": {
+            "familyName": "לוי",
+            "altNames": [
+                "levi",
+                "levy",
+                "לוי",
+                "weizman",
+                "ויצמן"
+            ]
+        },
+        "66": {
+            "familyName": "וורנין",
+            "altNames": [
+                "voronin",
+                "וורנין"
+            ]
+        },
+        "67": {
+            "familyName": "מנחם",
+            "altNames": [
+                "menachem",
+                "מנחם",
+                "zilberman",
+                "זילברמן"
+            ]
+        },
+        "68": {
+            "familyName": "לוי",
+            "altNames": [
+                "levi",
+                "levy",
+                "לוי"
+            ]
+        },
+        "69": {
+            "familyName": "כהן",
+            "altNames": [
+                "cohen",
+                "כהן",
+                "sitbon",
+                "סיטבון"
+            ]
+        },
+        "70": {
+            "familyName": "לניאדו",
+            "altNames": [
+                "laniado",
+                "לניאדו"
+            ]
+        },
+        "71": {
+            "familyName": "פוליאקוב",
+            "altNames": [
+                "polyakov",
+                "פוליאקוב"
+            ]
+        },
+        "72": {
+            "familyName": "שלוסברג",
+            "altNames": [
+                "schlossberg",
+                "שלוסברג"
+            ]
+        },
+        "73": {
+            "familyName": "מטאל",
+            "altNames": [
+                "metal",
+                "mattel",
+                "מטאל"
+            ]
+        },
+        "74": {
+            "familyName": "אדלר",
+            "altNames": [
+                "adler",
+                "אדלר",
+                "badusa",
+                "בדוסה"
+            ]
+        },
+        "75": {
+            "familyName": "מזור",
+            "altNames": [
+                "mazor",
+                "מזור"
+            ]
+        },
+        "76": {
+            "familyName": "מזרחי",
+            "altNames": [
+                "mizrachi",
+                "מזרחי",
+                "gez",
+                "gaz",
+                "גז"
+            ]
+        },
+        "77": {
+            "familyName": "נפתלי",
+            "altNames": [
+                "naftali",
+                "נפתלי",
+                "ochana",
+                "ohana",
+                "אוחנה"
+            ]
+        },
+        "78": {
+            "familyName": "ישראלסקי",
+            "altNames": [
+                "israelski",
+                "ישראלסקי"
+            ]
+        },
+        "79": {
+            "familyName": "אדות",
+            "altNames": [
+                "adut",
+                "adot",
+                "אדות"
+            ]
+        },
+        "80": {
+            "familyName": "שורני",
+            "altNames": [
+                "shurany",
+                "shorani",
+                "שורני"
+            ]
+        },
+        "81": {
+            "familyName": "האן",
+            "altNames": [
+                "hahn",
+                "han",
+                "האן"
+            ]
+        },
+        "82": {
+            "familyName": "אורטסי",
+            "altNames": [
+                "ortsi",
+                "ortsa",
+                "אורטסי"
+            ]
+        },
+        "83": {
+            "familyName": "בטשון",
+            "altNames": [
+                "batshon",
+                "בטשון"
+            ]
+        },
+        "84": {
+            "familyName": "רייכמן",
+            "altNames": [
+                "reichman",
+                "רייכמן"
+            ]
+        },
+        "85": {
+            "familyName": "רובין",
+            "altNames": [
+                "rubin",
+                "רובין",
+                "zukerman",
+                "tzukerman",
+                "צוקרמן"
+            ]
+        },
+        "86": {
+            "familyName": "חנה",
+            "altNames": [
+                "hana",
+                "chana",
+                "חנה",
+                "bar tal",
+                "bertal",
+                "בר טל"
+            ]
+        },
+        "87": {
+            "familyName": "גנון",
+            "altNames": [
+                "ganon",
+                "גנון"
+            ]
+        },
+        "88": {
+            "familyName": "אליאס",
+            "altNames": [
+                "elias",
+                "אליאס"
+            ]
+        },
+        "89": {
+            "familyName": "לידרמן",
+            "altNames": [
+                "liderman",
+                "לידרמן"
+            ]
+        },
+        "90": {
+            "familyName": "שילר",
+            "altNames": [
+                "schiller",
+                "shiller",
+                "שילר"
+            ]
+        },
+        "91": {
+            "familyName": "וילנסקי",
+            "altNames": [
+                "vilenski",
+                "וילנסקי"
+            ]
+        },
+        "92": {
+            "familyName": "רנארט",
+            "altNames": [
+                "renart",
+                "רנארט",
+                "sheferman",
+                "שפרמן"
+            ]
+        },
+        "93": {
+            "familyName": "יואחנין",
+            "altNames": [
+                "yochanin",
+                "יואחנין"
+            ]
+        },
+        "94": {
+            "familyName": "כהן",
+            "altNames": [
+                "cohen",
+                "כהן",
+                "gofman",
+                "גופמן"
+            ]
+        },
+        "95": {
+            "familyName": "טרגן",
+            "altNames": [
+                "taragan",
+                "טרגן",
+                "snir",
+                "שניר"
+            ]
+        },
+        "96": {
+            "familyName": "אשכנזי",
+            "altNames": [
+                "ashkenazi",
+                "אשכנזי"
+            ]
+        },
+        "97": {
+            "familyName": "מימון",
+            "altNames": [
+                "maimon",
+                "מימון"
+            ]
+        },
+        "98": {
+            "familyName": "לזרע",
+            "altNames": [
+                "lazra",
+                "lezera",
+                "לזרע"
+            ]
+        },
+        "99": {
+            "familyName": "צפריר",
+            "altNames": [
+                "tzafrir",
+                "zafrir",
+                "צפריר"
+            ]
+        }
+    }
+}
