@@ -3,6 +3,7 @@ import json
 import os
 import glob
 from datetime import datetime
+import re
 
 # Paths
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -73,9 +74,18 @@ def main():
 
         print(f"Found {len(df_filtered)} matching transactions.")
         
+        # Extract Receipt Number from 'עבור' (or fallback column)
+        def extract_receipt(val):
+            val_str = str(val)
+            match = re.search(r'\d+', val_str)
+            return match.group() if match else ""
+
+        df_filtered['קבלה'] = df_filtered[avur_col].apply(extract_receipt)
+
         # Select specific columns
-        # תאריך, הפעולה, אסמכתא, זכות, לטובת, עבור
-        target_cols = [c for c in df.columns if c in ["תאריך", "הפעולה", "אסמכתא", "זכות", "לטובת", "עבור"]]
+        # תאריך, הפעולה, אסמכתא, זכות, לטובת, קבלה
+        cols_to_keep = ["תאריך", "הפעולה", "אסמכתא", "זכות", "לטובת", "קבלה"]
+        target_cols = [c for c in cols_to_keep if c in df_filtered.columns]
         
         final_df = df_filtered[target_cols].copy()
         
@@ -97,37 +107,80 @@ def main():
                 except json.JSONDecodeError:
                     current_data = []
 
-        # Deduplicate using 'אסמכתא'
+        def generate_unique_id(record):
+            """Generates a robust unique ID based on multiple fields."""
+            ref = str(record.get('אסמכתא') or '').strip()
+            date = str(record.get('תאריך') or '').strip()
+            credit = str(record.get('זכות') or '').strip()
+            beneficiary = str(record.get('לטובת') or '').strip()
+            
+            # Handle 'nan' string from pandas or None
+            parts = [ref, date, credit, beneficiary]
+            clean_parts = []
+            for p in parts:
+                if p.lower() == 'nan' or p == 'None':
+                    clean_parts.append('')
+                else:
+                    clean_parts.append(p)
+            
+            # Create composite key: ref_date_credit_beneficiary
+            # Using MD5 or just a joined string. Joined string is readable.
+            return "_".join(clean_parts)
+
+        # Validate and clean existing data
+        migrated_count = 0
         existing_refs = set()
+        
+        allowed_keys = {"_id", "id", "migrated", "תאריך", "הפעולה", "אסמכתא", "זכות", "לטובת", "קבלה"}
+
         for item in current_data:
-            unique_key = str(item.get('אסמכתא') or item.get('_id') or item.get('id') or '')
-            if unique_key:
-                existing_refs.add(unique_key)
+            # Backfill 'קבלה' if missing and 'עבור' exists
+            if 'קבלה' not in item and 'עבור' in item:
+                 item['קבלה'] = extract_receipt(item['עבור'])
+                 migrated_count += 1
+            
+            # Remove unwanted keys
+            keys_to_remove = [k for k in item.keys() if k not in allowed_keys]
+            if keys_to_remove:
+                for k in keys_to_remove:
+                    del item[k]
+                migrated_count += 1
+            
+            # Generate ID based on item content (now cleaned/updated)
+            new_id = generate_unique_id(item)
+            
+            # Update ID if different or missing
+            if item.get('_id') != new_id:
+                item['_id'] = new_id
+                migrated_count += 1
+            
+            existing_refs.add(new_id)
+
+        if migrated_count > 0:
+            print(f"Migrated/Cleaned {migrated_count} existing records.")
 
         added_count = 0
         for record in new_records:
-            ref_val = str(record.get('אסמכתא', ''))
+            # Clean record first to ensure valid values for ID generation logic match final storage
+            clean_record = {k: (v if pd.notna(v) else "") for k, v in record.items()}
             
-            # If no ref or nan, create synthetic
-            if not ref_val or ref_val == "nan":
-                 date_val = str(record.get('תאריך', ''))
-                 credit_val = str(record.get('זכות', ''))
-                 ref_val = f"{date_val}-{credit_val}-synthetic"
+            rec_id = generate_unique_id(clean_record)
             
-            if ref_val not in existing_refs:
+            if rec_id not in existing_refs:
                 # Add
-                clean_record = {k: (v if pd.notna(v) else "") for k, v in record.items()}
-                clean_record['_id'] = ref_val
-                
+                clean_record['_id'] = rec_id
                 current_data.append(clean_record)
-                existing_refs.add(ref_val)
+                existing_refs.add(rec_id)
                 added_count += 1
 
         # Save
-        if added_count > 0:
+        if added_count > 0 or migrated_count > 0:
             with open(PROCESSED_FILE, 'w', encoding='utf-8') as f:
                 json.dump(current_data, f, ensure_ascii=False, indent=2)
-            print(f"Added {added_count} new transactions to processed.json.")
+            if added_count > 0:
+                print(f"Added {added_count} new transactions to processed.json.")
+            if migrated_count > 0:
+                print(f"Saved migration updates.")
         else:
             print("No new unique transactions to add.")
 
