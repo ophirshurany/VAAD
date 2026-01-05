@@ -1,7 +1,8 @@
 node_modules
 .env
 receipts/*.pdf
-data/*.json
+data/
+config/
 !data/.keep
 .DS_Store
 
