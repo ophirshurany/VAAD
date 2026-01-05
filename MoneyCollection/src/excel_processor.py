@@ -9,7 +9,7 @@ import re
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DOWNLOADS_DIR = os.path.join(BASE_DIR, 'data', 'downloads')
 DATA_DIR = os.path.join(BASE_DIR, 'data')
-PROCESSED_FILE = os.path.join(DATA_DIR, 'processed.json')
+PROCESSED_FILE = os.path.join(DATA_DIR, 'excel_output.json')
 
 def main():
     print("Starting Python Excel Processor...")

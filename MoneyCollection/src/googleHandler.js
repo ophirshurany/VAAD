@@ -4,26 +4,48 @@ const path = require('path');
 const moment = require('moment');
 require('dotenv').config();
 
-// Initialize Auth
-const auth = new google.auth.GoogleAuth({
-    credentials: {
-        client_email: process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL,
-        private_key: process.env.GOOGLE_PRIVATE_KEY?.replace(/\\n/g, '\n'), // Handle escaped newlines
-    },
-    scopes: [
-        'https://www.googleapis.com/auth/drive', // Full drive access needed to creation/upload
-        'https://www.googleapis.com/auth/spreadsheets'
-    ],
-});
+// Load credentials and token
+const CREDENTIALS_PATH = path.join(__dirname, '../credentials.json');
+const TOKEN_PATH = path.join(__dirname, '../token.json');
 
-const drive = google.drive({ version: 'v3', auth });
-const sheets = google.sheets({ version: 'v4', auth });
+// Initialize Auth
+function getAuthClient() {
+    // Check if token exists
+    if (!fs.existsSync(TOKEN_PATH)) {
+        throw new Error('token.json not found. Please run "node src/setupAuth.js" first to authenticate.');
+    }
+
+    const credentials = JSON.parse(fs.readFileSync(CREDENTIALS_PATH));
+    const token = JSON.parse(fs.readFileSync(TOKEN_PATH));
+
+    // Support both 'installed' and 'web' formats
+    const { client_secret, client_id, redirect_uris } = credentials.installed || credentials.web;
+
+    const oAuth2Client = new google.auth.OAuth2(client_id, client_secret, redirect_uris[0]);
+    oAuth2Client.setCredentials(token);
+    return oAuth2Client;
+}
+
+// Lazy load auth to avoid crashing on import if token missing (though global scope here runs immediately)
+// For robustness, we might want to wrap these, but let's stick to user provided structure
+// which initializes them at top level.
+let drive, sheets;
+try {
+    const auth = getAuthClient();
+    drive = google.drive({ version: 'v3', auth });
+    sheets = google.sheets({ version: 'v4', auth });
+} catch (e) {
+    console.error("Google Auth Initialization Error:", e.message);
+    // Allow module load, but methods will fail
+}
 
 /**
  * Ensures a folder for the current year exists inside the root folder.
  * @returns {Promise<string>} - The ID of the year folder.
  */
 async function getYearFolderId() {
+    if (!drive) throw new Error('Google Drive client not initialized');
+
     const currentYear = moment().format('YYYY');
     const rootFolderId = process.env.GOOGLE_DRIVE_FOLDER_ID;
 
@@ -73,6 +95,8 @@ async function getYearFolderId() {
  * @returns {Promise<string>} - WebViewLink of the uploaded file.
  */
 async function uploadReceiptToDrive(filePath, fileName) {
+    if (!drive) throw new Error('Google Drive client not initialized');
+
     try {
         const folderId = await getYearFolderId();
 
@@ -93,10 +117,6 @@ async function uploadReceiptToDrive(filePath, fileName) {
         });
 
         console.log(`Uploaded receipt ID: ${file.data.id}`);
-
-        // Set permissions so anyone with link can view (optional, or just restrict to committee)
-        // For now, assume inherited permissions from parent folder are sufficient.
-
         return file.data.webViewLink;
     } catch (err) {
         console.error('Error uploading receipt:', err);
@@ -108,22 +128,46 @@ async function uploadReceiptToDrive(filePath, fileName) {
  * Appends details to the Income Tracking Google Sheet.
  * @param {Array} rowData - Array of values: [Date, Amount, Payer, Apt, Ref, Link]
  */
+/**
+ * Gets the title of the first sheet in the spreadsheet.
+ */
+async function getFirstSheetName(spreadsheetId) {
+    const res = await sheets.spreadsheets.get({
+        spreadsheetId,
+        fields: 'sheets.properties.title'
+    });
+    if (res.data.sheets && res.data.sheets.length > 0) {
+        return res.data.sheets[0].properties.title;
+    }
+    return 'Sheet1'; // Fallback
+}
+
+/**
+ * Appends details to the Income Tracking Google Sheet.
+ * @param {Array} rowData - Array of values: [Date, Amount, Payer, Apt, Ref, Link]
+ */
 async function updateSheet(rowData) {
+    if (!sheets) throw new Error('Google Sheets client not initialized');
+
     const spreadsheetId = process.env.GOOGLE_SHEET_ID;
     if (!spreadsheetId) {
         throw new Error('GOOGLE_SHEET_ID is missing from .env');
     }
 
     try {
+        const sheetName = await getFirstSheetName(spreadsheetId);
+        // If name has spaces/special chars, it typically needs single quotes: "'My Sheet'!A:F"
+        const range = `'${sheetName}'!A:F`;
+
         await sheets.spreadsheets.values.append({
             spreadsheetId,
-            range: 'Sheet1!A:F', // Assumes Sheet1, columns A-F
+            range: range,
             valueInputOption: 'USER_ENTERED',
             resource: {
                 values: [rowData],
             },
         });
-        console.log('Sheet updated successfully.');
+        console.log(`Sheet '${sheetName}' updated successfully.`);
     } catch (err) {
         console.error('Error updating sheet:', err);
         throw err;
@@ -136,11 +180,12 @@ async function updateSheet(rowData) {
  * @returns {Promise<Object>} - Format matching tenants.json: { apartments: { "53": { familyName: ... } } }
  */
 async function fetchTenantsFromSheet() {
+    if (!sheets) throw new Error('Google Sheets client not initialized');
+
     const spreadsheetId = process.env.GOOGLE_SHEET_ID;
     if (!spreadsheetId) throw new Error('GOOGLE_SHEET_ID missing');
 
     try {
-        // Read from "Tenants" sheet, columns A-C
         const res = await sheets.spreadsheets.values.get({
             spreadsheetId,
             range: 'Tenants!A:C',
@@ -154,7 +199,6 @@ async function fetchTenantsFromSheet() {
 
         const tenantsConfig = { apartments: {} };
 
-        // Remove header if it looks like one (non-numeric first col)
         if (rows[0] && isNaN(parseInt(rows[0][0]))) {
             rows.shift();
         }
@@ -166,12 +210,11 @@ async function fetchTenantsFromSheet() {
 
             if (!apt) return;
 
-            // "if tenant cell is blank therefore the person who lives in this apartment is the landlord"
             const primaryName = tenant || landlord || 'Unknown';
 
             tenantsConfig.apartments[apt] = {
                 familyName: primaryName,
-                altNames: [landlord, tenant].filter(Boolean) // Add both for fuzzy search
+                altNames: [landlord, tenant].filter(Boolean)
             };
         });
 
