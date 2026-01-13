@@ -75,28 +75,26 @@ function generateReceipt(transaction, tenantInfo) {
             doc.text(`_________________________________________________`, { align: 'center' });
             doc.moveDown();
 
-            // Date
-            doc.text(`Date / תאריך: ${dateStr}`, { align: 'right' });
+            // תאריך
+            doc.text(`תאריך: ${dateStr}`, { align: 'right' });
 
-            // Amount
-            doc.text(`Amount / סכום: ${transaction.amount} ILS`, { align: 'right' });
+            // סכום
+            doc.text(`סכום: ${transaction.amount} ₪`, { align: 'right' });
 
-            // Apartment
-            doc.text(`Apartment / דירה: ${tenantInfo.apartment}`, { align: 'right' });
+            // דירה
+            doc.text(`דירה: ${tenantInfo.apartment}`, { align: 'right' });
 
-            // Tenant Name
-            // Use fallback if Hebrew characters cause issues in code logic, but tenantInfo should be fine.
-            doc.text(`Payer / משלם: ${tenantInfo.tenantName}`, { align: 'right' });
+            // משלם
+            doc.text(`משלם: ${tenantInfo.tenantName}`, { align: 'right' });
 
-            // Description (Bank)
-            doc.text(`Details / פרטים: ${transaction.description}`, { align: 'right' });
+            // פרטים
+            doc.text(`פרטים: ${transaction.description}`, { align: 'right' });
 
-            // Reference
-            doc.text(`Ref / אסמכתא: ${transaction.id}`, { align: 'right' });
+            // אסמכתא
+            doc.text(`אסמכתא: ${transaction.id}`, { align: 'right' });
 
             doc.moveDown(2);
             doc.fontSize(12).text('תודה רבה על התשלום!', { align: 'center' });
-            doc.text('Thank you for your payment!', { align: 'center' });
 
             doc.end();
 

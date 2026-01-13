@@ -1,15 +1,20 @@
 require('dotenv').config();
 const { getBankTransactions } = require('./bankCheckingAccount');
-const { uploadReceiptToDrive, updateSheet, fetchTenantsFromSheet } = require('./googleHandler');
+const { uploadReceiptToDrive, fetchTenantsFromSheet, recordPaymentToGrid } = require('./googleHandler');
 const { isProcessed, markProcessed } = require('./stateManager');
 const { classifyTransaction } = require('./transactionClassifier');
 const { generateReceipt } = require('./receiptGenerator');
+const { validatePayment, getFixedAmount } = require('./paymentValidator');
 const fs = require('fs');
 const path = require('path');
 const moment = require('moment');
 
+// Get fixed payment amount from config
+const FIXED_PAYMENT_AMOUNT = getFixedAmount();
+
 async function main() {
     console.log('Starting Building Committee Collection System...');
+    console.log(`Fixed payment amount: ${FIXED_PAYMENT_AMOUNT} ₪`);
 
     try {
         // 0. Load Tenant Config
@@ -25,9 +30,7 @@ async function main() {
             console.warn('Could not load local tenants.json');
         }
 
-        // Load from Sheet and merge (Sheet takes precedence if collision, or we can merge lists?)
-        // User wants Sheet to "build" the json, implying Sheet is source of truth.
-        // For now, let's overlay Sheet data on top of local data.
+        // Load from Sheet and merge (Sheet takes precedence if collision)
         const sheetConfig = await fetchTenantsFromSheet();
         if (Object.keys(sheetConfig.apartments).length > 0) {
             console.log(`Loaded ${Object.keys(sheetConfig.apartments).length} apartments from Google Sheet.`);
@@ -39,7 +42,6 @@ async function main() {
 
         // 1. Scrape Bank
         // For default, fetch current month. 
-        // To fetch more history initially, change date here manually or via args.
         const startOfMonth = moment().startOf('month').format('YYYY-MM-DD');
         const transactions = await getBankTransactions(startOfMonth);
 
@@ -53,9 +55,7 @@ async function main() {
         let processedCount = 0;
 
         for (const txn of transactions) {
-            // Use a unique ID combination if bank doesn't provide a global unique ID consistent across scrapes.
-            // israeli-bank-scrapers usually provides an 'identifier' or we can combine date-amount-desc.
-            // Assuming 'identifier' or 'id' property exists and is stable.
+            // Use a unique ID combination if bank doesn't provide a global unique ID
             const txnId = txn.identifier || txn.id;
 
             if (isProcessed(txnId)) {
@@ -63,18 +63,26 @@ async function main() {
                 continue;
             }
 
-            console.log(`\n--- Processing Transaction: ${txn.description} (${txn.chargedAmount} ILS) ---`);
+            console.log(`\n--- Processing Transaction: ${txn.description} (${txn.chargedAmount} ₪) ---`);
 
             // 2. Classify
             const classification = classifyTransaction(txn.description, tenantsConfig);
 
             if (!classification.apartment) {
                 console.warn(`Could not identify tenant for transaction: ${txn.description}. Handle manually.`);
-                // TODO: Maybe alert user or log to a "failed" list?
                 continue;
             }
 
             console.log(`Identified: Apt ${classification.apartment} (${classification.tenantName}) - Confidence: ${classification.confidence}`);
+
+            // 2.5. Validate Payment
+            const paymentValidation = validatePayment(txn.chargedAmount);
+
+            if (paymentValidation.isUnderpayment) {
+                console.warn(`⚠️  Underpayment detected: ${txn.chargedAmount} ₪ (expected ${FIXED_PAYMENT_AMOUNT} ₪, short by ${paymentValidation.shortfall} ₪)`);
+            } else if (paymentValidation.isOverpayment) {
+                console.log(`💰 Overpayment detected: ${txn.chargedAmount} ₪ covers ${paymentValidation.monthsCovered} months`);
+            }
 
             // 3. Generate Receipt
             const receiptPath = await generateReceipt({
@@ -94,19 +102,21 @@ async function main() {
             const webViewLink = await uploadReceiptToDrive(receiptPath, fileName);
             console.log(`Uploaded to Drive: ${webViewLink}`);
 
-            // 5. Update Sheet
-            // [Date, Amount, Payer, Apt, Ref, Link]
-            const rowData = [
-                moment(txn.date).format('YYYY-MM-DD'),
-                txn.chargedAmount,
-                classification.tenantName,
-                classification.apartment,
-                txnId,
-                webViewLink
-            ];
+            // 5. Record Payment to Grid (replaces old updateSheet append)
+            // This handles:
+            // - Recording payment in correct apartment row × month column
+            // - Highlighting underpayments in red
+            // - Covering previous unpaid months with overpayments
+            const coveredMonths = await recordPaymentToGrid({
+                apartment: classification.apartment,
+                payerName: classification.tenantName,
+                amount: txn.chargedAmount,
+                date: txn.date,
+                reference: txnId,
+                receiptLink: webViewLink
+            }, FIXED_PAYMENT_AMOUNT);
 
-            await updateSheet(rowData);
-            console.log('Updated Google Sheet.');
+            console.log(`Recorded to Payments grid. Months covered: ${coveredMonths.join(', ')}`);
 
             // 6. Mark Processed
             markProcessed(txnId);
@@ -121,7 +131,10 @@ async function main() {
     }
 }
 
-// Run
+// Export for scheduler
+module.exports = { main };
+
+// Run if executed directly
 if (require.main === module) {
     main();
 }

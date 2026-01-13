@@ -197,11 +197,11 @@ async function getBankTransactions(dateString) {
       const refRaw = colMap.ref !== -1 ? row[colMap.ref] : '';
       const forRaw = colMap.for !== -1 ? row[colMap.for] : ''; // The "עבור" column
 
-      // 1. Filter: "עבור" column must contain "ועד"
-      // If "עבור" column doesn't exist, check details? User was specific about 'column'.
-      // Let's assume strict check on the mapped column first.
+      // 1. Filter: "עבור" OR "פרטים" column must contain "ועד"
       const forText = forRaw ? forRaw.toString().trim() : '';
-      const hasVaad = forText.includes('ועד');
+      const detailsText = detailsRaw ? detailsRaw.toString().trim() : '';
+
+      const hasVaad = forText.includes('ועד') || detailsText.includes('ועד');
 
       if (!hasVaad) {
         // Optional: Log skipped?

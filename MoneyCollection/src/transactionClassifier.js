@@ -4,6 +4,8 @@ const fuzzball = require('fuzzball');
 
 /**
  * Classifies a transaction to find the corresponding tenant/apartment.
+ * Uses Regex for apartment numbers and Fuzzy Token Set Ratio for name matching.
+ * 
  * @param {string} description - The transaction description string.
  * @param {Object} tenantsConfig - The tenant configuration object.
  * @returns {Object} - { apartment, tenantName, confidence, method }
@@ -13,12 +15,22 @@ function classifyTransaction(description, tenantsConfig) {
         return { apartment: null, tenantName: null, confidence: 0, method: 'none' };
     }
 
-    // Default empty config if missing or for testing
+    // Default empty config if missing
     if (!tenantsConfig || !tenantsConfig.apartments) {
         tenantsConfig = { apartments: {} };
     }
 
-    const cleanDesc = description.toLowerCase().trim();
+    let cleanDesc = description.trim();
+
+    // Normalize Hebrew: Remove "Prefix Vav" when attached to words (e.g., "ומרדכי" -> " מרדכי")
+    // Replace "Space + Vav + Hebrew Letter" with " Space + Hebrew Letter"
+    cleanDesc = cleanDesc.replace(/\sו(?=[א-ת])/g, ' ');
+
+    // Remove common prefixes/labels in description to reduce noise
+    cleanDesc = cleanDesc.replace(/המבצע:|עבור:|מח-ן:/g, ' ');
+
+    // Normalize to lower case (for English parts)
+    cleanDesc = cleanDesc.toLowerCase();
 
     // 1. Try Regex for Apartment Number
     // Matches: "דירה 5", "דירה מס 53", "מספר 5" (Hebrew only)
@@ -40,25 +52,42 @@ function classifyTransaction(description, tenantsConfig) {
     // 2. Fuzzy Matching for Tenant Names
     let bestMatch = { apartment: null, score: 0, tenantName: null };
 
+    // Threshold for accepting a match
+    const THRESHOLD = 75; // Slightly lower for partial matches, but token_set_ratio is robust
+
     Object.entries(tenantsConfig.apartments).forEach(([aptNum, info]) => {
-        const namesToCheck = [info.familyName, ...(info.altNames || [])];
+        const namesToCheck = info.altNames || [];
+        if (namesToCheck.length === 0) return;
 
+        // 2a. Create a "Combined Candidate" string from all known names for this apartment
+        // This helps match "Niqana and Mordechai" against "Niqana Gaz" and "Mordechai Gaz"
+        // by creating a bag of words: "Niqana Gaz Mordechai Gaz"
+        const combinedCandidate = namesToCheck.join(' ').toLowerCase();
+
+        // Check token_set_ratio against combined string
+        // This handles "Couple Names" where order/intersection matters
+        const setScore = fuzzball.token_set_ratio(combinedCandidate, cleanDesc, { use_collator: true });
+
+        // 2b. Check partial_ratio against individual names (Legacy / Specific match)
+        let maxIndividualScore = 0;
         namesToCheck.forEach(name => {
-            // Use partial_ratio to find the name inside the description string
-            const score = fuzzball.partial_ratio(name, cleanDesc);
+            const score = fuzzball.partial_ratio(name.toLowerCase(), cleanDesc, { use_collator: true });
+            if (score > maxIndividualScore) maxIndividualScore = score;
+        });
 
-            if (score > bestMatch.score) {
-                bestMatch = {
-                    apartment: aptNum,
-                    score: score,
-                    tenantName: info.familyName
-                };
-            }
-        }); // end names loop
-    }); // end apartments loop
+        // Take the best of Set Score vs Individual Score
+        const finalScore = Math.max(setScore, maxIndividualScore);
 
-    // Threshold for fuzzy matching
-    if (bestMatch.score > 80) {
+        if (finalScore > bestMatch.score) {
+            bestMatch = {
+                apartment: aptNum,
+                score: finalScore,
+                tenantName: info.familyName
+            };
+        }
+    });
+
+    if (bestMatch.score >= THRESHOLD) {
         return {
             apartment: bestMatch.apartment,
             tenantName: bestMatch.tenantName,
@@ -74,27 +103,32 @@ module.exports = { classifyTransaction };
 
 // Test if run directly
 if (require.main === module) {
-    // Load local config for testing
-    let localConfig = { apartments: {} };
-    try {
-        const data = fs.readFileSync(path.join(__dirname, '../config/tenants.json'), 'utf8');
-        localConfig = JSON.parse(data);
-    } catch (e) {
-        console.warn("Could not load local config for testing.");
-    }
+    // Mock Config based on User Examples
+    const mockConfig = {
+        apartments: {
+            "87": {
+                familyName: "גנון",
+                altNames: ["לישי יעקב גנון"]
+            },
+            "76": {
+                familyName: "גז",
+                altNames: ["ניצנה גז", "מרדכי גז", "מיטל שניר", "אורן שניר"] // Merged scenario
+            }
+        }
+    };
 
     const testCases = [
-        "העברה עבור ועד בית דירה 53",
-        "תשלום ממשפחת כהן",
-        "עבור דירה מספר 54",
+        "המבצע: לישי יעקב גנון עבור: ועד בית             מח-ן:000572518",
+        "המבצע: ניצנה ומרדכי גז עבור: ועד הבית            מח-ן:000195189",
+        "המבצע: שניר אורן ומיטל עבור: וועד ינואר - משפחת  מח-ן:000290473",
         "סתם העברה לא קשורה",
-        "תשלום מ לוי עבור הועד"
+        "תשלום מדירה 87"
     ];
 
-    console.log("Running Classifier Tests...\n");
+    console.log("Running Classifier Tests with Mock Data...\n");
     testCases.forEach(desc => {
-        const result = classifyTransaction(desc, localConfig);
+        const result = classifyTransaction(desc, mockConfig);
         console.log(`Description: "${desc}"`);
-        console.log(`Result: ${JSON.stringify(result)}\n`);
+        console.log(`Result: Apt ${result.apartment} (${result.confidence * 100}%) - Method: ${result.method}\n`);
     });
 }
