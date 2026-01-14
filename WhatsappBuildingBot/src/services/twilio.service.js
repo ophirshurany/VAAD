@@ -24,6 +24,28 @@ const sendMessage = async (to, body) => {
 };
 
 /**
+ * Send a WhatsApp template message
+ * @param {string} to - The recipient's phone number
+ * @param {string} contentSid - The template Content SID
+ * @param {object} contentVariables - Key-value pairs for template variables
+ */
+const sendTemplateMessage = async (to, contentSid, contentVariables) => {
+    try {
+        const message = await client.messages.create({
+            from: `whatsapp:${config.twilio.phoneNumber}`,
+            to: to.startsWith('whatsapp:') ? to : `whatsapp:${to}`,
+            contentSid: contentSid,
+            contentVariables: JSON.stringify(contentVariables)
+        });
+        console.log(`Template message sent to ${to}: ${message.sid}`);
+        return message;
+    } catch (error) {
+        console.error(`Error sending template message to ${to}:`, error);
+        throw error;
+    }
+};
+
+/**
  * Verify Twilio Webhook Signature (Middleware helper)
  * This acts as a wrapper for twilio.webhook()
  */
@@ -31,5 +53,6 @@ const webhookMiddleware = twilio.webhook({ protocol: 'https' }); // Adjust proto
 
 module.exports = {
     sendMessage,
+    sendTemplateMessage,
     webhookMiddleware
 };
