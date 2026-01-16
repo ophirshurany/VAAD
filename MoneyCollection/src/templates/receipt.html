@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Receipt</title>
+    <style>
+        :root {
+            --primary: #6366f1;
+            --secondary: #64748b;
+            --bg-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            margin: 0;
+            padding: 0;
+            direction: rtl;
+            background: white; /* Print background */
+        }
+
+        /* Receipt Styling */
+        .receipt {
+            background: white;
+            width: 100%;
+            max-width: 450px; /* Or wider for PDF, but this matches design */
+            margin: 0 auto;
+            padding: 40px;
+            /* box-shadow: 0 4px 15px rgba(0,0,0,0.05); */ /* No shadow for print */
+            border: 1px solid #e2e8f0;
+            position: relative;
+            font-family: 'Courier New', Courier, monospace;
+        }
+
+        /* Decorative perforated edge */
+        .receipt::before {
+            content: '';
+            position: absolute;
+            top: -5px; left: 0; right: 0;
+            height: 10px;
+            background-image: radial-gradient(circle, transparent 70%, white 70%);
+            background-size: 15px 15px;
+            background-position: 0 -7px;
+        }
+
+        .receipt-header {
+            text-align: center;
+            border-bottom: 2px dashed #cbd5e1;
+            margin-bottom: 20px;
+            padding-bottom: 20px;
+        }
+
+        .receipt-logo img {
+            max-width: 100px;
+            height: auto;
+            margin-bottom: 15px;
+        }
+
+        .receipt-title {
+            font-size: 1.8rem;
+            font-weight: bold;
+            margin-top: 10px;
+            text-decoration: underline;
+        }
+
+        .receipt-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 12px;
+            font-size: 1.1rem;
+        }
+
+        .label { font-weight: bold; }
+
+        .total-box {
+            margin-top: 25px;
+            padding: 15px;
+            border: 2px solid #1e293b;
+            text-align: center;
+            font-size: 1.4rem;
+            font-weight: bold;
+        }
+
+        .receipt-footer {
+            margin-top: 30px;
+            text-align: center;
+            border-top: 1px solid #e2e8f0;
+            padding-top: 20px;
+            position: relative;
+        }
+
+        .signature-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-top: 10px;
+        }
+
+        .signature-line {
+            border-top: 1px solid #1e293b;
+            width: 180px;
+            margin: 5px 0;
+        }
+
+        .committee-text {
+            font-family: 'Segoe UI', sans-serif;
+            font-weight: bold;
+            font-size: 1rem;
+            margin-top: 8px;
+        }
+
+        .building-subtext {
+            font-family: 'Segoe UI', sans-serif;
+            font-size: 0.85rem;
+            color: #475569;
+        }
+        
+        .notes {
+            margin-top:10px; 
+            font-style: italic; 
+            font-size: 0.9rem; 
+            color: #64748b;
+        }
+    </style>
+</head>
+<body>
+    <div class="receipt">
+        <div class="receipt-header">
+            <div class="receipt-logo">
+                <!-- ID for logo injection -->
+                <img id="logoImg" src="" alt="Logo" style="display:none"> 
+            </div>
+            <div style="font-size: 1.1rem; font-weight: bold; margin-bottom: 5px;" id="buildingName"></div>
+            <div class="receipt-title">קבלה</div>
+            <div style="margin-top:10px;">מספר סידורי: <span id="receiptNum"></span></div>
+        </div>
+
+        <div class="receipt-row">
+            <span class="label">תאריך:</span>
+            <span id="date"></span>
+        </div>
+
+        <div class="receipt-row">
+            <span class="label">לכבוד:</span>
+            <span id="tenantName"></span>
+        </div>
+
+        <div class="receipt-row">
+            <span class="label">מספר דירה:</span>
+            <span id="apartment"></span>
+        </div>
+
+        <div class="receipt-row">
+            <span class="label">עבור:</span>
+            <span id="paymentType"></span>
+        </div>
+
+        <div class="receipt-row">
+            <span class="label">לחודש:</span>
+            <span id="paymentMonth"></span>
+        </div>
+
+        <div class="receipt-row">
+            <span class="label">אמצעי תשלום:</span>
+            <span id="paymentMethod"></span>
+        </div>
+
+        <div id="notesContainer" class="notes" style="display:none">
+            הערות: <span id="notes"></span>
+        </div>
+
+        <div class="total-box">
+            סה"כ: <span id="amount"></span>
+        </div>
+
+        <div class="receipt-footer">
+            <p>תודה רבה!</p>
+            <div class="signature-container">
+                <div class="signature-line"></div>
+                <div class="committee-text">בברכה, ועד הבית</div>
+                <div class="building-subtext" id="footerBuilding"></div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

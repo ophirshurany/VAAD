@@ -1,19 +1,21 @@
-const PDFDocument = require('pdfkit');
+const puppeteer = require('puppeteer-extra');
+const StealthPlugin = require('puppeteer-extra-plugin-stealth');
 const fs = require('fs');
 const path = require('path');
 const moment = require('moment');
 
+puppeteer.use(StealthPlugin());
+
 /**
- * Generates a PDF receipt for a transaction.
+ * Generates a PDF receipt for a transaction using Puppeteer and an HTML template.
  * @param {Object} transaction - { date, amount, description, id }
  * @param {Object} tenantInfo - { apartment, tenantName }
  * @returns {Promise<string>} - The absolute path to the generated PDF.
  */
 function generateReceipt(transaction, tenantInfo) {
-    return new Promise((resolve, reject) => {
+    return new Promise(async (resolve, reject) => {
+        let browser = null;
         try {
-            const doc = new PDFDocument({ size: 'A4', margin: 50 });
-
             // Ensure receipts directory exists
             const receiptsDir = path.join(__dirname, '../receipts');
             if (!fs.existsSync(receiptsDir)) {
@@ -21,95 +23,113 @@ function generateReceipt(transaction, tenantInfo) {
             }
 
             const dateStr = moment(transaction.date).format('YYYY-MM-DD');
-            const filename = `Receipt_Apt_${tenantInfo.apartment}_${dateStr}_${transaction.id.slice(-4)}.pdf`;
+            // Clean filename
+            const cleanName = (tenantInfo.tenantName || 'Unknown').replace(/[^a-z0-9\u0590-\u05ff]/gi, '_');
+            const filename = `Receipt_Apt_${tenantInfo.apartment}_${cleanName}_${dateStr}.pdf`;
             const filePath = path.join(receiptsDir, filename);
 
-            const stream = fs.createWriteStream(filePath);
-            doc.pipe(stream);
+            // Read template
+            const templatePath = path.join(__dirname, 'templates', 'receipt.html');
+            if (!fs.existsSync(templatePath)) {
+                throw new Error(`Template not found at ${templatePath}`);
+            }
+            let htmlContent = fs.readFileSync(templatePath, 'utf8');
 
-            // Registers a Hebrew font. Windows standard path.
-            // If this fails on a specific system, we might need to bundle a specific font.
-            // 'Arial' usually supports Hebrew.
-            const fontPath = 'C:\\Windows\\Fonts\\arial.ttf';
-            if (fs.existsSync(fontPath)) {
-                doc.font(fontPath);
-            } else {
-                console.warn('Warning: Arial font not found at default path. Hebrew might not render correctly.');
-                // Fallback to standard font (might fail for Hebrew)
+            // Read Logo
+            const logoPath = path.join(__dirname, 'assets', 'logo.jpg');
+            let logoBase64 = '';
+            if (fs.existsSync(logoPath)) {
+                const logoData = fs.readFileSync(logoPath);
+                logoBase64 = `data:image/jpeg;base64,${logoData.toString('base64')}`;
             }
 
-            // -- Header --
-            doc.fontSize(20).text('קבלה - ועד בית שדרות האלונים 8', { align: 'center', underline: true });
-            doc.moveDown();
-
-            // -- Details --
-            doc.fontSize(14);
-
-            // Note: PDFKit might require RTL text to be reversed if simple 'text' is used without complex script shaping.
-            // However, for single line simple Hebrew, let's try direct.
-            // If output is reversed, we might need a small helper function.
-            // Simple reversal helper:
-            const reverse = (str) => str.split('').reverse().join('');
-
-            // Actually, for "visual" logical ordering in simple PDF engines, we often just type standard. 
-            // Let's assume standard writing for now, but handle alignment.
-            // Align right for Hebrew.
-
-            const addLine = (label, value) => {
-                // Simple RTL hack check: if value contains Hebrew, we might want to ensure align 'right'.
-                // But PDFKit text call with {align: 'right'} aligns the whole block right.
-                doc.text(`${reverse(label)}: ${value}`, { align: 'right' });
-                doc.moveDown(0.5);
+            // Prepare Data
+            const buildingName = 'אלונים 8, באר יעקב';
+            const receiptData = {
+                logoSrc: logoBase64,
+                buildingName: buildingName,
+                receiptNum: `AL-${(transaction.id || '0000').slice(-6)}`, // Use last 6 chars of ID
+                date: moment(transaction.date).format('DD/MM/YYYY'),
+                tenantName: tenantInfo.tenantName || 'דייר לא ידוע',
+                apartment: tenantInfo.apartment || '?',
+                paymentType: 'ועד בית חודשי', // Default
+                paymentMonth: formatHebrewMonth(transaction.date), // Helper
+                paymentMethod: 'העברה בנקאית', // Default for bank scraping
+                amount: new Intl.NumberFormat('he-IL', { style: 'currency', currency: 'ILS' }).format(transaction.amount),
+                notes: transaction.description || '',
+                footerBuilding: buildingName
             };
 
-            // Actually, standard practice without advanced shaping: 
-            // reverse the hebrew string visually effectively? 
-            // Or just rely on align right?
-            // Let's stick to standard printing. If user complains about Hebrew direction, we fix it.
-            // Usually users read PDFKit hebrew output best when:
-            // 1. Valid font
-            // 2. align: 'right'
-            // 3. Text content is logically stored? 
-            // Let's use standard order first.
+            // Launch Puppeteer
+            browser = await puppeteer.launch({
+                headless: "new",
+                args: ['--no-sandbox', '--disable-setuid-sandbox', '--font-render-hinting=none'] // Font hinting off for better Hebrew?
+            });
+            const page = await browser.newPage();
 
-            doc.text(`_________________________________________________`, { align: 'center' });
-            doc.moveDown();
+            // Set content
+            await page.setContent(htmlContent, { waitUntil: 'networkidle0' });
 
-            // תאריך
-            doc.text(`תאריך: ${dateStr}`, { align: 'right' });
+            // Inject Data
+            await page.evaluate((data) => {
+                if (data.logoSrc) {
+                    const img = document.getElementById('logoImg');
+                    img.src = data.logoSrc;
+                    img.style.display = 'block';
+                }
 
-            // סכום
-            doc.text(`סכום: ${transaction.amount} ₪`, { align: 'right' });
+                const setText = (id, text) => {
+                    const el = document.getElementById(id);
+                    if (el) el.innerText = text;
+                };
 
-            // דירה
-            doc.text(`דירה: ${tenantInfo.apartment}`, { align: 'right' });
+                setText('buildingName', data.buildingName);
+                setText('receiptNum', data.receiptNum);
+                setText('date', data.date);
+                setText('tenantName', data.tenantName);
+                setText('apartment', data.apartment);
+                setText('paymentType', data.paymentType);
+                setText('paymentMonth', data.paymentMonth);
+                setText('paymentMethod', data.paymentMethod);
+                setText('amount', data.amount);
+                setText('footerBuilding', data.footerBuilding);
 
-            // משלם
-            doc.text(`משלם: ${tenantInfo.tenantName}`, { align: 'right' });
+                if (data.notes) {
+                    document.getElementById('notesContainer').style.display = 'block';
+                    setText('notes', data.notes);
+                }
 
-            // פרטים
-            doc.text(`פרטים: ${transaction.description}`, { align: 'right' });
+            }, receiptData);
 
-            // אסמכתא
-            doc.text(`אסמכתא: ${transaction.id}`, { align: 'right' });
-
-            doc.moveDown(2);
-            doc.fontSize(12).text('תודה רבה על התשלום!', { align: 'center' });
-
-            doc.end();
-
-            stream.on('finish', () => {
-                resolve(filePath);
+            // Generate PDF
+            await page.pdf({
+                path: filePath,
+                format: 'A4',
+                printBackground: true,
+                margin: {
+                    top: '20px',
+                    bottom: '20px',
+                    left: '20px',
+                    right: '20px'
+                }
             });
 
-            stream.on('error', (err) => {
-                reject(err);
-            });
+            console.log(`Receipt generated: ${filePath}`);
+            resolve(filePath);
 
         } catch (err) {
+            console.error('Error generating receipt:', err);
             reject(err);
+        } finally {
+            if (browser) await browser.close();
         }
     });
+}
+
+function formatHebrewMonth(dateInput) {
+    const d = moment(dateInput).toDate();
+    const months = ['ינואר', 'פברואר', 'מרץ', 'אפריל', 'מאי', 'יוני', 'יולי', 'אוגוסט', 'ספטמבר', 'אוקטובר', 'נובמבר', 'דצמבר'];
+    return months[d.getMonth()] + ' ' + d.getFullYear();
 }
 
 module.exports = { generateReceipt };
