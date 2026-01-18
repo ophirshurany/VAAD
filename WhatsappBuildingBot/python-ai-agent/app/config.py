@@ -14,14 +14,14 @@ class Settings(BaseSettings):
     
     # Server
     host: str = "0.0.0.0"
-    port: int = 8000
+    port: int = 8001
     log_level: str = "INFO"
     
     # Environment
     environment: str = "development"
     
     class Config:
-        env_file = ".env"
+        env_file = "../.env"  # Read from parent directory
         env_file_encoding = "utf-8"
         case_sensitive = False
 
