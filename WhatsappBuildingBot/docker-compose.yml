@@ -1,14 +1,48 @@
 version: '3.8'
+
 services:
-  bot:
-    build: .
+  # Node.js WhatsApp Gateway Service
+  node-gateway:
+    build: ./node-whatsapp-gateway
+    container_name: node-whatsapp-gateway
     ports:
       - "3000:3000"
-    volumes:
-      - .:/app
-      - /app/node_modules
-    env_file:
-      - .env
     environment:
-      - NODE_ENV=development
-    command: npm start
+      - NODE_ENV=production
+      - AI_SERVICE_URL=http://python-ai-agent:8000
+    env_file:
+      - ./node-whatsapp-gateway/.env
+    depends_on:
+      - python-ai-agent
+    restart: unless-stopped
+    networks:
+      - whatsapp-bot-network
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:3000/health" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Python AI Agent Service
+  python-ai-agent:
+    build: ./python-ai-agent
+    container_name: python-ai-agent
+    ports:
+      - "8000:8000"
+    environment:
+      - ENVIRONMENT=production
+    env_file:
+      - ./python-ai-agent/.env
+    restart: unless-stopped
+    networks:
+      - whatsapp-bot-network
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8000/health" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+networks:
+  whatsapp-bot-network:
+    driver: bridge
+    name: whatsapp-bot-network
